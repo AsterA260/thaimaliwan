@@ -1,0 +1,1239 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Thai Maliwan — Recepcja</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --black: #0D0D0D;
+  --graphite: #1A1A1A;
+  --graphite2: #2D2D2D;
+  --gold-deep: #8B6000;
+  --gold-mid: #B8860B;
+  --gold: #D4A843;
+  --gold-light: #F5D978;
+  --gold-pale: #FDF6E3;
+  --white: #FAFAFA;
+  --green: #4CAF50;
+  --red: #C62828;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+body {
+  background: var(--graphite);
+  color: var(--white);
+  font-family: 'Jost', sans-serif;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ===== EKRAN LOGOWANIA ===== */
+#screen-login {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 24px;
+  background: var(--black);
+}
+
+.logo-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 13px;
+  font-weight: 300;
+  letter-spacing: 6px;
+  color: var(--gold);
+  text-transform: uppercase;
+  margin-bottom: 8px;
+  text-align: center;
+}
+
+.logo-sub {
+  font-size: 11px;
+  color: var(--gold-mid);
+  letter-spacing: 3px;
+  text-align: center;
+  margin-bottom: 48px;
+}
+
+.login-label {
+  font-size: 11px;
+  letter-spacing: 3px;
+  color: var(--gold);
+  text-transform: uppercase;
+  margin-bottom: 20px;
+}
+
+.therapist-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  width: 100%;
+  max-width: 360px;
+  margin-bottom: 24px;
+}
+
+.therapist-btn {
+  background: var(--graphite2);
+  border: 1px solid var(--gold-mid);
+  border-radius: 12px;
+  padding: 20px 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: center;
+}
+
+.therapist-btn:active { transform: scale(0.97); }
+.therapist-btn.selected {
+  background: var(--gold-mid);
+  border-color: var(--gold-light);
+}
+
+.therapist-avatar {
+  font-size: 32px;
+  margin-bottom: 8px;
+}
+
+.therapist-name {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--gold-light);
+  margin-bottom: 2px;
+}
+
+.therapist-btn.selected .therapist-name { color: var(--black); }
+
+.therapist-salon {
+  font-size: 10px;
+  letter-spacing: 2px;
+  color: var(--gold);
+  text-transform: uppercase;
+}
+
+.therapist-btn.selected .therapist-salon { color: var(--graphite2); }
+
+.divider {
+  width: 100%;
+  max-width: 360px;
+  height: 1px;
+  background: var(--graphite2);
+  margin: 20px 0;
+  position: relative;
+}
+
+.divider span {
+  position: absolute;
+  top: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--black);
+  padding: 0 12px;
+  font-size: 10px;
+  color: var(--gold-mid);
+  letter-spacing: 2px;
+}
+
+.reception-btn {
+  background: transparent;
+  border: 1px solid var(--graphite2);
+  border-radius: 12px;
+  padding: 14px 32px;
+  color: var(--gold-mid);
+  font-family: 'Jost', sans-serif;
+  font-size: 13px;
+  letter-spacing: 2px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.reception-btn:active { background: var(--graphite2); }
+
+/* ===== GŁÓWNY INTERFEJS ===== */
+#screen-main { display: none; min-height: 100vh; }
+
+.top-bar {
+  background: var(--black);
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--graphite2);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.top-bar-user {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.top-bar-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--gold-mid);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+}
+
+.top-bar-name {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 18px;
+  color: var(--gold-light);
+}
+
+.top-bar-salon {
+  font-size: 10px;
+  letter-spacing: 2px;
+  color: var(--gold-mid);
+  text-transform: uppercase;
+}
+
+.logout-btn {
+  background: transparent;
+  border: 1px solid var(--graphite2);
+  border-radius: 8px;
+  padding: 6px 12px;
+  color: var(--gold-mid);
+  font-size: 11px;
+  letter-spacing: 1px;
+  cursor: pointer;
+}
+
+/* TABS */
+.tabs {
+  display: flex;
+  background: var(--black);
+  border-bottom: 1px solid var(--graphite2);
+}
+
+.tab {
+  flex: 1;
+  padding: 14px 8px;
+  text-align: center;
+  font-size: 11px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--gold-mid);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: all 0.2s;
+}
+
+.tab.active {
+  color: var(--gold-light);
+  border-bottom-color: var(--gold);
+}
+
+/* CONTENT */
+.tab-content { display: none; padding: 20px; }
+.tab-content.active { display: block; }
+
+/* SEKCJA NAGŁÓWEK */
+.section-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 22px;
+  color: var(--gold-light);
+  margin-bottom: 4px;
+}
+
+.section-sub {
+  font-size: 11px;
+  color: var(--gold-mid);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: 24px;
+}
+
+/* FORMULARZ REZERWACJI */
+.form-step {
+  margin-bottom: 20px;
+}
+
+.form-label {
+  font-size: 10px;
+  letter-spacing: 3px;
+  color: var(--gold);
+  text-transform: uppercase;
+  margin-bottom: 10px;
+  display: block;
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.chip {
+  background: var(--graphite2);
+  border: 1px solid #444;
+  border-radius: 20px;
+  padding: 8px 16px;
+  font-size: 13px;
+  color: var(--white);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.chip:active { transform: scale(0.97); }
+
+.chip.selected {
+  background: var(--gold-mid);
+  border-color: var(--gold-light);
+  color: var(--black);
+  font-weight: 600;
+}
+
+.chips-2col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.chip-big {
+  background: var(--graphite2);
+  border: 1px solid #444;
+  border-radius: 12px;
+  padding: 14px 12px;
+  font-size: 13px;
+  color: var(--white);
+  cursor: pointer;
+  transition: all 0.15s;
+  text-align: center;
+}
+
+.chip-big.selected {
+  background: var(--gold-mid);
+  border-color: var(--gold-light);
+  color: var(--black);
+  font-weight: 600;
+}
+
+.chip-big .chip-price {
+  font-size: 11px;
+  color: var(--gold);
+  margin-top: 2px;
+}
+
+.chip-big.selected .chip-price { color: var(--graphite2); }
+
+.form-input {
+  width: 100%;
+  background: var(--graphite2);
+  border: 1px solid #444;
+  border-radius: 12px;
+  padding: 14px 16px;
+  color: var(--white);
+  font-family: 'Jost', sans-serif;
+  font-size: 15px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.form-input:focus { border-color: var(--gold); }
+.form-input::placeholder { color: #666; }
+
+.separator {
+  height: 1px;
+  background: var(--graphite2);
+  margin: 24px 0;
+}
+
+/* PRZYCISK GŁÓWNY */
+.btn-primary {
+  width: 100%;
+  background: var(--gold-mid);
+  border: none;
+  border-radius: 14px;
+  padding: 18px;
+  color: var(--black);
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 20px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  letter-spacing: 1px;
+}
+
+.btn-primary:active { transform: scale(0.98); background: var(--gold); }
+.btn-primary:disabled { background: #444; color: #666; cursor: not-allowed; }
+
+.btn-secondary {
+  width: 100%;
+  background: transparent;
+  border: 1px solid var(--graphite2);
+  border-radius: 14px;
+  padding: 14px;
+  color: var(--gold-mid);
+  font-family: 'Jost', sans-serif;
+  font-size: 14px;
+  cursor: pointer;
+  margin-top: 10px;
+  letter-spacing: 1px;
+}
+
+/* KALENDARZ / LISTA WIZYT */
+.visit-card {
+  background: var(--graphite2);
+  border-radius: 14px;
+  padding: 16px;
+  margin-bottom: 12px;
+  border-left: 3px solid var(--gold-mid);
+}
+
+.visit-card.completed { border-left-color: var(--green); opacity: 0.7; }
+.visit-card.pending { border-left-color: var(--gold); }
+
+.visit-time {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 24px;
+  color: var(--gold-light);
+  margin-bottom: 4px;
+}
+
+.visit-client {
+  font-size: 15px;
+  color: var(--white);
+  margin-bottom: 2px;
+}
+
+.visit-service {
+  font-size: 12px;
+  color: var(--gold-mid);
+  letter-spacing: 1px;
+  margin-bottom: 10px;
+}
+
+.visit-price {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--gold-light);
+  margin-bottom: 10px;
+}
+
+.visit-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.btn-rozlicz {
+  flex: 1;
+  background: var(--gold-mid);
+  border: none;
+  border-radius: 10px;
+  padding: 10px;
+  color: var(--black);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.btn-rozlicz:active { background: var(--gold); }
+
+.visit-status {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 10px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.status-ok { background: #1B5E20; color: #A5D6A7; }
+.status-wait { background: #3E2723; color: var(--gold-light); }
+
+/* MODAL ROZLICZENIA */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.85);
+  z-index: 200;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.modal-overlay.active { display: flex; }
+
+.modal-sheet {
+  background: var(--graphite);
+  border-radius: 24px 24px 0 0;
+  padding: 24px 20px 40px;
+  width: 100%;
+  max-width: 500px;
+  animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
+.modal-handle {
+  width: 40px;
+  height: 4px;
+  background: #444;
+  border-radius: 2px;
+  margin: 0 auto 20px;
+}
+
+.modal-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 22px;
+  color: var(--gold-light);
+  margin-bottom: 4px;
+}
+
+.modal-sub {
+  font-size: 13px;
+  color: var(--gold-mid);
+  margin-bottom: 20px;
+}
+
+/* PODSUMOWANIE */
+.summary-box {
+  background: var(--black);
+  border-radius: 16px;
+  padding: 20px;
+  margin-bottom: 20px;
+  border: 1px solid var(--gold-mid);
+}
+
+.summary-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--graphite2);
+}
+
+.summary-row:last-child { border-bottom: none; }
+
+.summary-label { font-size: 12px; color: #888; letter-spacing: 1px; }
+.summary-value { font-size: 14px; color: var(--white); font-weight: 500; }
+.summary-price { font-size: 22px; color: var(--gold-light); font-weight: 600; }
+
+/* SUCCESS */
+.success-screen {
+  display: none;
+  text-align: center;
+  padding: 40px 20px;
+}
+
+.success-icon { font-size: 64px; margin-bottom: 16px; }
+.success-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 28px;
+  color: var(--gold-light);
+  margin-bottom: 8px;
+}
+.success-sub { font-size: 14px; color: var(--gold-mid); margin-bottom: 32px; }
+
+/* TOAST */
+.toast {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%) translateY(100px);
+  background: var(--green);
+  color: white;
+  padding: 14px 24px;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 500;
+  z-index: 999;
+  transition: transform 0.3s ease;
+  white-space: nowrap;
+}
+
+.toast.show { transform: translateX(-50%) translateY(0); }
+.toast.error { background: var(--red); }
+
+/* LOADING */
+.loading {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  border: 2px solid rgba(0,0,0,0.3);
+  border-top-color: var(--black);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  vertical-align: middle;
+  margin-right: 8px;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.empty-state {
+  text-align: center;
+  padding: 40px 20px;
+  color: #555;
+}
+
+.empty-icon { font-size: 40px; margin-bottom: 12px; }
+.empty-text { font-size: 14px; }
+</style>
+</head>
+<body>
+
+<!-- ===== EKRAN LOGOWANIA ===== -->
+<div id="screen-login">
+  <div class="logo-title">🌺 Thai Maliwan</div>
+  <div class="logo-sub">System Recepcji</div>
+
+  <div class="login-label">Wybierz siebie</div>
+
+  <div class="therapist-grid" id="therapist-grid">
+    <!-- generowane przez JS -->
+  </div>
+
+  <div class="divider"><span>LUB</span></div>
+  <button class="reception-btn" onclick="loginAs('RECEPCJA', 'OBA', '📱')">
+    📱 Recepcja — oba salony
+  </button>
+</div>
+
+<!-- ===== GŁÓWNY INTERFEJS ===== -->
+<div id="screen-main">
+  <div class="top-bar">
+    <div class="top-bar-user">
+      <div class="top-bar-avatar" id="bar-avatar">👩</div>
+      <div>
+        <div class="top-bar-name" id="bar-name">Sumalee</div>
+        <div class="top-bar-salon" id="bar-salon">Zwierzyniecka</div>
+      </div>
+    </div>
+    <button class="logout-btn" onclick="logout()">Wyloguj</button>
+  </div>
+
+  <div class="tabs">
+    <div class="tab active" onclick="switchTab('rezerwacja', this)">➕ Rezerwacja</div>
+    <div class="tab" onclick="switchTab('wizyty', this)">📅 Wizyty</div>
+  </div>
+
+  <!-- TAB: REZERWACJA -->
+  <div class="tab-content active" id="tab-rezerwacja">
+    <div id="form-screen">
+      <br>
+      <div class="section-title">Nowa rezerwacja</div>
+      <div class="section-sub" id="form-date-label">Dziś · Ładowanie...</div>
+
+      <!-- KROK 1: SALON (tylko dla recepcji) -->
+      <div class="form-step" id="step-salon" style="display:none">
+        <label class="form-label">Salon</label>
+        <div class="chips">
+          <div class="chip" onclick="selectSalon('ZW', this)">🏠 Zwierzyniecka</div>
+          <div class="chip" onclick="selectSalon('SZ', this)">🏠 Szewska</div>
+        </div>
+      </div>
+
+      <!-- KROK 2: TERAPEUTA (tylko dla recepcji) -->
+      <div class="form-step" id="step-terapeuta" style="display:none">
+        <label class="form-label">Terapeuta</label>
+        <div class="chips" id="chips-terapeuta"></div>
+      </div>
+
+      <!-- KROK 3: MASAŻ -->
+      <div class="form-step">
+        <label class="form-label">Masaż</label>
+        <div class="chips" id="chips-masaz"></div>
+      </div>
+
+      <!-- KROK 4: CZAS -->
+      <div class="form-step">
+        <label class="form-label">Czas</label>
+        <div class="chips" id="chips-czas"></div>
+      </div>
+
+      <!-- KROK 5: GODZINA -->
+      <div class="form-step">
+        <label class="form-label">Godzina</label>
+        <div class="chips" id="chips-godzina"></div>
+      </div>
+
+      <div class="separator"></div>
+
+      <!-- KROK 6: DANE KLIENTA -->
+      <div class="form-step">
+        <label class="form-label">Imię klienta</label>
+        <input class="form-input" type="text" id="input-imie" placeholder="np. Anna" autocomplete="off">
+      </div>
+
+      <div class="form-step">
+        <label class="form-label">Telefon</label>
+        <input class="form-input" type="tel" id="input-tel" placeholder="np. 500 123 456" autocomplete="off">
+      </div>
+
+      <div class="form-step">
+        <label class="form-label">Płatność</label>
+        <div class="chips">
+          <div class="chip" onclick="selectChip('platnosc', 'GOTÓWKA', this)">💵 Gotówka</div>
+          <div class="chip" onclick="selectChip('platnosc', 'KARTA', this)">💳 Karta</div>
+          <div class="chip" onclick="selectChip('platnosc', 'BLIK', this)">📱 Blik</div>
+          <div class="chip" onclick="selectChip('platnosc', 'PayU', this)">🌐 PayU</div>
+          <div class="chip" onclick="selectChip('platnosc', 'BON', this)">🎁 Bon</div>
+          <div class="chip" onclick="selectChip('platnosc', 'DO ZAPŁATY', this)">⏳ Do zapłaty</div>
+        </div>
+      </div>
+
+      <div class="form-step">
+        <label class="form-label">Uwagi (opcjonalne)</label>
+        <input class="form-input" type="text" id="input-uwagi" placeholder="np. alergia, preferencje...">
+      </div>
+
+      <div class="separator"></div>
+
+      <button class="btn-primary" id="btn-zapisz" onclick="zapiszRezerwacje()">
+        Zapisz rezerwację
+      </button>
+      <button class="btn-secondary" onclick="resetForm()">Wyczyść formularz</button>
+      <br><br>
+    </div>
+
+    <!-- SUCCESS -->
+    <div class="success-screen" id="success-screen">
+      <div class="success-icon">✅</div>
+      <div class="success-title">Zapisano!</div>
+      <div class="success-sub" id="success-text">Rezerwacja dodana do systemu</div>
+      <button class="btn-primary" onclick="nowaRezerwacja()">+ Nowa rezerwacja</button>
+    </div>
+  </div>
+
+  <!-- TAB: WIZYTY -->
+  <div class="tab-content" id="tab-wizyty">
+    <br>
+    <div class="section-title">Moje wizyty</div>
+    <div class="section-sub" id="wizyty-date">Dziś · Ładowanie...</div>
+    <div id="wizyty-list">
+      <div class="empty-state">
+        <div class="empty-icon">📅</div>
+        <div class="empty-text">Ładowanie wizyt...</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL ROZLICZENIA -->
+<div class="modal-overlay" id="modal-rozlicz">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Rozlicz wizytę</div>
+    <div class="modal-sub" id="modal-client-name">Anna Kowalska · Tajski 60 min</div>
+
+    <div class="summary-box" id="modal-summary"></div>
+
+    <label class="form-label">Sposób płatności</label>
+    <div class="chips" style="margin-bottom: 20px;">
+      <div class="chip" onclick="selectRozliczPlatnosc('GOTÓWKA', this)">💵 Gotówka</div>
+      <div class="chip" onclick="selectRozliczPlatnosc('KARTA', this)">💳 Karta</div>
+      <div class="chip" onclick="selectRozliczPlatnosc('BLIK', this)">📱 Blik</div>
+      <div class="chip" onclick="selectRozliczPlatnosc('PayU', this)">🌐 PayU</div>
+      <div class="chip" onclick="selectRozliczPlatnosc('BON', this)">🎁 Bon</div>
+    </div>
+
+    <button class="btn-primary" id="btn-rozlicz-confirm" onclick="potwierdzRozliczenie()">
+      ✓ Zrealizowana
+    </button>
+    <button class="btn-secondary" onclick="closeModal()">Anuluj</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ===== KONFIGURACJA =====
+const SHEET_ID = '1JUJUSv5I3nw134pshrFqSm37FjS10tk7';
+
+// Ceny z arkusza
+const CENY = {
+  'Tajski Klasyczny':     {60:210, 90:270, 120:330},
+  'Oil Aromatyczny':      {60:240, 90:300, 120:360},
+  'Świecą':               {60:240, 90:300, 120:390},
+  'Sportowy':             {60:270, 90:330, 120:390},
+  'Głowa+Plecy+Ramiona':  {60:190, 90:260},
+  'Masaż Głowy':          {30:120, 60:190, 90:240},
+  'Masaż Stóp':           {30:120, 60:190, 90:240},
+  'Stemplami Ziołowymi':  {60:250, 90:320, 120:380},
+  'Wyszczuplający':       {60:250, 90:320, 120:390},
+  'Ciepłymi Olejkami':    {60:240, 90:300, 120:360},
+  'Kobido Głowa+Twarz':   {60:220, 90:270},
+  'Lomi Lomi':            {60:270, 90:330, 120:390},
+  'Dla Seniorów':         {60:200, 90:260, 120:320},
+  'Dla Kobiet w Ciąży':   {60:210, 90:260},
+  'Dla Dzieci/Młodzieży': {60:180, 90:250},
+  'Gorącymi Kamieniami':  {60:250, 90:320, 120:380},
+  'Czteroręczny':         {60:390, 90:480},
+};
+
+const TERAPEUCI = {
+  ZW: ['Sumalee','Khanjana','Tip','Maliwan'],
+  SZ: ['Wawa','Miau','Kai']
+};
+
+const AVATARS = {
+  'Sumalee':'👩','Khanjana':'👩‍🦱','Tip':'🧘','Maliwan':'🌺',
+  'Wawa':'👩','Miau':'🌸','Kai':'✨','RECEPCJA':'📱'
+};
+
+const GODZINY = ['10:00','10:30','11:00','11:30','12:00','12:30','13:00','13:30',
+                 '14:00','14:30','15:00','15:30','16:00','16:30','17:00','17:30',
+                 '18:00','18:30','19:00','19:30','20:00','20:30'];
+
+// ===== STAN =====
+let state = {
+  user: null,
+  salon: null,
+  terapeuta: null,
+  masaz: null,
+  czas: null,
+  godzina: null,
+  platnosc: null,
+  rozliczPlatnosc: null,
+  currentVisitRow: null,
+};
+
+// ===== LOGOWANIE =====
+function buildLoginScreen() {
+  const grid = document.getElementById('therapist-grid');
+  const all = [...TERAPEUCI.ZW.map(n => ({name:n, salon:'ZW', label:'Zwierzyniecka'})),
+               ...TERAPEUCI.SZ.map(n => ({name:n, salon:'SZ', label:'Szewska'}))];
+  grid.innerHTML = all.map(t => `
+    <div class="therapist-btn" onclick="loginAs('${t.name}','${t.salon}','${AVATARS[t.name]||'👩'}')">
+      <div class="therapist-avatar">${AVATARS[t.name]||'👩'}</div>
+      <div class="therapist-name">${t.name}</div>
+      <div class="therapist-salon">${t.label}</div>
+    </div>
+  `).join('');
+}
+
+function loginAs(name, salon, avatar) {
+  state.user = name;
+  state.salon = salon === 'OBA' ? null : salon;
+
+  document.getElementById('bar-name').textContent = name;
+  document.getElementById('bar-salon').textContent =
+    salon === 'ZW' ? '🏠 Zwierzyniecka' :
+    salon === 'SZ' ? '🏠 Szewska' : '📱 Recepcja — oba salony';
+  document.getElementById('bar-avatar').textContent = avatar;
+
+  document.getElementById('screen-login').style.display = 'none';
+  document.getElementById('screen-main').style.display = 'block';
+
+  buildForm();
+  loadWizyty();
+}
+
+function logout() {
+  state = {user:null,salon:null,terapeuta:null,masaz:null,czas:null,godzina:null,platnosc:null};
+  document.getElementById('screen-login').style.display = 'flex';
+  document.getElementById('screen-main').style.display = 'none';
+}
+
+// ===== BUDOWANIE FORMULARZA =====
+function buildForm() {
+  const today = new Date();
+  const dateStr = today.toLocaleDateString('pl-PL', {weekday:'long', day:'numeric', month:'long'});
+  document.getElementById('form-date-label').textContent = 'Dziś · ' + dateStr;
+
+  const isRecepcja = state.user === 'RECEPCJA';
+
+  // Salon (tylko recepcja)
+  document.getElementById('step-salon').style.display = isRecepcja ? 'block' : 'none';
+  document.getElementById('step-terapeuta').style.display = isRecepcja ? 'block' : 'none';
+
+  if (!isRecepcja) {
+    state.terapeuta = state.user;
+    // Ustaw salon auto
+  }
+
+  // Masaże
+  const masazDiv = document.getElementById('chips-masaz');
+  masazDiv.innerHTML = Object.keys(CENY).map(m =>
+    `<div class="chip" onclick="selectChip('masaz','${m}',this)">${m}</div>`
+  ).join('');
+
+  // Godziny
+  const godz = document.getElementById('chips-godzina');
+  godz.innerHTML = GODZINY.map(g =>
+    `<div class="chip" onclick="selectChip('godzina','${g}',this)">${g}</div>`
+  ).join('');
+}
+
+function selectSalon(salon, el) {
+  document.querySelectorAll('#step-salon .chip').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  state.salon = salon;
+
+  // Aktualizuj terapeutów
+  const div = document.getElementById('chips-terapeuta');
+  div.innerHTML = TERAPEUCI[salon].map(t =>
+    `<div class="chip" onclick="selectTerapeuta('${t}',this)">${AVATARS[t]||'👩'} ${t}</div>`
+  ).join('');
+  state.terapeuta = null;
+}
+
+function selectTerapeuta(name, el) {
+  document.querySelectorAll('#chips-terapeuta .chip').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  state.terapeuta = name;
+}
+
+function selectChip(field, value, el) {
+  const parent = el.parentElement;
+  parent.querySelectorAll('.chip').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  state[field] = value;
+
+  // Jeśli masaż - aktualizuj czasy
+  if (field === 'masaz') updateCzasy(value);
+  // Jeśli czas - aktualizuj cenę
+  if (field === 'czas') updateCena();
+}
+
+function updateCzasy(masaz) {
+  state.czas = null;
+  const czasy = Object.keys(CENY[masaz] || {});
+  const div = document.getElementById('chips-czas');
+  div.innerHTML = czasy.map(c => {
+    const cena = CENY[masaz][c];
+    return `<div class="chip" onclick="selectChip('czas',${c},this)">${c} min · <span style="color:var(--gold)">${cena} zł</span></div>`;
+  }).join('');
+}
+
+function updateCena() {
+  // cena aktualizowana dynamicznie przy zapisie
+}
+
+// ===== ZAPIS DO GOOGLE SHEETS =====
+async function zapiszRezerwacje() {
+  const imie = document.getElementById('input-imie').value.trim();
+  const tel = document.getElementById('input-tel').value.trim();
+  const uwagi = document.getElementById('input-uwagi').value.trim();
+
+  // Walidacja
+  if (state.user === 'RECEPCJA' && !state.salon) return showToast('Wybierz salon!', true);
+  if (state.user === 'RECEPCJA' && !state.terapeuta) return showToast('Wybierz terapeutę!', true);
+  if (!state.masaz) return showToast('Wybierz masaż!', true);
+  if (!state.czas) return showToast('Wybierz czas!', true);
+  if (!state.godzina) return showToast('Wybierz godzinę!', true);
+  if (!imie) return showToast('Wpisz imię klienta!', true);
+  if (!state.platnosc) return showToast('Wybierz płatność!', true);
+
+  const cena = CENY[state.masaz]?.[state.czas] || 0;
+  const salon = state.salon;
+  const sheetName = salon === 'ZW' ? 'REZERWACJE ZW' : 'REZERWACJE SZ';
+
+  // Oblicz godzinę stop
+  const [h, m] = state.godzina.split(':').map(Number);
+  const stopMin = h * 60 + m + parseInt(state.czas);
+  const stopH = Math.floor(stopMin / 60);
+  const stopM = stopMin % 60;
+  const godzinaStop = `${String(stopH).padStart(2,'0')}:${String(stopM).padStart(2,'0')}`;
+
+  const today = new Date();
+  const dateStr = `${today.getMonth()+1}/${today.getDate()}/${today.getFullYear()}`;
+
+  const row = [
+    dateStr,           // A - Data
+    state.godzina,     // B - Godzina Start
+    godzinaStop,       // C - Godzina Stop
+    imie,              // D - Imię
+    '',                // E - Nazwisko
+    tel,               // F - Telefon
+    state.masaz,       // G - Masaż
+    state.czas,        // H - Czas
+    cena,              // I - Cena
+    state.platnosc,    // J - Płatność
+    'brak',            // K - Rabat
+    cena,              // L - Kwota po rabacie
+    cena,              // M - SUMA
+    state.terapeuta || state.user,  // N - Terapeuta
+    'OCZEKUJE',        // O - Status
+    uwagi,             // P - Uwagi
+  ];
+
+  const btn = document.getElementById('btn-zapisz');
+  btn.innerHTML = '<span class="loading"></span> Zapisuję...';
+  btn.disabled = true;
+
+  try {
+    await appendToSheet(sheetName, row);
+    document.getElementById('form-screen').style.display = 'none';
+    document.getElementById('success-screen').style.display = 'block';
+    document.getElementById('success-text').textContent =
+      `${imie} · ${state.masaz} ${state.czas} min · ${state.godzina} · ${cena} zł`;
+  } catch(e) {
+    showToast('Błąd zapisu! Sprawdź połączenie.', true);
+    console.error(e);
+  }
+
+  btn.innerHTML = 'Zapisz rezerwację';
+  btn.disabled = false;
+}
+
+const API_URL = "https://script.google.com/macros/s/AKfycbwvqOxZDusOxJitNyuwsB1H7kMSfbzMzCjeFzkQJ1gzHGDUSeDqjXEPrNy7JRf4aIOFVg/exec";
+
+async function appendToSheet(sheetName, values) {
+  const salon = sheetName.includes('ZW') ? 'ZW' : 'SZ';
+  const resp = await fetch(API_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'text/plain' },
+    body: JSON.stringify({
+      action: 'addReservation',
+      salon: salon,
+      data: values[0],
+      godzinaStart: values[1],
+      godzinaStop: values[2],
+      imie: values[3],
+      nazwisko: values[4],
+      telefon: values[5],
+      masaz: values[6],
+      czas: values[7],
+      cena: values[8],
+      platnosc: values[9],
+      terapeuta: values[13],
+      uwagi: values[15],
+    })
+  });
+  const data = await resp.json();
+  if (!data.success) throw new Error(data.error || 'Błąd zapisu');
+  return data;
+}
+
+// ===== WIZYTY =====
+async function loadWizyty() {
+  const today = new Date();
+  const dateStr = today.toLocaleDateString('pl-PL', {weekday:'long', day:'numeric', month:'long'});
+  document.getElementById('wizyty-date').textContent = 'Dziś · ' + dateStr;
+
+  const list = document.getElementById('wizyty-list');
+  list.innerHTML = '<div class="empty-state"><div class="empty-icon">⏳</div><div class="empty-text">Ładowanie...</div></div>';
+
+  try {
+    const salons = state.salon ? [state.salon] : ['ZW', 'SZ'];
+    let allVisits = [];
+
+    for (const salon of salons) {
+      const sheetName = salon === 'ZW' ? 'REZERWACJE ZW' : 'REZERWACJE SZ';
+      const data = await getSheetData(sheetName);
+      if (!data) continue;
+
+      const todayStr = today.toLocaleDateString('pl-PL');
+      data.forEach((row, idx) => {
+        if (!row[0]) return;
+        const rowDate = new Date(row[0]);
+        const rowDateStr = rowDate.toLocaleDateString('pl-PL');
+
+        // Filtruj po dacie i terapeucie
+        const isTodayRow = rowDateStr === todayStr;
+        const isMyRow = state.user === 'RECEPCJA' || row[13] === state.user;
+
+        if (isTodayRow && isMyRow) {
+          allVisits.push({
+            rowIndex: idx + 2, // +2 bo header
+            salon,
+            sheetName,
+            czas_start: row[1],
+            czas_stop: row[2],
+            imie: row[3],
+            nazwisko: row[4],
+            tel: row[5],
+            masaz: row[6],
+            czas: row[7],
+            cena: row[8],
+            platnosc: row[9],
+            status: row[14],
+            terapeuta: row[13],
+          });
+        }
+      });
+    }
+
+    allVisits.sort((a,b) => (a.czas_start||'').localeCompare(b.czas_start||''));
+
+    if (allVisits.length === 0) {
+      list.innerHTML = '<div class="empty-state"><div class="empty-icon">🌿</div><div class="empty-text">Brak wizyt na dziś</div></div>';
+      return;
+    }
+
+    list.innerHTML = allVisits.map(v => `
+      <div class="visit-card ${v.status === 'ZREALIZOWANA' ? 'completed' : 'pending'}">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px">
+          <div class="visit-time">${v.czas_start} – ${v.czas_stop}</div>
+          <span class="visit-status ${v.status === 'ZREALIZOWANA' ? 'status-ok' : 'status-wait'}">
+            ${v.status === 'ZREALIZOWANA' ? '✓ Zrealizowana' : 'Oczekuje'}
+          </span>
+        </div>
+        <div class="visit-client">${v.imie} ${v.nazwisko||''} ${v.tel ? '· '+v.tel : ''}</div>
+        <div class="visit-service">${v.masaz||''} · ${v.czas||''} min${state.user==='RECEPCJA' ? ' · '+v.terapeuta+' · '+v.salon : ''}</div>
+        <div class="visit-price">${v.cena ? v.cena+' zł' : '—'}</div>
+        ${v.status !== 'ZREALIZOWANA' ? `
+          <div class="visit-actions">
+            <button class="btn-rozlicz" onclick='openRozlicz(${JSON.stringify(v)})'>
+              💳 Rozlicz wizytę
+            </button>
+          </div>
+        ` : `<div style="font-size:12px;color:#666">Zapłacono: ${v.platnosc||'—'}</div>`}
+      </div>
+    `).join('');
+
+  } catch(e) {
+    list.innerHTML = '<div class="empty-state"><div class="empty-icon">⚠️</div><div class="empty-text">Błąd ładowania. Sprawdź połączenie.</div></div>';
+    console.error(e);
+  }
+}
+
+async function getSheetData(sheetName) {
+  const salon = sheetName.includes('ZW') ? 'ZW' : 'SZ';
+  const terapeuta = state.user === 'RECEPCJA' ? 'RECEPCJA' : state.user;
+  const resp = await fetch(`${API_URL}?action=getReservations&salon=${salon}&terapeuta=${encodeURIComponent(terapeuta)}`);
+  if (!resp.ok) return null;
+  const data = await resp.json();
+  if (!data.success) return null;
+  // Konwertuj obiekty na tablice dla kompatybilności
+  return data.data.map(r => [r.data||'', r.godzinaStart||'', r.godzinaStop||'', r.imie||'', r.nazwisko||'', r.telefon||'', r.masaz||'', r.czas||'', r.cena||'', r.platnosc||'', '', '', '', r.terapeuta||'', r.status||'', r.uwagi||'', r.rowIndex, r.salon]);
+}
+
+// ===== ROZLICZENIE =====
+let currentVisit = null;
+
+function openRozlicz(visit) {
+  currentVisit = visit;
+  state.rozliczPlatnosc = visit.platnosc || null;
+
+  document.getElementById('modal-client-name').textContent =
+    `${visit.imie} ${visit.nazwisko||''} · ${visit.masaz} ${visit.czas} min`;
+
+  document.getElementById('modal-summary').innerHTML = `
+    <div class="summary-row">
+      <span class="summary-label">GODZINA</span>
+      <span class="summary-value">${visit.czas_start} – ${visit.czas_stop}</span>
+    </div>
+    <div class="summary-row">
+      <span class="summary-label">MASAŻ</span>
+      <span class="summary-value">${visit.masaz}</span>
+    </div>
+    <div class="summary-row">
+      <span class="summary-label">TERAPEUTA</span>
+      <span class="summary-value">${visit.terapeuta}</span>
+    </div>
+    <div class="summary-row">
+      <span class="summary-label">DO ZAPŁATY</span>
+      <span class="summary-price">${visit.cena} zł</span>
+    </div>
+  `;
+
+  // Zaznacz aktualną płatność
+  document.querySelectorAll('#modal-rozlicz .chip').forEach(c => c.classList.remove('selected'));
+  if (visit.platnosc) {
+    document.querySelectorAll('#modal-rozlicz .chip').forEach(c => {
+      if (c.textContent.includes(visit.platnosc)) c.classList.add('selected');
+    });
+  }
+
+  document.getElementById('modal-rozlicz').classList.add('active');
+}
+
+function selectRozliczPlatnosc(val, el) {
+  document.querySelectorAll('#modal-rozlicz .chip').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  state.rozliczPlatnosc = val;
+}
+
+async function potwierdzRozliczenie() {
+  if (!state.rozliczPlatnosc) return showToast('Wybierz płatność!', true);
+
+  const btn = document.getElementById('btn-rozlicz-confirm');
+  btn.innerHTML = '<span class="loading"></span> Zapisuję...';
+  btn.disabled = true;
+
+  try {
+    const resp = await fetch(API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain' },
+      body: JSON.stringify({
+        action: 'updateStatus',
+        salon: currentVisit.salon,
+        rowIndex: currentVisit.rowIndex,
+        platnosc: state.rozliczPlatnosc,
+      })
+    });
+    const data = await resp.json();
+    if (!data.success) throw new Error(data.error || 'Błąd');
+
+    closeModal();
+    showToast('✓ Wizyta rozliczona!');
+    setTimeout(loadWizyty, 500);
+  } catch(e) {
+    showToast('Błąd! Sprawdź połączenie.', true);
+    console.error(e);
+  }
+
+  btn.innerHTML = '✓ Zrealizowana';
+  btn.disabled = false;
+}
+
+async function updateCell(range, value, token) {
+  // używane przez potwierdzRozliczenie - przekierowane do updateStatus
+  // nic nie rób - obsługiwane przez potwierdzRozliczenie
+}
+
+function closeModal() {
+  document.getElementById('modal-rozlicz').classList.remove('active');
+  currentVisit = null;
+}
+
+// ===== HELPERS =====
+function switchTab(tab, el) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('tab-' + tab).classList.add('active');
+  if (tab === 'wizyty') loadWizyty();
+}
+
+function nowaRezerwacja() {
+  document.getElementById('success-screen').style.display = 'none';
+  document.getElementById('form-screen').style.display = 'block';
+  resetForm();
+}
+
+function resetForm() {
+  state.masaz = null; state.czas = null; state.godzina = null; state.platnosc = null;
+  if (state.user === 'RECEPCJA') { state.salon = null; state.terapeuta = null; }
+  document.querySelectorAll('.chip').forEach(c => c.classList.remove('selected'));
+  document.getElementById('input-imie').value = '';
+  document.getElementById('input-tel').value = '';
+  document.getElementById('input-uwagi').value = '';
+  document.getElementById('chips-czas').innerHTML = '';
+}
+
+function showToast(msg, isError = false) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast' + (isError ? ' error' : '') + ' show';
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+// ===== INIT =====
+buildLoginScreen();
+
+// Zamknij modal kliknięciem tła
+document.getElementById('modal-rozlicz').addEventListener('click', function(e) {
+  if (e.target === this) closeModal();
+});
+</script>
+
+</body>
+</html>
