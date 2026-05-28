@@ -672,8 +672,12 @@ body {
 
       <div class="form-step">
         <label class="form-label">Telefon</label>
-        <input class="form-input" type="tel" id="input-tel" placeholder="np. 500 123 456" autocomplete="off">
+        <input class="form-input" type="tel" id="input-tel" placeholder="np. 500 123 456" autocomplete="off" 
+          oninput="sprawdzKlienta(this.value)">
       </div>
+      
+      <!-- STATUS KLIENTA -->
+      <div id="status-klienta" style="display:none; margin: -8px 0 16px 0; padding: 12px 16px; border-radius: 10px; font-size: 13px; font-weight: 500; letter-spacing: 1px;"></div>
 
       <div class="form-step">
         <label class="form-label">Płatność</label>
@@ -984,6 +988,52 @@ async function zapiszRezerwacje() {
 
 const API_URL = "https://script.google.com/macros/s/AKfycbwvqOxZDusOxJitNyuwsB1H7kMSfbzMzCjeFzkQJ1gzHGDUSeDqjXEPrNy7JRf4aIOFVg/exec";
 
+// ===== SPRAWDŹ KLIENTA =====
+let checkTimeout = null;
+async function sprawdzKlienta(tel) {
+  const box = document.getElementById('status-klienta');
+  tel = tel.replace(/\s/g,'');
+  
+  // Reset
+  state.typKlienta = '';
+  box.style.display = 'none';
+  
+  if (tel.length < 9) return;
+  
+  clearTimeout(checkTimeout);
+  checkTimeout = setTimeout(async () => {
+    try {
+      box.style.display = 'block';
+      box.style.background = '#2D2D2D';
+      box.style.color = '#D4A843';
+      box.textContent = '⏳ Sprawdzam klienta...';
+      
+      const resp = await fetch(API_URL, {
+        method: 'POST',
+        headers: {'Content-Type': 'text/plain'},
+        body: JSON.stringify({action: 'checkClient', telefon: tel})
+      });
+      const data = await resp.json();
+      
+      if (data.success && data.status === 'STAŁY') {
+        state.typKlienta = data.typ;
+        const colors = {GOLD: '#8B6000', SILVER: '#607D8B', CZARNA: '#212121'};
+        const icons = {GOLD: '🥇', SILVER: '🥈', CZARNA: '🖤'};
+        box.style.background = colors[data.typ] || '#2D2D2D';
+        box.style.color = '#FAFAFA';
+        box.textContent = (icons[data.typ]||'🃏') + ' ' + data.typ + ' — ' + (data.imie||'') + ' ' + (data.nazwisko||'');
+      } else {
+        state.typKlienta = '';
+        box.style.background = '#1A1A1A';
+        box.style.color = '#888';
+        box.textContent = '👤 Nowy klient';
+      }
+    } catch(e) {
+      box.style.display = 'none';
+    }
+  }, 800);
+}
+
 async function appendToSheet(sheetName, values) {
   const salon = sheetName.includes('ZW') ? 'ZW' : 'SZ';
   const resp = await fetch(API_URL, {
@@ -1004,6 +1054,7 @@ async function appendToSheet(sheetName, values) {
       platnosc: values[9],
       terapeuta: values[13],
       uwagi: values[15],
+      typKlienta: state.typKlienta || '',
     })
   });
   const data = await resp.json();
@@ -1025,38 +1076,29 @@ async function loadWizyty() {
     let allVisits = [];
 
     for (const salon of salons) {
-      const sheetName = salon === 'ZW' ? 'REZERWACJE ZW' : 'REZERWACJE SZ';
-      const data = await getSheetData(sheetName);
-      if (!data) continue;
+      const terapeuta = state.user === 'RECEPCJA' ? 'RECEPCJA' : state.user;
+      const resp = await fetch(`${API_URL}?action=getReservations&salon=${salon}&terapeuta=${encodeURIComponent(terapeuta)}`);
+      if (!resp.ok) continue;
+      const data = await resp.json();
+      if (!data.success || !data.data) continue;
 
-      const todayStr = today.toLocaleDateString('pl-PL');
-      data.forEach((row, idx) => {
-        if (!row[0]) return;
-        const rowDate = new Date(row[0]);
-        const rowDateStr = rowDate.toLocaleDateString('pl-PL');
-
-        // Filtruj po dacie i terapeucie
-        const isTodayRow = rowDateStr === todayStr;
-        const isMyRow = state.user === 'RECEPCJA' || row[13] === state.user;
-
-        if (isTodayRow && isMyRow) {
-          allVisits.push({
-            rowIndex: idx + 2, // +2 bo header
-            salon,
-            sheetName,
-            czas_start: row[1],
-            czas_stop: row[2],
-            imie: row[3],
-            nazwisko: row[4],
-            tel: row[5],
-            masaz: row[6],
-            czas: row[7],
-            cena: row[8],
-            platnosc: row[9],
-            status: row[14],
-            terapeuta: row[13],
-          });
-        }
+      data.data.forEach(r => {
+        allVisits.push({
+          rowIndex: r.rowIndex,
+          salon: r.salon,
+          sheetName: salon === 'ZW' ? 'REZERWACJE ZW' : 'REZERWACJE SZ',
+          czas_start: r.godzinaStart,
+          czas_stop: r.godzinaStop,
+          imie: r.imie,
+          nazwisko: r.nazwisko,
+          tel: r.telefon,
+          masaz: r.masaz,
+          czas: r.czas,
+          cena: r.cena,
+          platnosc: r.platnosc,
+          status: r.status,
+          terapeuta: r.terapeuta,
+        });
       });
     }
 
