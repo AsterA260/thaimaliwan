@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Thai Maliwan · Wybierz wolny termin</title>
+<style>
+  :root{
+    --bg:#F6F3EC; --surface:#FFFFFF; --surface-2:#FBF9F4;
+    --ink:#1E2A27; --muted:#6E7A74; --faint:#9AA39D;
+    --line:#E7E2D7; --line-strong:#D7D0C2;
+    --jade:#0E6E59; --jade-deep:#0B4A3B;
+    --free-bg:#E5F2EC; --free-tx:#0B4A3B; --free-edge:#3FA088;
+    --radius:14px; --shadow:0 1px 2px rgba(30,42,39,.05),0 10px 30px rgba(30,42,39,.05);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased;}
+  .wrap{max-width:920px;margin:0 auto;padding:26px 18px 60px}
+
+  .top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:24px}
+  .brand{display:flex;align-items:center;gap:11px}
+  .mark{width:30px;height:30px;flex:0 0 30px}
+  .brand b{font-size:17px;font-weight:700;letter-spacing:.14em;color:var(--jade-deep);display:block;line-height:1}
+  .brand span{font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--faint)}
+  .salon{display:flex;background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:3px}
+  .salon button{border:0;background:transparent;color:var(--muted);font:inherit;font-size:13px;font-weight:600;
+    padding:7px 16px;border-radius:999px;cursor:pointer;transition:.15s}
+  .salon button.on{background:var(--jade);color:#fff}
+  .salon button:focus-visible{outline:2px solid var(--jade);outline-offset:2px}
+
+  h1{font-size:27px;font-weight:700;letter-spacing:-.01em;margin:6px 0 6px}
+  .lead{color:var(--muted);max-width:560px;margin:0 0 4px}
+  .addr{color:var(--faint);font-size:13px;margin:0 0 22px}
+
+  .grid{display:grid;grid-template-columns:1fr 320px;gap:18px;align-items:start}
+  @media(max-width:760px){.grid{grid-template-columns:1fr}}
+
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:18px;box-shadow:var(--shadow)}
+  .cal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+  .cal-head .m{font-weight:700;font-size:16px}
+  .nav{width:32px;height:32px;border:1px solid var(--line);background:var(--surface);border-radius:9px;cursor:pointer;color:var(--muted);font-size:16px}
+  .nav:hover{background:var(--surface-2)}
+  .nav:disabled{opacity:.3;cursor:default}
+  .dow{display:grid;grid-template-columns:repeat(7,1fr);text-align:center;font-size:11px;color:var(--faint);margin-bottom:8px}
+  .days{display:grid;grid-template-columns:repeat(7,1fr);gap:3px}
+  .day{aspect-ratio:1/1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;
+    border-radius:11px;cursor:default;color:var(--faint);font-size:14px;border:1px solid transparent;position:relative}
+  .day.in{color:var(--ink)}
+  .day.has{cursor:pointer}
+  .day.has:hover{background:var(--surface-2)}
+  .day.sel{background:var(--jade);color:#fff;font-weight:700}
+  .day .dot{width:5px;height:5px;border-radius:50%;background:var(--free-edge)}
+  .day.sel .dot{background:#fff}
+  .day:focus-visible{outline:2px solid var(--jade);outline-offset:1px}
+  .legend{margin-top:12px;display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--muted)}
+  .legend .dot{width:6px;height:6px;border-radius:50%;background:var(--free-edge)}
+
+  .side h3{margin:0 0 3px;font-size:15px;font-weight:700}
+  .side .sub{color:var(--faint);font-size:13px;margin:0 0 14px}
+  .hours{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+  .hour{border:1px solid var(--free-edge);background:var(--free-bg);color:var(--free-tx);
+    font:inherit;font-weight:700;padding:13px 0;border-radius:11px;cursor:pointer;transition:.12s;text-align:center}
+  .hour:hover{background:#d7ebe1}
+  .hour.on{background:var(--jade);color:#fff;border-color:var(--jade)}
+  .empty{color:var(--faint);font-size:13.5px;text-align:center;padding:26px 8px;line-height:1.6}
+  .loading{color:var(--faint);font-size:13.5px;text-align:center;padding:26px 8px}
+
+  .form{margin-top:16px;border-top:1px dashed var(--line);padding-top:16px;display:none}
+  .form.show{display:block}
+  .pick{background:var(--free-bg);border:1px solid var(--free-edge);border-radius:10px;padding:9px 12px;
+    font-size:13.5px;color:var(--free-tx);font-weight:600;margin-bottom:13px}
+  .field{margin-bottom:10px}
+  .field label{display:block;font-size:12px;color:var(--muted);margin-bottom:4px;font-weight:600}
+  .field input{width:100%;border:1px solid var(--line-strong);border-radius:9px;padding:10px 11px;font:inherit;font-size:14px;background:var(--surface-2)}
+  .field input:focus{outline:2px solid var(--jade);outline-offset:0;background:#fff}
+  .go{width:100%;border:0;background:var(--jade);color:#fff;font:inherit;font-weight:700;font-size:15px;padding:13px 0;border-radius:11px;cursor:pointer;margin-top:4px}
+  .go:hover{background:var(--jade-deep)}
+  .go:disabled{opacity:.55;cursor:default}
+  .msg{margin-top:10px;font-size:13px;border-radius:9px;padding:9px 11px;display:none}
+  .msg.ok{display:block;background:#E5F2EC;color:#0B4A3B}
+  .msg.err{display:block;background:#FBE8EE;color:#7A2942}
+  .msg.info{display:block;background:#FBF3DF;color:#6B5318}
+
+  .foot{margin-top:18px;display:flex;align-items:center;gap:7px;color:var(--faint);font-size:12px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <div class="brand">
+      <svg class="mark" viewBox="0 0 40 40" fill="none"><path d="M20 4c2 6 6 10 12 12-6 2-10 6-12 12-2-6-6-10-12-12 6-2 10-6 12-12z" fill="#0E6E59"/></svg>
+      <div><b>THAI MALIWAN</b><span>Rezerwacja online</span></div>
+    </div>
+    <div class="salon" id="salonSeg">
+      <button data-s="ZW" class="on">Zwierzyniecka</button>
+      <button data-s="SZ">Szewska</button>
+    </div>
+  </div>
+
+  <h1>Wybierz wolny termin</h1>
+  <p class="lead">Pokazujemy tylko dostępne godziny. Wybierz dzień, kliknij godzinę i zostaw kontakt.</p>
+  <p class="addr" id="addr">ul. Zwierzyniecka 14/7, Kraków · pon–niedz 12:00–22:30</p>
+
+  <div class="grid">
+    <div class="card">
+      <div class="cal-head">
+        <button class="nav" id="prev" aria-label="Poprzedni miesiąc">‹</button>
+        <div class="m" id="monthLbl">—</div>
+        <button class="nav" id="next" aria-label="Następny miesiąc">›</button>
+      </div>
+      <div class="dow"><span>Pon</span><span>Wt</span><span>Śr</span><span>Czw</span><span>Pt</span><span>So</span><span>Nd</span></div>
+      <div class="days" id="days"></div>
+      <div class="legend"><span class="dot"></span> kropka = są wolne godziny tego dnia</div>
+    </div>
+
+    <div class="card side">
+      <h3>Wolne godziny</h3>
+      <p class="sub" id="sideSub">Kliknij dzień w kalendarzu, żeby zobaczyć wolne godziny.</p>
+      <div id="hours"></div>
+
+      <div class="form" id="form">
+        <div class="pick" id="pick">—</div>
+        <div class="field"><label>Imię</label><input id="fImie" placeholder="Imię"></div>
+        <div class="field"><label>Nazwisko</label><input id="fNazwisko" placeholder="Nazwisko"></div>
+        <div class="field"><label>Telefon</label><input id="fTel" placeholder="np. 600 100 200"></div>
+        <div class="field"><label>Numer bonu</label><input id="fBon" placeholder="np. 6874"></div>
+        <button class="go" id="goBtn">Zarezerwuj wizytę</button>
+        <div class="msg" id="msg"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="foot">🔒 Nie pokazujemy, kto pracuje ani innych rezerwacji — tylko wolne godziny.</div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  /* ===== USTAWIENIA ===== */
+  // okienko blokad (czyta wolne terminy z arkusza). Ten sam dla ZW i SZ — salon w parametrze.
+  var BLOKADY_URL = 'https://script.google.com/macros/s/AKfycbxRHoym4ficL0meQkTDs5G_q3K96ICVUagduC_u5c4V2yJK1PEXvbsCT5OjiUdjTdGc/exec';
+  // zapis rezerwacji — ten sam projekt (KALENDARZ BONY), akcja=zapis
+  var ZAPIS_URL = 'https://script.google.com/macros/s/AKfycbxRHoym4ficL0meQkTDs5G_q3K96ICVUagduC_u5c4V2yJK1PEXvbsCT5OjiUdjTdGc/exec';
+
+  var ADRES = { ZW:'ul. Zwierzyniecka 14/7, Kraków · pon–niedz 12:00–22:30',
+                SZ:'ul. Szewska 12, Kraków · pon–niedz 12:00–22:30' };
+  var MIES = ['stycznia','lutego','marca','kwietnia','maja','czerwca','lipca','sierpnia','września','października','listopada','grudnia'];
+  var MIES_M = ['Styczeń','Luty','Marzec','Kwiecień','Maj','Czerwiec','Lipiec','Sierpień','Wrzesień','Październik','Listopad','Grudzień'];
+  var DNI = ['niedziela','poniedziałek','wtorek','środa','czwartek','piątek','sobota'];
+
+  var $ = function(id){ return document.getElementById(id); };
+  function pad(n){ return (n<10?'0':'')+n; }
+
+  var today = new Date();
+  var state = {
+    salon:'ZW',
+    calY:today.getFullYear(),
+    calMo:today.getMonth(),
+    selKey:null,
+    selHour:null,
+    slots:{}   // "YYYY-MM-DD" -> [ "12:00", "13:30", ... ]
+  };
+
+  /* ---- JSONP do okienka blokad ---- */
+  var seq=0;
+  function pobierzBlokady(cb){
+    var s=++seq, name='__blok'+s, sc=document.createElement('script');
+    window[name]=function(res){ try{delete window[name];}catch(e){} if(sc.parentNode)sc.parentNode.removeChild(sc); cb(res); };
+    sc.onerror=function(){ try{delete window[name];}catch(e){} if(sc.parentNode)sc.parentNode.removeChild(sc); cb(null); };
+    sc.src=BLOKADY_URL+'?salon='+encodeURIComponent(state.salon)+'&callback='+name+'&_='+Date.now();
+    document.body.appendChild(sc);
+  }
+
+  // "DD.MM.YYYY" lub "YYYY-MM-DD" -> "YYYY-MM-DD"
+  function keyZDaty(s){
+    s=String(s||'').trim();
+    var a=s.match(/^(\d{1,2})\.(\d{1,2})\.(\d{4})/); if(a) return a[3]+'-'+pad(+a[2])+'-'+pad(+a[1]);
+    var b=s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/); if(b) return b[1]+'-'+pad(+b[2])+'-'+pad(+b[3]);
+    return '';
+  }
+  function gg(s){ var m=String(s||'').match(/(\d{1,2}):(\d{2})/); return m?(pad(+m[1])+':'+m[2]):''; }
+
+  function wczytaj(){
+    state.slots={}; state.selKey=null; state.selHour=null;
+    $('hours').innerHTML='<div class="loading">⏳ ładuję wolne terminy…</div>';
+    $('form').classList.remove('show');
+    $('sideSub').textContent='Kliknij dzień w kalendarzu, żeby zobaczyć wolne godziny.';
+    pobierzBlokady(function(res){
+      if(!res||!res.ok){ $('hours').innerHTML='<div class="empty">Nie udało się pobrać terminów.<br>Odśwież stronę.</div>'; renderCal(); return; }
+      var map={};
+      (res.wolne||[]).forEach(function(w){
+        var k=keyZDaty(w.data), h=gg(w.start); if(!k||!h) return;
+        (map[k]=map[k]||[]); if(map[k].indexOf(h)<0) map[k].push(h);
+      });
+      Object.keys(map).forEach(function(k){ map[k].sort(); });
+      state.slots=map;
+      $('hours').innerHTML='';
+      renderCal();
+    });
+  }
+
+  function renderCal(){
+    $('monthLbl').textContent=MIES_M[state.calMo]+' '+state.calY;
+    var first=new Date(state.calY,state.calMo,1);
+    var startDow=(first.getDay()+6)%7;           // poniedziałek=0
+    var dim=new Date(state.calY,state.calMo+1,0).getDate();
+    var html=''; var i;
+    for(i=0;i<startDow;i++) html+='<div class="day"></div>';
+    for(var d=1;d<=dim;d++){
+      var key=state.calY+'-'+pad(state.calMo+1)+'-'+pad(d);
+      var has=!!state.slots[key];
+      var cls='day in'+(has?' has':'')+(key===state.selKey?' sel':'');
+      html+='<div class="'+cls+'" data-k="'+key+'"'+(has?' tabindex="0" role="button"':'')+'>'+d+(has?'<span class="dot"></span>':'')+'</div>';
+    }
+    $('days').innerHTML=html;
+    [].forEach.call($('days').querySelectorAll('.day.has'),function(el){
+      el.onclick=function(){ wybierzDzien(el.getAttribute('data-k')); };
+      el.onkeydown=function(e){ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); wybierzDzien(el.getAttribute('data-k')); } };
+    });
+  }
+
+  function wybierzDzien(key){
+    state.selKey=key; state.selHour=null; renderCal();
+    var dt=new Date(key+'T00:00:00');
+    $('sideSub').textContent=DNI[dt.getDay()]+', '+dt.getDate()+' '+MIES[dt.getMonth()];
+    var hours=state.slots[key]||[];
+    var h='<div class="hours">';
+    hours.forEach(function(x){ h+='<button class="hour" data-h="'+x+'">'+x+'</button>'; });
+    h+='</div>';
+    $('hours').innerHTML=h;
+    $('form').classList.remove('show');
+    [].forEach.call($('hours').querySelectorAll('.hour'),function(b){
+      b.onclick=function(){ wybierzGodzine(b.getAttribute('data-h'), b); };
+    });
+  }
+
+  function wybierzGodzine(hh, btn){
+    state.selHour=hh;
+    [].forEach.call($('hours').querySelectorAll('.hour'),function(b){ b.classList.remove('on'); });
+    btn.classList.add('on');
+    var dt=new Date(state.selKey+'T00:00:00');
+    var salonNazwa=(state.salon==='ZW')?'Zwierzyniecka':'Szewska';
+    $('pick').textContent='📅 '+dt.getDate()+' '+MIES[dt.getMonth()]+', godz. '+hh+' · '+salonNazwa;
+    $('msg').className='msg';
+    $('form').classList.add('show');
+    $('form').scrollIntoView({behavior:'smooth',block:'nearest'});
+  }
+
+  function zarezerwuj(){
+    var imie=$('fImie').value.trim(), nazw=$('fNazwisko').value.trim(), tel=$('fTel').value.trim();
+    if(!imie||!nazw){ pokazMsg('Podaj imię i nazwisko.','err'); return; }
+    if(!state.selKey||!state.selHour){ pokazMsg('Wybierz najpierw godzinę.','err'); return; }
+    if(!ZAPIS_URL){
+      pokazMsg('Termin wybrany: '+$('pick').textContent.replace('📅 ','')+'. Zapis do arkusza włączymy w następnym kroku.','info');
+      return;
+    }
+    var b=$('goBtn'); b.disabled=true; b.textContent='Rezerwuję…';
+    var name='__zap'+(++seq), sc=document.createElement('script');
+    window[name]=function(res){
+      try{delete window[name];}catch(e){} if(sc.parentNode)sc.parentNode.removeChild(sc);
+      b.disabled=false; b.textContent='Zarezerwuj wizytę';
+      if(res&&res.ok){ pokazMsg('Gotowe! Termin zarezerwowany. Do zobaczenia w Thai Maliwan 🌿','ok'); wczytaj(); }
+      else pokazMsg('Nie udało się zapisać'+(res&&res.powod?': '+res.powod:'.'),'err');
+    };
+    sc.onerror=function(){ b.disabled=false; b.textContent='Zarezerwuj wizytę'; pokazMsg('Błąd połączenia. Spróbuj ponownie.','err'); };
+    var q='?akcja=zapis&salon='+state.salon+'&data='+state.selKey+'&start='+state.selHour
+        +'&imie='+encodeURIComponent(imie)+'&nazwisko='+encodeURIComponent(nazw)
+        +'&telefon='+encodeURIComponent(tel)+'&bon='+encodeURIComponent($('fBon').value.trim())
+        +'&callback='+name+'&_='+Date.now();
+    sc.src=ZAPIS_URL+q; document.body.appendChild(sc);
+  }
+  function pokazMsg(t,k){ var m=$('msg'); m.textContent=t; m.className='msg '+k; }
+
+  /* ---- zdarzenia ---- */
+  $('prev').onclick=function(){ if(state.calMo===0){state.calMo=11;state.calY--;}else state.calMo--; renderCal(); };
+  $('next').onclick=function(){ if(state.calMo===11){state.calMo=0;state.calY++;}else state.calMo++; renderCal(); };
+  $('goBtn').onclick=zarezerwuj;
+  [].forEach.call($('salonSeg').querySelectorAll('button'),function(b){
+    b.onclick=function(){
+      [].forEach.call($('salonSeg').querySelectorAll('button'),function(x){x.classList.remove('on');});
+      b.classList.add('on'); state.salon=b.getAttribute('data-s');
+      $('addr').textContent=ADRES[state.salon];
+      wczytaj();
+    };
+  });
+
+  wczytaj();
+})();
+</script>
+</body>
+</html>
