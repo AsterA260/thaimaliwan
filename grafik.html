@@ -608,6 +608,7 @@
     var data2=state.y+'-'+pad2(state.mo+1)+'-'+pad2(state.d);
     var url=KRAN_URL+'?salon='+encodeURIComponent(state.salon)+'&data='+encodeURIComponent(data2)+'&callback='+cbName+'&_='+Date.now();
     var sc=document.createElement('script');
+    sc.crossOrigin = 'anonymous';
     sc.src = url;
     function sprzataj(){ try{delete window[cbName];}catch(e){window[cbName]=null;} if(sc&&sc.parentNode)sc.parentNode.removeChild(sc); }
     function blad(msg){ if(seq!==kranSeq)return; var g=document.getElementById('gridRow'); if(g) g.innerHTML='<div style="padding:46px 20px;text-align:center;color:var(--walk-edge);font-size:13px">'+msg+'</div>'; sprzataj(); }
