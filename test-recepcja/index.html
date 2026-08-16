@@ -330,7 +330,7 @@ body> :not(.ui-r1){display:none!important}
           </section>
           <section class="r1-panel r1-board">
             <div class="r1-board-toolbar"><button class="back" data-screen-link="home" aria-label="Wróć">‹</button><div class="r1-board-date"><strong>Piątek, 14 sierpnia 2026</strong><span><span data-salon-label>Salon SZ</span> · 12:00–22:00 · DANE PRZYKŁADOWE</span></div><div class="r1-view-tabs"><button class="active">Dzień</button><button data-not-yet="Widok tygodnia">Tydzień</button><button data-not-yet="Widok miesiąca">Miesiąc</button></div><button class="r1-icon-btn" data-open-modal="slots" aria-label="Udostępnij termin"><svg viewBox="0 0 24 24"><path d="M4 12h16M12 4v16"/></svg></button></div>
-            <div class="r1-booking-context" id="r1BookingContext" role="status"><div><b>Powiązana rezerwacja</b><br><span id="r1BookingContextCopy"></span></div><button type="button" id="r1ClearBookingContext" aria-label="Zamknij podgląd powiązanej rezerwacji">×</button></div>
+            <div class="r1-booking-context" id="r1BookingContext" role="status"><div><b id="r1BookingContextTitle">Powiązana rezerwacja</b><br><span id="r1BookingContextCopy"></span></div><button type="button" id="r1ClearBookingContext" aria-label="Zamknij podgląd kontekstu">×</button></div>
             <div class="r1-schedule-wrap"><div class="r1-schedule" id="r1Schedule"></div></div>
           </section>
         </div>
@@ -347,7 +347,7 @@ body> :not(.ui-r1){display:none!important}
 
   <footer class="r1-footer"><span>Thai Maliwan Internal · UI-R3F · tylko makieta</span><span>Backend zamrożony · zero POST / deploy</span><span>Stan lokalny <i class="ok"></i></span></footer>
 
-  <div class="r1-modal-shell" id="r1SlotsModal" role="dialog" aria-modal="true"><div class="r1-modal r1-slots-modal"><div class="r1-modal-head"><h3>Udostępnij terminy klientom</h3><button class="r1-close" data-close-modal>×</button></div><p class="r1-modal-sub">To jest tryb edycji tego samego Grafiku. Wybierz wolną godzinę przy masażystce: od razu pojawi się w głównej siatce jako udostępniona. W tej demonstracji dane pozostają lokalne.</p><div class="r1-slot-list" id="r1SlotList"></div></div></div>
+  <div class="r1-modal-shell" id="r1SlotsModal" role="dialog" aria-modal="true"><div class="r1-modal r1-slots-modal"><div class="r1-modal-head"><h3>Udostępnij terminy klientom</h3><button class="r1-close" data-close-modal>×</button></div><p class="r1-modal-sub" id="r1SlotsIntro">To jest tryb edycji tego samego Grafiku. Wybierz wolną godzinę przy masażystce: od razu pojawi się w głównej siatce jako udostępniona. W tej demonstracji dane pozostają lokalne.</p><div class="r1-slot-list" id="r1SlotList"></div></div></div>
   <div class="r1-modal-shell" id="r1TeamModal" role="dialog" aria-modal="true"><div class="r1-modal"><div class="r1-modal-head"><h3>Dzisiejszy zespół</h3><button class="r1-close" data-close-modal>×</button></div><p class="r1-modal-sub">Prosty podgląd i lokalna edycja składu dnia. Bez zapisu do arkusza.</p><div class="r1-check-list" id="r1TeamChecks"></div></div></div>
 
   <div class="r1-modal-shell" id="r2ReceptionModal" role="dialog" aria-modal="true" aria-label="Recepcja — rezerwacja lub sprzedaż bonu">
@@ -666,7 +666,7 @@ addEventListener('pointerup',function(){if(!drag)return;drag=false;vel=Math.max(
   var root=document.getElementById('uiR1');
   root.addEventListener('pointerdown',function(e){e.stopPropagation();});
 
-  var state={salon:'SZ',screen:'home',theme:'dark',bookingContext:null};
+  var state={salon:'SZ',screen:'home',theme:'dark',bookingContext:null,releaseContext:null};
   var DATA={
     SZ:{team:[['Cholthida','Masaż tajski klasyczny',true],['Butsakorn','Masaż olejkami',true],['Kai','Masaż głowy, pleców i ramion',true],['Tip','Rytuały i masaże relaksacyjne',true]],
       visits:[
@@ -691,6 +691,25 @@ addEventListener('pointerup',function(){if(!drag)return;drag=false;vel=Math.max(
         {id:'ZW-005',booking_id:'AST-ZW-20260814-005',source:'ASTERA',date:'2026-08-14',t:'20:00',end:'21:00',who:'Sumalee',client:'Gabriela K.',phone:'600 000 205',categoryId:'couples',serviceId:'couple-oil',service:'Masaż tajski olejkami dla par',duration:60,price:460,bookToTherapist:false,note:'',status:'REZERWACJA'}],
       slots:[['12:30','Maliwan'],['13:45','Sumalee'],['15:45','Maliwan'],['17:45','Sumalee'],['19:45','Tip'],['21:15','Khanjana']]}
   };
+  /* Wspólny lokalny most demonstracyjny: klient z flow-bonu trafia do tej samej siatki Rezerwacji. */
+  var R5_DEMO_BOOKING_STORAGE_KEY='asteraTestRecepcjaDemoBooking';
+  function r1HydrateDemoVoucherBooking(){
+    var raw,row,data,exists;
+    try{raw=localStorage.getItem(R5_DEMO_BOOKING_STORAGE_KEY);row=raw?JSON.parse(raw):null;}catch(error){return false;}
+    if(!row||!row.booking_id||!row.salon||!DATA[row.salon])return false;
+    data=DATA[row.salon];
+    exists=data.visits.some(function(visit){return visit.booking_id===row.booking_id||visit.id===row.id;});
+    if(exists)return true;
+    data.visits.push({
+      id:row.id||'DEMO_'+row.booking_id,booking_id:row.booking_id,source:'ASTERA',booking_type:'VOUCHER',
+      date:row.date||'2026-08-20',t:row.t||'13:00',end:row.end||'14:00',who:row.who||data.team[0][0],
+      client:row.client||'Klient demo',phone:row.phone||'',categoryId:'single',serviceId:'thai-traditional',
+      service:row.service||'Tajski Klasyczny',duration:Number(row.duration)||60,price:Number(row.price)||210,
+      bookToTherapist:true,note:'DEMO · bon '+(row.voucherNumber||''),status:'REZERWACJA',
+      settlementStatus:'NIEROZLICZONA',paymentMethod:'',voucherNumber:row.voucherNumber||'',voucherStatus:'Ważny'
+    });
+    return true;
+  }
   /* Metody rozliczenia wizyty. Bon zamyka się automatycznie poza listą przycisków. */
   var SETTLEMENT_METHODS=[
     {id:'g',label:'Gotówka'},{id:'k',label:'Karta'},{id:'p',label:'Przelew'},{id:'b',label:'Blik'},
@@ -766,17 +785,26 @@ addEventListener('pointerup',function(){if(!drag)return;drag=false;vel=Math.max(
     document.querySelectorAll('[data-theme-choice]').forEach(function(btn){var active=btn.dataset.themeChoice===theme;btn.classList.toggle('active',active);btn.setAttribute('aria-pressed',active?'true':'false');});
   }
   function r1RenderBookingContext(){
-    var box=document.getElementById('r1BookingContext'),copy=document.getElementById('r1BookingContextCopy'),ctx=state.bookingContext;
-    if(!ctx){box.classList.remove('show');copy.textContent='';return;}
-    copy.textContent=ctx.id+' · '+ctx.salon+' · '+ctx.date+' · '+ctx.start+'–'+ctx.end+' · '+ctx.therapist+' · '+ctx.client;
-    box.classList.add('show');
+    var box=document.getElementById('r1BookingContext'),title=document.getElementById('r1BookingContextTitle'),copy=document.getElementById('r1BookingContextCopy'),ctx=state.bookingContext,release=state.releaseContext;
+    if(ctx){title.textContent='Powiązana rezerwacja';copy.textContent=ctx.id+' · '+ctx.salon+' · '+ctx.date+' · '+ctx.start+'–'+ctx.end+' · '+ctx.therapist+' · '+ctx.client;box.classList.add('show');return;}
+    if(release){title.textContent='Udostępnianie terminu';copy.textContent='Bon '+release.voucher+' · '+release.salon+' · wybierz wolną masażystkę i godzinę. To wspólny termin dla klientów z ważnym bonem.';box.classList.add('show');return;}
+    box.classList.remove('show');copy.textContent='';
   }
   function r1OpenBookingContext(){
+    r1HydrateDemoVoucherBooking();
     var hash=location.hash.replace(/^#/,'');if(!hash)return;
-    var q=new URLSearchParams(hash),id=q.get('booking');if(!id)return;
-    var salon=q.get('salon'),date=q.get('date'),start=q.get('start'),end=q.get('end'),therapist=q.get('therapist'),client=q.get('client');
+    var q=new URLSearchParams(hash),salon=q.get('salon');
+    if(q.get('mode')==='release'){
+      if(salon!=='ZW'&&salon!=='SZ')return;
+      state.bookingContext=null;state.releaseContext={voucher:q.get('voucher')||'wybrany bon',salon:salon};state.salon=salon;
+      document.querySelectorAll('[data-salon-picker] button').forEach(function(btn){btn.classList.toggle('active',btn.dataset.salon===salon);});
+      document.querySelectorAll('[data-salon-label]').forEach(function(el){el.textContent='Salon '+salon;});
+      showScreen('calendar');openModal('slots');return;
+    }
+    var id=q.get('booking');if(!id)return;
+    var date=q.get('date'),start=q.get('start'),end=q.get('end'),therapist=q.get('therapist'),client=q.get('client');
     if(salon!=='ZW'&&salon!=='SZ')return;
-    state.bookingContext={id:id,salon:salon,date:date||'data DEMO',start:start||'—',end:end||'—',therapist:therapist||'—',client:client||'Klient demo'};
+    state.releaseContext=null;state.bookingContext={id:id,salon:salon,date:date||'data DEMO',start:start||'—',end:end||'—',therapist:therapist||'—',client:client||'Klient demo'};
     state.salon=salon;
     document.querySelectorAll('[data-salon-picker] button').forEach(function(btn){btn.classList.toggle('active',btn.dataset.salon===salon);});
     document.querySelectorAll('[data-salon-label]').forEach(function(el){el.textContent='Salon '+salon;});
@@ -1094,7 +1122,9 @@ addEventListener('pointerup',function(){if(!drag)return;drag=false;vel=Math.max(
     renderAll();toast('Termin udostępniony w głównym Grafiku · DEMO bez zapisu');
   }
   function renderSlots(){
-    var el=document.getElementById('r1SlotList'),data=DATA[state.salon];el.innerHTML='';
+    var el=document.getElementById('r1SlotList'),intro=document.getElementById('r1SlotsIntro'),data=DATA[state.salon];
+    intro.textContent=state.releaseContext?'Kontekst: bon '+state.releaseContext.voucher+'. Udostępniasz wspólny wolny termin w głównym Grafiku — zobaczą go klienci z ważnym bonem, nie tylko ten numer.':'To jest tryb edycji tego samego Grafiku. Wybierz wolną godzinę przy masażystce: od razu pojawi się w głównej siatce jako udostępniona. W tej demonstracji dane pozostają lokalne.';
+    el.innerHTML='';
     data.team.forEach(function(person){
       var therapist=person[0],column=document.createElement('section'),head=document.createElement('div'),times=document.createElement('div'),own=data.slots.filter(function(s){return s[1]===therapist;});
       column.className='r1-slot-column';head.className='r1-slot-person';times.className='r1-slot-times';head.innerHTML='<i>'+r2Esc(initials(therapist))+'</i><strong>'+r2Esc(therapist)+'</strong>';column.appendChild(head);
@@ -1152,7 +1182,7 @@ addEventListener('pointerup',function(){if(!drag)return;drag=false;vel=Math.max(
   document.querySelectorAll('[data-theme-choice]').forEach(function(el){el.addEventListener('click',function(){setTheme(el.dataset.themeChoice);});});
   document.querySelectorAll('[data-open-modal]').forEach(function(el){el.addEventListener('click',function(){openModal(el.dataset.openModal);});});
   document.querySelectorAll('[data-open-bony]').forEach(function(el){el.addEventListener('click',function(){location.href='bony/';});});
-  document.getElementById('r1ClearBookingContext').addEventListener('click',function(){state.bookingContext=null;history.replaceState(null,'',location.pathname);r1RenderBookingContext();});
+  document.getElementById('r1ClearBookingContext').addEventListener('click',function(){state.bookingContext=null;state.releaseContext=null;history.replaceState(null,'',location.pathname);renderSlots();r1RenderBookingContext();});
   document.querySelectorAll('[data-close-modal]').forEach(function(el){el.addEventListener('click',function(){el.closest('.r1-modal-shell').classList.remove('open');});});
   document.querySelectorAll('.r1-modal-shell').forEach(function(el){el.addEventListener('click',function(e){if(e.target===el)el.classList.remove('open');});});
   document.querySelectorAll('[data-not-yet]').forEach(function(el){el.addEventListener('click',function(){toast(el.dataset.notYet+' — następny etap, bez implementacji w UI-R1');});});
@@ -1160,6 +1190,11 @@ addEventListener('pointerup',function(){if(!drag)return;drag=false;vel=Math.max(
   window.__ASTERA_R3D__={version:'UI-R3D',productionWrites:false,methods:SETTLEMENT_METHODS.map(function(method){return {id:method.id,label:method.label};}),cancellationDecision:function(visit,cancelledAt){return r3dVoucherCancellationDecision(visit,new Date(cancelledAt));},visit:function(salon,id){var visit=r3cVisit(salon,id);return visit?{id:visit.id,booking_id:visit.booking_id,status:visit.status,settlementStatus:visit.settlementStatus||'NIEROZLICZONA',paymentMethod:visit.paymentMethod||'',voucherNumber:visit.voucherNumber||'',voucherStatus:visit.voucherStatus||''}:null;}};
   window.__ASTERA_R3E__={version:'UI-R3E',productionWrites:false,methods:SETTLEMENT_METHODS.map(function(method){return {id:method.id,label:method.label,source:method.source||'',requiresBooking:method.requiresBooking!==false};}),voucherButtons:false,cancelled:function(){return r3eCancelledVisits().map(function(row){return {salon:row.salon,id:row.visit.id,booking_id:row.visit.booking_id,status:row.visit.status,voucherStatus:row.visit.voucherStatus||''};});},qrEntries:function(){return r3e.qrEntries.map(function(entry){return {id:entry.id,source:entry.source,booking_id:entry.booking_id,requiresBooking:entry.requiresBooking,salon:entry.salon,client:entry.client,amount:entry.amount,status:entry.status};});}};
   window.__ASTERA_R3F__={version:'UI-R3F',productionWrites:false,paymentIcon:function(method){return r3fPaymentIcon(method);},supportedMethods:SETTLEMENT_METHODS.map(function(method){return method.id;}).concat(['bon'])};
+  r1HydrateDemoVoucherBooking();
+  window.addEventListener('storage',function(event){
+    if(event.key!==R5_DEMO_BOOKING_STORAGE_KEY)return;
+    if(r1HydrateDemoVoucherBooking()&&state.screen==='calendar')renderAll();
+  });
   renderAll();
   r1OpenBookingContext();
 })();
