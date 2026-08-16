@@ -4,7 +4,8 @@ Statyczny, odizolowany pakiet testowy na bazie zaakceptowanych makiet UI-R3F i U
 
 - `index.html` — Mandala oraz działający lokalnie widok Rezerwacji/Grafiku;
 - `bony/` — Bony i partnerzy, dostępne z kuli na Mandali;
-- `flow-bonu/` — demonstracja miesięcznego wyboru terminów VOUCHER.
+- `flow-bonu/` — archiwalny, odseparowany scenariusz flow bonu;
+- w `index.html` przycisk `Udostępnij terminy` otwiera tryb edycji tego samego głównego Grafiku: wybrana godzina od razu pojawia się w jego siatce jako udostępniona, a przy takim terminie działa lokalne `× Cofnij`.
 
 ## Bezpieczeństwo
 
