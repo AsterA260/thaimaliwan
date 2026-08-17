@@ -35,7 +35,12 @@
     </main></div><div class="toast" id="toast"></div>
   <script>
   // UI-R4: lokalne dane demonstracyjne. Produkcja i arkusze są niepodłączone.
-  const VOUCHERS=[
+  // ===== ASTERA VOUCHERS BRIDGE (Instrukcja nr 2) — konfiguracja =====
+  // PROD wyłączony domyślnie. Token NIE jest wpisany w kod — frontend czyta go
+  // wyłącznie z localStorage('asteraReadToken'). Bez tokenu: bezpieczny DEMO.
+  const ASTERA_VOUCHERS_PROD_ENABLED=true;
+  const ASTERA_VOUCHERS_API_URL='https://script.google.com/macros/s/AKfycbz1DIfrEuALN3wJ0MFJ_bmoWHFbWg3FKQH-OGvAGZSPOa5ej52XfbvrH-1tdTxxHy90DA/exec';
+  const DEMO_VOUCHERS=[
    {n:'140801/26/ZW',salon:'ZW',status:'Ważny',kind:'Tajski Klasyczny',minutes:60,value:210,client:'Test R5',channel:'Recepcja',booking:{id:'AST-ZW-20260820-8941C8C88339',date:'20.08.2026',start:'10:00',end:'11:00',therapist:'Cholthida',status:'REZERWACJA'}},
    {n:'140804/26/ZW',salon:'ZW',status:'Ważny',kind:'Masaż olejkami',minutes:90,value:310,client:'Test R4',channel:'Recepcja',booking:null},
    {n:'140801/26/SZ',salon:'SZ',status:'Ważny',kind:'Rytuał relaksu',minutes:120,value:420,client:'Test R4 SZ',channel:'Recepcja',booking:null},
@@ -47,6 +52,7 @@
    {n:'130901/26/ZW',salon:'ZW',status:'Ważny',kind:'Masaż głowy, pleców i ramion',minutes:45,value:170,client:'Nieprzypisany',channel:'PayU — bony',booking:null},
    {n:'120864/26/SZ',salon:'SZ',status:'Ważny',kind:'Tajski Klasyczny',minutes:90,value:290,client:'Paweł N.',channel:'Partner',booking:null}
   ];
+  let VOUCHERS=DEMO_VOUCHERS; // DEMO domyślnie; PROD podmienia przez asteraLoadProductionVouchers()
   const PARTNERS=[['PayU — bony','Automatyczny import płatności','5 bonów w widoku'],['Recepcja','Sprzedaż ręczna / AsterA','3 bony w widoku'],['Maliwan / Groupon','Partner zewnętrzny','1 bon w widoku'],['Partner','Bony partnerskie','2 bony w widoku'],['BOOKSY','Kanał rezerwacji, nie writer bonu','odseparowany']];
   const state={salon:'ALL',status:'ALL',query:'',selected:null,tab:'vouchers'};
   const esc=s=>String(s||'').replace(/[&<>"']/g,x=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[x]));
@@ -61,6 +67,30 @@
   let toastTimer;function toast(msg){let t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove('show'),3400)}
   document.querySelectorAll('[data-salon]').forEach(b=>b.onclick=()=>{state.salon=b.dataset.salon;document.querySelectorAll('[data-salon]').forEach(x=>x.classList.toggle('active',x===b));renderList()});document.getElementById('statusFilter').onchange=e=>{state.status=e.target.value;renderList()};document.getElementById('search').oninput=e=>{state.query=e.target.value;renderList()};document.getElementById('clearFilters').onclick=()=>{state.salon='ALL';state.status='ALL';state.query='';document.getElementById('statusFilter').value='ALL';document.getElementById('search').value='';document.querySelectorAll('[data-salon]').forEach(x=>x.classList.toggle('active',x.dataset.salon==='ALL'));renderList()};document.querySelectorAll('[data-tab]').forEach(t=>t.onclick=()=>{state.tab=t.dataset.tab;document.querySelectorAll('[data-tab]').forEach(x=>x.classList.toggle('active',x===t));document.getElementById('voucherList').hidden=state.tab!=='vouchers';document.getElementById('partnerList').hidden=state.tab!=='partners';document.getElementById('resultCount').style.visibility=state.tab==='vouchers'?'visible':'hidden';document.getElementById('listTitle').textContent=state.tab==='vouchers'?'Lista bonów':'Kanały i partnerzy'});document.getElementById('themeButton').onclick=()=>{document.body.classList.toggle('light');document.getElementById('themeButton').textContent=document.body.classList.contains('light')?'◐ NIGHT':'☀ DAY'};document.querySelectorAll('[data-nav]').forEach(b=>b.onclick=()=>{if(b.dataset.nav!=='Bony i partnerzy')toast(`${b.dataset.nav} pozostaje poza zakresem tej makiety`)});document.querySelectorAll('[data-home]').forEach(b=>b.onclick=()=>location.href='../');document.querySelectorAll('[data-reservations]').forEach(b=>b.onclick=()=>location.href='../#booking');renderMetrics();renderList();renderPartners();
   document.getElementById('openCustomerFlow').onclick=()=>location.href='../flow-bonu/';
-  window.__ASTERA_BONY_UI_R4__={productionWrites:false,version:'UI-R4-BONY',relation:'REZERWACJE.Nr Bonu + REZERWACJE.BOOKING_ID'};
+  window.__ASTERA_BONY_UI_R4__={productionWrites:false,version:'UI-R4-BONY',relation:'REZERWACJE.Nr Bonu + REZERWACJE.BOOKING_ID',dataSource:'DEMO'};
+  // ===== ASTERA VOUCHERS BRIDGE (Instrukcja nr 2) — ładowanie PROD, read-only =====
+  function asteraProdInfo(msg){try{toast(msg)}catch(e){} }
+  function asteraApplyVouchers(list){
+    VOUCHERS=(list||[]).map(function(v){var w=(v.finalValue!=null?v.finalValue:v.value);return {n:v.n,salon:v.salon,status:v.status,statusRaw:v.statusRaw,kind:v.kind,minutes:v.minutes,value:w,client:'—',channel:v.channel,category:v.category,issueDate:v.issueDate,discount:v.discount,validUntil:v.validUntil,booking:null};});
+    window.__ASTERA_BONY_UI_R4__.dataSource='PROD';
+    state.selected=null;renderMetrics();renderList();
+  }
+  function asteraLoadProductionVouchers(){
+    if(!ASTERA_VOUCHERS_PROD_ENABLED)return; // DEMO bez zmian
+    var token='';try{token=localStorage.getItem('asteraReadToken')||''}catch(e){}
+    var urlOk=/^https:\/\/script\.google\.com\/macros\/s\/.+\/exec$/.test(ASTERA_VOUCHERS_API_URL);
+    if(!token||!urlOk){asteraProdInfo('Brak połączenia z bazą bonów — widok DEMO.');return;}
+    fetch(ASTERA_VOUCHERS_API_URL+'?action=vouchers&token='+encodeURIComponent(token))
+      .then(function(r){return r.json()})
+      .then(function(data){
+        if(!data||data.ok!==true||!Array.isArray(data.vouchers)){asteraProdInfo('Brak połączenia z bazą bonów — widok DEMO.');return;}
+        asteraApplyVouchers(data.vouchers);
+        asteraProdInfo('Połączono z produkcją: '+data.count+' bonów.');
+      })
+      .catch(function(){asteraProdInfo('Brak połączenia z bazą bonów — widok DEMO.');});
+  }
+  asteraLoadProductionVouchers();
+  // §6: auto-odświeżanie danych (nie strony) co 5 minut przy otwartej zakładce
+  if(ASTERA_VOUCHERS_PROD_ENABLED){setInterval(asteraLoadProductionVouchers,5*60*1000);}
   </script>
 </body></html>
