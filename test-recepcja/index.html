@@ -1156,14 +1156,32 @@ addEventListener('pointerup',function(){if(!drag)return;drag=false;vel=Math.max(
     });
   }
   function r1AvailableSlots(data){
-    var result=[],seen={};
-    function add(slot){var key=slot.terapeutka+'|'+slot.start;if(!seen[key]){seen[key]=true;result.push(slot);}}
-    data.slots.forEach(function(raw,index){var start=raw[0],therapist=raw[1],stop=r1AddMinutes(start,60),active=data.team.some(function(t){return t[0]===therapist&&t[2]!==false;}),occupied=data.visits.some(function(v){return v.status!=='ODWOŁANA'&&v.who===therapist&&min(start)<min(v.end)&&min(stop)>min(v.t);});if(active&&!occupied)add({data:'2026-08-14',start:start,stop:stop,terapeutka:therapist,slot_id:'LOCAL-'+state.salon+'-'+index});});
+    var result=[];
+    data.team.forEach(function(member,therapistIndex){
+      if(member[2]===false)return;
+      var therapist=member[0];
+      for(var hour=12;hour<20;hour++){
+        var start=String(hour).padStart(2,'0')+':00';
+        var stop=r1AddMinutes(start,60);
+        var occupied=data.visits.some(function(v){
+          return v.status!=='ODWOŁANA'&&v.who===therapist&&min(start)<min(v.end)&&min(stop)>min(v.t);
+        });
+        if(!occupied)result.push({
+          data:'2026-08-14',
+          start:start,
+          stop:stop,
+          terapeutka:therapist,
+          slot_id:'LOCAL-'+state.salon+'-'+therapistIndex+'-'+hour
+        });
+      }
+    });
     return result.sort(function(a,b){return min(a.start)-min(b.start)||a.terapeutka.localeCompare(b.terapeutka,'pl');});
   }
   function renderAvailability(){
     var list=document.getElementById('r1AvailabilityList'),intro=document.getElementById('r1AvailabilityIntro'),data=DATA[state.salon];if(!list||!intro)return;
-    var slots=r1AvailableSlots(data);intro.textContent='Wybierz całkowicie wolne okienko. Otworzy się Rezerwacja ręczna z podstawioną datą, godziną i masażystką. Terminy udostępnione klientom oraz blokady są tu traktowane jak zajęte.';list.innerHTML='';
+    var slots=r1AvailableSlots(data);
+    intro.textContent=slots.length+' wolnych pełnych godzin od 12:00 do 20:00. Wybierz okienko, aby otworzyć Rezerwację ręczną z podstawioną datą, godziną i masażystką. Terminy udostępnione klientom, blokady i aktywne rezerwacje są tu traktowane jak zajęte.';
+    list.innerHTML='';
     if(!slots.length){list.innerHTML='<span class="r1-slot-empty">Brak wolnych terminów w tym widoku.</span>';return;}
     data.team.filter(function(t){return t[2]!==false;}).forEach(function(member){var matching=slots.filter(function(slot){return slot.terapeutka===member[0];});if(!matching.length)return;var column=document.createElement('section');column.className='r1-slot-column';column.innerHTML='<div class="r1-slot-person"><i>'+r2Esc(initials(member[0]))+'</i><strong>'+r2Esc(member[0])+'</strong></div>';var times=document.createElement('div');times.className='r1-slot-times';matching.forEach(function(slot){var button=document.createElement('button');button.type='button';button.className='r1-slot available';button.innerHTML='<b>'+r2Esc(slot.start+'–'+slot.stop)+'</b><span>wolny termin</span>';button.addEventListener('click',function(){r3OpenBookingFromFreeSlot(slot);});times.appendChild(button);});column.appendChild(times);list.appendChild(column);});
   }
