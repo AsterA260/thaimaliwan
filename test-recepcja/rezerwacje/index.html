@@ -651,14 +651,67 @@ function zapiszDoMakiety(){
   }catch(e){return false}
 }
 
-function zarezerwuj(){
-  var zapisano=zapiszDoMakiety();
-  toast('<b>Zarezerwowano (makieta).</b><br>'+
-    [(S.imie||S.tel),salonNazwa(S.salon),S.usluga,S.min+' min',dataPL(S.data),S.godzina,
-     (S.wyborTerapeutki==='dowolna'?'dowolna':S.terapeutka),pln(S.cena)].join(' • ')+
-    '<br><span style="color:var(--r1-muted)">Kliknięć od startu: '+KLIKI+'.</span>'+
-    (zapisano?'<br><span style="color:var(--r1-gold2)">Wizyta wskoczyła do grafiku dnia — wróć do panelu, żeby ją zobaczyć.</span>':''));
-  if(zapisano)setTimeout(function(){location.href='../index.html'},2600);
+/* ── ZAPIS DO ARKUSZA (produkcja) ─────────────────────────────
+   Woła ten sam most co panel: ?action=bookings&zapisz=1, który po
+   stronie Apps Script wywołuje istniejącą zapiszRezerwacje().
+   Token bierzemy z localStorage — nigdy nie ma go w kodzie. */
+var ASTERA_MOST='https://script.google.com/macros/s/AKfycbz1DIfrEuALN3wJ0MFJ_bmoWHFbWg3FKQH-OGvAGZSPOa5ej52XfbvrH-1tdTxxHy90DA/exec';
+
+function asteraToken(){try{return localStorage.getItem('asteraReadToken')||''}catch(e){return ''}}
+
+/* "Anna Kowalska" -> {imie:'Anna', nazwisko:'Kowalska'} */
+function rozbijImie(pelne){
+  var s=String(pelne||'').trim().replace(/\s+/g,' ');
+  if(!s)return{imie:'',nazwisko:''};
+  var i=s.indexOf(' ');
+  if(i<0)return{imie:s,nazwisko:''};
+  return{imie:s.slice(0,i),nazwisko:s.slice(i+1)};
+}
+
+async function zapiszNaSerwer(){
+  var t=asteraToken();
+  if(!t)return{ok:false,error:'BRAK_TOKENA'};
+  if(!S.salon||!S.data||!S.godzina||!S.terapeutka)return{ok:false,error:'NIEKOMPLETNE_DANE'};
+  var n=rozbijImie(S.imie);
+  var q=new URLSearchParams({
+    action:'bookings', zapisz:'1', token:t,
+    salon:S.salon, data:S.data, start:S.godzina,
+    imie:n.imie, nazwisko:n.nazwisko, telefon:S.tel||'',
+    masaz:S.usluga||'', czas:String(S.min||60),
+    terapeuta:S.terapeutka, status:'OCZEKUJE',
+    uwagi:'Panel AsterA - rezerwacja reczna'
+  });
+  try{
+    var r=await fetch(ASTERA_MOST+'?'+q.toString());
+    return await r.json();
+  }catch(e){return{ok:false,error:String(e)}}
+}
+
+async function zarezerwuj(){
+  var btn=document.querySelector('.navrow .cta')||$('#rezerwuj');
+  var etykieta=btn?btn.textContent:'';
+  if(btn){btn.disabled=true;btn.textContent='Zapisuję…';}
+
+  var w=await zapiszNaSerwer();
+  zapiszDoMakiety();               // żeby wizyta była w grafiku od razu, zanim odświeży się most
+
+  var opis=[(S.imie||S.tel),salonNazwa(S.salon),S.usluga,S.min+' min',dataPL(S.data),S.godzina,
+            (S.wyborTerapeutki==='dowolna'?'dowolna':S.terapeutka),pln(S.cena)].join(' • ');
+
+  if(w&&w.ok){
+    toast('<b>Zapisano w arkuszu.</b><br>'+opis+
+      '<br><span style="color:var(--r1-gold2)">Wiersz '+w.row+' w REZERWACJE '+S.salon+'. Wizyta jest już w grafiku dnia.</span>');
+    setTimeout(function(){location.href='../index.html'},2600);
+    return;
+  }
+
+  if(btn){btn.disabled=false;btn.textContent=etykieta||'Zarezerwuj →';}
+  var powod=(w&&w.error==='BRAK_TOKENA')?'Ten komputer nie ma tokenu recepcji.'
+           :(w&&w.error==='UNAUTHORIZED')?'Token odrzucony przez serwer.'
+           :(w&&w.error)?String(w.error):'Brak odpowiedzi z serwera.';
+  toast('<b>NIE zapisano w arkuszu.</b><br>'+opis+
+    '<br><span style="color:#c0392b">'+powod+'</span>'+
+    '<br><span style="color:var(--r1-muted)">Wizyta jest widoczna tylko w tym panelu — wpisz ją ręcznie w arkuszu.</span>');
 }
 $('#rezerwuj').onclick=zarezerwuj;
 
