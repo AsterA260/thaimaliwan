@@ -155,6 +155,32 @@ button,input,select{font:inherit}button{cursor:pointer}
   .rowhead .opt,.row .opt{display:none}
   .r1-nav{display:none}
 }
+
+/* ── WERSJA JASNA ─────────────────────────────────────────────
+   Te same zmienne co w panelu. Wybor motywu trzymamy w
+   localStorage['astera.motyw'], zeby przechodzil miedzy ekranami. */
+.ui-r1.theme-light{--r1-bg:#f7f2ea;--r1-panel:#fffdf9;--r1-panel2:#f4ede3;--r1-gold:#b87920;--r1-gold2:#9a5f13;--r1-line:rgba(171,111,28,.25);--r1-muted:#86735a;--r1-text:#3b2a18;color:var(--r1-text);background:radial-gradient(circle at 50% 38%,rgba(224,180,102,.17),transparent 32%),radial-gradient(circle at 0 100%,rgba(208,164,87,.10),transparent 31%),linear-gradient(145deg,#fbf8f2,#f3ece2 72%,#faf6ef)}
+.theme-light .r1-lotus-bg{opacity:.055}
+.theme-light .r1-topbar{background:rgba(255,252,247,.97);border-bottom-color:rgba(166,105,23,.18);box-shadow:0 4px 18px rgba(83,53,18,.05)}
+.theme-light .r1-brand-mark{background:#fffaf1;border-color:rgba(171,111,28,.35)}
+.theme-light .r1-brand-copy strong{color:#9a5f13}
+.theme-light .r1-brand-copy span{color:#8c7559}
+.theme-light .r1-nav button{color:#725f48}
+.theme-light .r1-nav button:hover,.theme-light .r1-nav button.active{color:#9a5f13}
+.theme-light .r1-badge{background:#fffaf2;border-color:rgba(171,111,28,.28)}
+.theme-light .r1-theme-switch,.theme-light .salons,.theme-light .pill,.theme-light .szukaj input,.theme-light .zakres input{background:#fffaf3;border-color:rgba(171,111,28,.3)}
+.theme-light .r1-theme-switch button,.theme-light .salons button{color:#80684c}
+.theme-light .metric,.theme-light .card,.theme-light .partnerzy{background:linear-gradient(180deg,#fffdf9,#f6efe4);border-color:rgba(171,111,28,.2)}
+.theme-light .blok,.theme-light .partner{background:#fffaf3;border-color:rgba(171,111,28,.18)}
+.theme-light .head h1{color:#49331c}
+.theme-light .head p,.theme-light .eyebrow,.theme-light .metric span,.theme-light .card-head span,.theme-light .cell.dim{color:#7d6b54}
+.theme-light .metric b,.theme-light .card-head b,.theme-light .kwota{color:#8a5a12}
+.theme-light .row:hover,.theme-light .row.open{background:rgba(205,159,76,.10)}
+.theme-light .rowhead{background:#f7efe4;color:#4d3820}
+.theme-light .ghost,.theme-light .link,.theme-light .badge{background:#fffaf3;color:#8d5b17;border-color:rgba(171,111,28,.28)}
+.theme-light .lockinfo{color:#8a5a12}
+.theme-light .r1-footer{background:#fbf8f2;color:#8c7c67;border-top-color:rgba(171,111,28,.14)}
+.theme-light .toast{background:linear-gradient(90deg,rgba(245,225,190,.96),rgba(255,250,242,.98));color:#6b4512;border-color:rgba(171,111,28,.42)}
 </style>
 </head>
 <body>
@@ -433,8 +459,10 @@ $('#partnerToggle').onclick=()=>{
   $('#partnerToggle').setAttribute('aria-expanded',on?'true':'false');
 };
 document.querySelectorAll('[data-theme-choice]').forEach(b=>b.onclick=()=>{
+  var m=b.dataset.themeChoice;
   document.querySelectorAll('[data-theme-choice]').forEach(x=>x.classList.toggle('active',x===b));
-  toast('Wersja jasna dojdzie razem z resztą panelu.');
+  document.querySelector('.ui-r1').classList.toggle('theme-light',m==='light');
+  try{localStorage.setItem('astera.motyw',m)}catch(e){}
 });
 document.querySelectorAll('[data-nav]').forEach(b=>b.onclick=()=>{if(b.dataset.nav!=='Bony i partnerzy')toast(b.dataset.nav+' pozostaje poza zakresem tej makiety')});
 document.querySelectorAll('[data-home]').forEach(b=>b.onclick=()=>location.href='../');
@@ -495,6 +523,18 @@ if(ASTERA_VOUCHERS_PROD_ENABLED){setInterval(asteraLoadProductionVouchers,5*60*1
   document.getElementById('salonPick').classList.add('locked');
   document.getElementById('lockInfoTxt').textContent='Salon zablokowany: '+zapis;
   document.getElementById('lockInfo').classList.add('show');
+})();
+
+/* Motyw dziedziczymy po panelu - jeden wybor obowiazuje na wszystkich ekranach. */
+(function(){
+  try{
+    var m=localStorage.getItem('astera.motyw')||'dark';
+    var root=document.querySelector('.ui-r1');
+    if(root)root.classList.toggle('theme-light',m==='light');
+    document.querySelectorAll('[data-theme-choice]').forEach(function(b){
+      b.classList.toggle('active',b.dataset.themeChoice===m);
+    });
+  }catch(e){}
 })();
 </script>
 </body>
