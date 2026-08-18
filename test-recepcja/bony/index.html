@@ -454,7 +454,13 @@ function asteraApplyVouchers(list){
   window.__ASTERA_BONY_UI_R4__.dataSource='PROD';
   state.otwarty=null;renderMetrics();renderList();
 }
-function asteraLoadProductionVouchers(){
+/* Pierwsze wywołanie potrafi nie dojść (Apps Script wstaje z zimna).
+   Dajemy jedną cichą ponowkę po 4 s, zanim powiemy „widok DEMO". */
+function asteraPonow(bylaJuz){
+  if(bylaJuz){asteraProdInfo('Brak połączenia z bazą bonów — widok DEMO.');return;}
+  setTimeout(function(){asteraLoadProductionVouchers(true)},4000);
+}
+function asteraLoadProductionVouchers(ponowka){
   if(!ASTERA_VOUCHERS_PROD_ENABLED)return;
   var token='';try{token=localStorage.getItem('asteraReadToken')||''}catch(e){}
   var urlOk=/^https:\/\/script\.google\.com\/macros\/s\/.+\/exec$/.test(ASTERA_VOUCHERS_API_URL);
@@ -462,11 +468,11 @@ function asteraLoadProductionVouchers(){
   fetch(ASTERA_VOUCHERS_API_URL+'?action=vouchers&token='+encodeURIComponent(token))
     .then(function(r){return r.json()})
     .then(function(data){
-      if(!data||data.ok!==true||!Array.isArray(data.vouchers)){asteraProdInfo('Brak połączenia z bazą bonów — widok DEMO.');return;}
+      if(!data||data.ok!==true||!Array.isArray(data.vouchers)){asteraPonow(ponowka);return;}
       asteraApplyVouchers(data.vouchers);
       asteraProdInfo('Połączono z produkcją: '+data.count+' bonów'+(data.archivedCount!=null?' (+'+data.archivedCount+' w archiwum)':'')+'.');
     })
-    .catch(function(){asteraProdInfo('Brak połączenia z bazą bonów — widok DEMO.');});
+    .catch(function(){asteraPonow(ponowka);});
 }
 asteraLoadProductionVouchers();
 if(ASTERA_VOUCHERS_PROD_ENABLED){setInterval(asteraLoadProductionVouchers,5*60*1000);}
