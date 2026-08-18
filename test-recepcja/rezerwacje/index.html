@@ -195,11 +195,11 @@ mark{background:rgba(205,159,76,.24);color:var(--r1-gold2);border-radius:3px;pad
       <div class="r1-brand-copy"><strong>ASTERA</strong><span>Recepcja wewnętrzna</span></div>
     </div>
     <nav class="r1-nav" aria-label="Główna nawigacja">
-      <button><svg viewBox="0 0 24 24"><rect x="4" y="4" width="6" height="6"/><rect x="14" y="4" width="6" height="6"/><rect x="4" y="14" width="6" height="6"/><rect x="14" y="14" width="6" height="6"/></svg><span>Pulpit</span></button>
+      <button data-idz="../index.html"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="6" height="6"/><rect x="14" y="4" width="6" height="6"/><rect x="4" y="14" width="6" height="6"/><rect x="14" y="14" width="6" height="6"/></svg><span>Pulpit</span></button>
       <button class="active"><svg viewBox="0 0 24 24"><rect x="4" y="6" width="16" height="14" rx="2"/><path d="M8 3v6M16 3v6M4 10h16"/></svg><span>Rezerwacje</span></button>
-      <button><svg viewBox="0 0 24 24"><path d="M12 3c3 5 4 10 2 15-3-3-4-9-2-15zM5 8c4 2 7 6 7 11-4-1-7-5-7-11zM19 8c0 6-3 10-7 11 0-5 3-9 7-11z"/></svg><span>Grafik dnia</span></button>
-      <button><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.5"/><path d="M5 21c0-4 3-6 7-6s7 2 7 6"/></svg><span>Klienci</span></button>
-      <button><svg viewBox="0 0 24 24"><path d="M5 20V10M10 20V5M15 20v-8M20 20V3"/></svg><span>Raporty</span></button>
+      <button data-idz="../index.html"><svg viewBox="0 0 24 24"><path d="M12 3c3 5 4 10 2 15-3-3-4-9-2-15zM5 8c4 2 7 6 7 11-4-1-7-5-7-11zM19 8c0 6-3 10-7 11 0-5 3-9 7-11z"/></svg><span>Grafik dnia</span></button>
+      <button data-poza="Klienci"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.5"/><path d="M5 21c0-4 3-6 7-6s7 2 7 6"/></svg><span>Klienci</span></button>
+      <button data-poza="Raporty"><svg viewBox="0 0 24 24"><path d="M5 20V10M10 20V5M15 20v-8M20 20V3"/></svg><span>Raporty</span></button>
       <button><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19 13.5l2 1.5-2 3-2.5-1M13.5 19l-1.5 2-3-2 1-2.5M5 13.5L3 15l2 3 2.5-1M10.5 5L9 3l-3 2 1 2.5M18 6l-2-2-2 2"/></svg><span>Ustawienia</span></button>
     </nav>
     <div class="r1-top-actions">
@@ -213,7 +213,7 @@ mark{background:rgba(205,159,76,.24);color:var(--r1-gold2);border-radius:3px;pad
 
     <div class="r1-head">
       <div><h1>Recepcja</h1><div class="r1-eyebrow">Prosta rezerwacja · rezerwacja ręczna</div></div>
-      <button class="r1-action" id="trybBtn">✦ <span id="trybTxt">Kroki 1–5</span></button>
+      <button class="r1-action" id="wrocBtn">‹ Wróć do panelu</button><button class="r1-action" id="trybBtn">✦ <span id="trybTxt">Kroki 1–5</span></button>
     </div>
 
     <!-- ================= TRYB MINIMUM ================= -->
@@ -356,7 +356,8 @@ const KATALOG={
  ]
 };
 const ETYKIETY={single:'1 osoba',couples:'2 osoby',rituals:'Rytuał'};
-const TERAPEUTKI={ZW:['Tip','Nan','Fon','Aor'],SZ:['Kai','Cholthida','Butsakorn','Nok']};
+/* Zespoły 1:1 z panelem recepcji — inaczej wizyta nie miałaby gdzie wylądować w grafiku. */
+const TERAPEUTKI={ZW:['Maliwan','Sumalee','Khanjana','Tip'],SZ:['Cholthida','Butsakorn','Kai','Tip']};
 const KLIENCI={
  '881063331':{imie:'Norbert',staly:true,ostatnia:{bucket:'single',nazwa:'Masaż stemplami ziołowymi',min:90,cena:320,salon:'SZ'}},
  '600123456':{imie:'Anna',staly:true,ostatnia:{bucket:'single',nazwa:'Masaż olejami aromatycznymi',min:60,cena:240,salon:'ZW'}},
@@ -437,7 +438,8 @@ $('#qclr').onclick=()=>{$('#q').value='';S.q='';generujListe();$('#q').focus()};
 
 /* ---------- godziny ---------- */
 function ziarno(t){let h=0;for(let i=0;i<t.length;i++)h=(h*31+t.charCodeAt(i))>>>0;return h}
-const PULA=['10:00','10:45','11:30','12:30','13:45','14:15','15:30','16:45','17:30','18:00','19:15','20:45'];
+/* Godziny w zakresie pracy salonu 12:00-22:00 — te same, po ktorych chodzi grafik w panelu. */
+const PULA=['12:00','12:45','13:30','14:15','15:00','16:30','17:15','18:00','19:00','19:45','20:30'];
 function wolneGodziny(){
   const z=ziarno(S.data+S.salon+(S.min||60));
   const w=PULA.filter((_,i)=>((z>>i)&1)===1).slice(0,6);
@@ -540,6 +542,11 @@ $$('[data-toggle]').forEach(h=>h.addEventListener('click',e=>{
   document.getElementById(h.dataset.toggle).classList.toggle('open');
 }));
 
+/* ---------- nawigacja: powrót do panelu ---------- */
+$('#wrocBtn').onclick=()=>{location.href='../index.html'};
+$$('[data-idz]').forEach(b=>b.onclick=()=>{location.href=b.getAttribute('data-idz')});
+$$('[data-poza]').forEach(b=>b.onclick=()=>toast(b.getAttribute('data-poza')+' pozostaje poza zakresem tej makiety.'));
+
 /* ---------- tryby ---------- */
 $('#trybBtn').onclick=()=>{
   S.tryb=S.tryb==='min'?'kroki':'min';
@@ -622,11 +629,36 @@ function rysujKrok(){
   }
 }
 
+/* Makieta nie ma backendu, ale rezerwacja ma trafić do grafiku — inaczej
+   nie widać, że coś w ogóle zadziałało. Zapisujemy ją w pamięci przeglądarki;
+   panel czyta ten klucz przy starcie i dokłada wizytę do dnia.
+   Nadal zero POST i zero zapisu po stronie serwera. */
+function zapiszDoMakiety(){
+  try{
+    var min=parseInt(String(S.godzina).split(':')[0],10)*60+parseInt(String(S.godzina).split(':')[1],10)+(S.min||60);
+    var koniec=(Math.floor(min/60)<10?'0':'')+Math.floor(min/60)+':'+(min%60<10?'0':'')+(min%60);
+    var lista=JSON.parse(localStorage.getItem('astera.makietaRezerwacje')||'[]');
+    lista.push({
+      id:'REC-'+S.salon+'-'+S.data.replace(/-/g,'')+'-'+String(S.godzina).replace(':','')+'-'+lista.length,
+      salon:S.salon, date:S.data, t:S.godzina, end:koniec,
+      who:(S.wyborTerapeutki==='dowolna'?S.terapeutka:S.terapeutka),
+      client:(S.imie||'Klient bez danych'), phone:S.tel||'',
+      service:S.usluga, duration:S.min, price:S.cena
+    });
+    if(lista.length>40)lista=lista.slice(-40);
+    localStorage.setItem('astera.makietaRezerwacje',JSON.stringify(lista));
+    return true;
+  }catch(e){return false}
+}
+
 function zarezerwuj(){
+  var zapisano=zapiszDoMakiety();
   toast('<b>Zarezerwowano (makieta).</b><br>'+
     [(S.imie||S.tel),salonNazwa(S.salon),S.usluga,S.min+' min',dataPL(S.data),S.godzina,
      (S.wyborTerapeutki==='dowolna'?'dowolna':S.terapeutka),pln(S.cena)].join(' • ')+
-    '<br><span style="color:var(--r1-muted)">Kliknięć od startu: '+KLIKI+'. Nic nie zostało zapisane — to makieta.</span>');
+    '<br><span style="color:var(--r1-muted)">Kliknięć od startu: '+KLIKI+'.</span>'+
+    (zapisano?'<br><span style="color:var(--r1-gold2)">Wizyta wskoczyła do grafiku dnia — wróć do panelu, żeby ją zobaczyć.</span>':''));
+  if(zapisano)setTimeout(function(){location.href='../index.html'},2600);
 }
 $('#rezerwuj').onclick=zarezerwuj;
 

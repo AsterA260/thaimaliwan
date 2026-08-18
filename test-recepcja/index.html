@@ -1513,6 +1513,19 @@ addEventListener('pointerup',function(){if(!drag)return;drag=false;vel=Math.max(
     if(r1HydrateDemoVoucherBooking()&&state.screen==='calendar')renderAll();
   });
   r1GenerujDemo();
+  /* Wizyty założone w ekranie „Rezerwacja ręczna" (makieta, pamięć przeglądarki). */
+  (function(){
+    var lista=[];try{lista=JSON.parse(localStorage.getItem('astera.makietaRezerwacje')||'[]')}catch(e){}
+    lista.forEach(function(r){
+      var d=DATA[r.salon];if(!d)return;
+      if(d.visits.some(function(v){return v.id===r.id}))return;
+      d.visits.push({id:r.id,booking_id:'AST-'+r.salon+'-'+String(r.date).replace(/-/g,'')+'-REC',
+        source:'ASTERA',date:r.date,t:r.t,end:r.end,who:r.who,client:r.client,phone:r.phone,
+        categoryId:'single',serviceId:'recepcja',service:r.service,duration:r.duration,price:r.price,
+        bookToTherapist:false,note:'Założona w Rezerwacji ręcznej',status:'REZERWACJA',
+        settlementStatus:'NIEROZLICZONA',paymentMethod:''});
+    });
+  })();
   r1WczytajZamek();
   /* Wchodzimy na dzisiejszy dzien — inaczej pasek godziny nie ma się gdzie pokazać. */
   (function(){var t=r1DzisIso();
