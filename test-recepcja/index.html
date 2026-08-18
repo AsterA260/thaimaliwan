@@ -835,6 +835,71 @@ addEventListener('pointerup',function(){if(!drag)return;drag=false;vel=Math.max(
     if(active)active.classList.add('active');
     if(name==='calendar'){renderAll();}
   }
+  /* ═══ PRAWDZIWE REZERWACJE Z ARKUSZA (read-only) ═══════════════════════════
+     Most `action=bookings` czyta BOOKSY-NOWE + REZERWACJE ZW/SZ i oddaje
+     wizyty. Token wyłącznie z localStorage — bez niego zostają dane
+     przykładowe. Zero zapisu: panel tylko czyta.                            */
+  var R1_API='https://script.google.com/macros/s/AKfycbz1DIfrEuALN3wJ0MFJ_bmoWHFbWg3FKQH-OGvAGZSPOa5ej52XfbvrH-1tdTxxHy90DA/exec';
+  var R1_PROD=false;
+
+  function r1Kwota(t){
+    var m=String(t||'').replace(/\s/g,'').replace(',','.').match(/(\d+(?:\.\d+)?)/);
+    return m?Math.round(parseFloat(m[1])):null;
+  }
+  function r1PierwszaTerapeutka(t,salon){
+    var lista=String(t||'').split(/[,;]+/).map(function(x){return x.trim()}).filter(Boolean);
+    var zespol=(DATA[salon]&&DATA[salon].team||[]).map(function(x){return x[0]});
+    for(var i=0;i<lista.length;i++) if(zespol.indexOf(lista[i])>-1) return lista[i];
+    return lista[0]||'';
+  }
+  function r1WczytajRezerwacje(ponowka){
+    var token='';try{token=localStorage.getItem('asteraReadToken')||''}catch(e){}
+    if(!token)return;
+    var dzis=new Date();
+    var od=r1Iso(dzis.getFullYear(),dzis.getMonth()-1,1);
+    var doD=r1Iso(dzis.getFullYear(),dzis.getMonth()+3,1);
+    fetch(R1_API+'?action=bookings&from='+od+'&to='+doD+'&token='+encodeURIComponent(token))
+      .then(function(r){return r.json()})
+      .then(function(d){
+        if(!d||d.ok!==true||!Array.isArray(d.bookings)){
+          if(!ponowka)setTimeout(function(){r1WczytajRezerwacje(true)},4000);
+          return;
+        }
+        ['ZW','SZ'].forEach(function(s){
+          DATA[s].visits=DATA[s].visits.filter(function(v){
+            return v.status==='BLOKADA'||String(v.id).indexOf('REC-')===0;   // zostawiamy udostępnione terminy i wpisy z rezerwacji ręcznej
+          });
+        });
+        d.bookings.forEach(function(b,i){
+          var d2=DATA[b.salon];if(!d2)return;
+          var kto=r1PierwszaTerapeutka(b.therapist,b.salon);
+          if(!kto)return;
+          d2.visits.push({
+            id:'PROD-'+b.salon+'-'+i,
+            booking_id:(b.source==='BOOKSY'?'BOOKSY-':'AST-')+b.salon+'-'+b.date.replace(/-/g,'')+'-'+i,
+            source:b.source,date:b.date,t:b.start,end:b.end,who:kto,
+            client:b.client||'(bez nazwiska)',phone:b.phone||'',
+            categoryId:'single',serviceId:'prod',service:b.service||'—',
+            duration:b.minutes||60,price:r1Kwota(b.price),
+            bookToTherapist:false,note:b.note||'',
+            status:(b.status==='ODWOŁANA'?'ODWOŁANA':'REZERWACJA'),
+            settlementStatus:'NIEROZLICZONA',paymentMethod:'',
+            terapeutki:b.therapist||''
+          });
+        });
+        R1_PROD=true;
+        document.querySelectorAll('[data-salon-label]').forEach(function(el){});
+        var znaczniki=document.querySelectorAll('.r1-board-date span, .r1-date-card span');
+        znaczniki.forEach(function(el){
+          if(/DANE PRZYKŁADOWE|makieta/i.test(el.textContent))
+            el.innerHTML=el.innerHTML.replace(/DANE PRZYKŁADOWE/i,'DANE Z ARKUSZA').replace(/· makieta/i,'· dane z arkusza');
+        });
+        renderAll();
+        toast('Wczytano '+d.count+' rezerwacji z arkusza.');
+      })
+      .catch(function(){ if(!ponowka)setTimeout(function(){r1WczytajRezerwacje(true)},4000); });
+  }
+
   /* ═══ KŁÓDKA SALONU ══════════════════════════════════════════════════════
      Dziewczyny pracują na dwa salony i zdarza się zrobić rezerwację nie tam,
      gdzie trzeba. Po zamknięciu kłódki przełącznik salonu jest martwy —
@@ -1534,6 +1599,8 @@ addEventListener('pointerup',function(){if(!drag)return;drag=false;vel=Math.max(
   setSalon(state.salon);
   renderAll();
   setInterval(r1RenderNowLine,30000);
+  r1WczytajRezerwacje();
+  setInterval(function(){r1WczytajRezerwacje()},5*60*1000);
   r1OpenBookingContext();
 })();
 </script>
