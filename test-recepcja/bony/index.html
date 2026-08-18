@@ -223,7 +223,7 @@ button,input,select{font:inherit}button{cursor:pointer}
         <option value="ALL">Cały okres</option>
         <option value="TODAY">Dziś</option>
         <option value="D7">Ostatnie 7 dni</option>
-        <option value="D30">Ostatnie 30 dni</option>
+        <option value="D30" selected>Ostatnie 30 dni</option>
         <option value="D90">Ostatnie 3 miesiące</option>
         <option value="RANGE">Zakres dat…</option>
       </select>
@@ -291,7 +291,7 @@ const PARTNERS=[
  ['Booksy','Kanał rezerwacji, nie writer bonu','odseparowany']
 ];
 
-const state={salon:'ALL',status:'ALL',query:'',otwarty:null,dateMode:'ALL',dateFrom:'',dateTo:''};
+const state={salon:'ALL',status:'ALL',query:'',otwarty:null,dateMode:'D30',dateFrom:'',dateTo:''};
 const esc=s=>String(s||'').replace(/[&<>"']/g,x=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[x]));
 const $=s=>document.querySelector(s);
 
@@ -370,7 +370,8 @@ function kartaHTML(v){
 function renderList(){
   const box=$('#voucherList'), rows=filtered();
   $('#resultCount').textContent=rows.length+' z '+VOUCHERS.length;
-  $('#listTitle').textContent=state.salon==='ALL'?'Lista bonów · ZW + SZ':'Lista bonów · '+state.salon;
+  var opisDaty={ALL:'',TODAY:' · dziś',D7:' · ostatnie 7 dni',D30:' · ostatnie 30 dni',D90:' · ostatnie 3 miesiące',RANGE:' · wybrany zakres'}[state.dateMode]||'';
+  $('#listTitle').textContent=(state.salon==='ALL'?'Lista bonów · ZW + SZ':'Lista bonów · '+state.salon)+opisDaty;
   box.innerHTML='';
   if(!rows.length){box.innerHTML='<div class="empty">Brak bonów dla wybranego filtra.</div>';return}
   rows.forEach(v=>{
@@ -421,8 +422,8 @@ $('#clearFilters').onclick=()=>{
   const zamek=document.querySelector('[data-salon]:disabled');
   state.status='ALL';state.query='';state.otwarty=null;
   $('#statusFilter').value='ALL';$('#search').value='';
-  state.dateMode='ALL';state.dateFrom='';state.dateTo='';
-  $('#dateFilter').value='ALL';$('#dateFrom').value='';$('#dateTo').value='';
+  state.dateMode='D30';state.dateFrom='';state.dateTo='';
+  $('#dateFilter').value='D30';$('#dateFrom').value='';$('#dateTo').value='';
   $('#dateRange').classList.remove('show');
   if(!zamek){state.salon='ALL';document.querySelectorAll('[data-salon]').forEach(x=>x.classList.toggle('active',x.dataset.salon==='ALL'));}
   renderList();
