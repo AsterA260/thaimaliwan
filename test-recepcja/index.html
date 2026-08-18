@@ -965,6 +965,7 @@ addEventListener('pointerup',function(){if(!drag)return;drag=false;vel=Math.max(
   }
   function setTheme(theme){
     state.theme=theme;
+    try{localStorage.setItem('astera.motyw',theme)}catch(e){}   // podekrany (Bony, Rezerwacja reczna) czytaja ten sam klucz
     root.classList.toggle('theme-light',theme==='light');
     document.querySelectorAll('[data-theme-choice]').forEach(function(btn){var active=btn.dataset.themeChoice===theme;btn.classList.toggle('active',active);btn.setAttribute('aria-pressed',active?'true':'false');});
   }
@@ -1562,6 +1563,7 @@ addEventListener('pointerup',function(){if(!drag)return;drag=false;vel=Math.max(
   document.querySelectorAll('[data-screen-link]').forEach(function(el){el.addEventListener('click',function(){showScreen(el.dataset.screenLink);});});
   document.querySelectorAll('[data-salon]').forEach(function(el){el.addEventListener('click',function(){setSalon(el.dataset.salon);});});
   document.querySelectorAll('[data-theme-choice]').forEach(function(el){el.addEventListener('click',function(){setTheme(el.dataset.themeChoice);});});
+  try{var zapisanyMotyw=localStorage.getItem('astera.motyw');if(zapisanyMotyw)setTheme(zapisanyMotyw);}catch(e){}
   document.querySelectorAll('[data-open-modal]').forEach(function(el){el.addEventListener('click',function(){openModal(el.dataset.openModal);});});
   document.querySelectorAll('[data-open-bony]').forEach(function(el){el.addEventListener('click',function(){location.href='bony/';});});
   document.getElementById('r1ClearBookingContext').addEventListener('click',function(){state.bookingContext=null;state.releaseContext=null;history.replaceState(null,'',location.pathname);renderSlots();r1RenderBookingContext();});
