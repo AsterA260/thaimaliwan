@@ -181,6 +181,35 @@ mark{background:rgba(205,159,76,.24);color:var(--r1-gold2);border-radius:3px;pad
 .toast b{color:var(--r1-gold2)}
 .hidden{display:none!important}
 @media(max-width:900px){.steps{grid-template-columns:1fr}.picks{grid-template-columns:1fr}.sec-body{padding-left:20px}.r1-nav{display:none}}
+
+/* ── WERSJA JASNA ─────────────────────────────────────────────
+   Te same zmienne co w panelu. Wybor motywu trzymamy w
+   localStorage['astera.motyw'], zeby przechodzil miedzy ekranami. */
+.ui-r1.theme-light{--r1-bg:#f7f2ea;--r1-panel:#fffdf9;--r1-panel2:#f4ede3;--r1-gold:#b87920;--r1-gold2:#9a5f13;--r1-line:rgba(171,111,28,.25);--r1-muted:#86735a;--r1-text:#3b2a18;color:var(--r1-text);background:radial-gradient(circle at 50% 38%,rgba(224,180,102,.17),transparent 32%),radial-gradient(circle at 0 100%,rgba(208,164,87,.10),transparent 31%),linear-gradient(145deg,#fbf8f2,#f3ece2 72%,#faf6ef)}
+.theme-light .r1-lotus-bg{opacity:.055}
+.theme-light .r1-topbar{background:rgba(255,252,247,.97);border-bottom-color:rgba(166,105,23,.18);box-shadow:0 4px 18px rgba(83,53,18,.05)}
+.theme-light .r1-brand-mark{background:#fffaf1;border-color:rgba(171,111,28,.35)}
+.theme-light .r1-brand-copy strong{color:#9a5f13}
+.theme-light .r1-brand-copy span{color:#8c7559}
+.theme-light .r1-nav button{color:#725f48}
+.theme-light .r1-nav button:hover,.theme-light .r1-nav button.active{color:#9a5f13}
+.theme-light .r1-badge{background:#fffaf2;border-color:rgba(171,111,28,.28)}
+.theme-light .r1-salon-pick,.theme-light .chip,.theme-light .slot,.theme-light .pick,.theme-light .back,.theme-light input[type=text],.theme-light input[type=tel],.theme-light input[type=date],.theme-light input[type=search],.theme-light .szukaj input,.theme-light .stp .num{background:#fffaf3;border-color:rgba(171,111,28,.3);color:var(--r1-text)}
+.theme-light .r1-salon-pick button{color:#80684c}
+.theme-light .sec,.theme-light .stepper,.theme-light .stage2{background:linear-gradient(180deg,#fffdf9,#f6efe4);border-color:rgba(171,111,28,.2)}
+.theme-light .list,.theme-light .recap{background:#fffaf3;border-color:rgba(171,111,28,.2)}
+.theme-light .r1-head h1,.theme-light .sec-title,.theme-light h3{color:#49331c}
+.theme-light .r1-eyebrow,.theme-light .lead,.theme-light .hint,.theme-light .sec-sum,.theme-light .opt .tag,.theme-light .opt .sep,.theme-light .sub{color:#7d6b54}
+.theme-light .sec-sum b,.theme-light .opt .pr,.theme-light .ttl{color:#8a5a12}
+.theme-light .opt:hover{background:rgba(205,159,76,.10)}
+.theme-light .opt.sel,.theme-light .slot.sel,.theme-light .pick.sel,.theme-light .chip.active{background:linear-gradient(145deg,#fff7e9,#ecd6b5);border-color:#b77a23;color:#5b3c19}
+.theme-light .r1-action,.theme-light .cta{color:#8d5b17}
+.theme-light .cta{background:linear-gradient(135deg,#a46c1d,#d6a348,#8c5917);color:#fff8ea;border-color:#c08a2c}
+.theme-light .bar{background:linear-gradient(180deg,rgba(255,250,243,.92),rgba(247,240,230,.99));border-top-color:rgba(171,111,28,.22);box-shadow:0 -8px 24px rgba(83,53,18,.06)}
+.theme-light .barlbl{color:#9a5f13}
+.theme-light .barsum{color:#7d6b54}
+.theme-light .r1-footer{background:#fbf8f2;color:#8c7c67;border-top-color:rgba(171,111,28,.14)}
+.theme-light .toast{background:linear-gradient(90deg,rgba(245,225,190,.96),rgba(255,250,242,.98));color:#6b4512;border-color:rgba(171,111,28,.42)}
 </style>
 </head>
 <body>
@@ -302,8 +331,8 @@ mark{background:rgba(205,159,76,.24);color:var(--r1-gold2);border-radius:3px;pad
   </div></div>
 
   <footer class="r1-footer">
-    <span>Thai Maliwan Internal · UI-R3F · rezerwacja ręczna · tylko makieta</span>
-    <span>Backend zamrożony · zero POST / deploy</span>
+    <span>Thai Maliwan Internal · UI-R3F · rezerwacja ręczna</span>
+    <span>Zapis do arkusza aktywny · REZERWACJE ZW / SZ</span>
     <span>Stan lokalny <i class="ok"></i></span>
   </footer>
 
@@ -716,6 +745,18 @@ async function zarezerwuj(){
 $('#rezerwuj').onclick=zarezerwuj;
 
 generujListe();generujGodziny();odswiez();
+
+/* Motyw dziedziczymy po panelu - jeden wybor obowiazuje na wszystkich ekranach. */
+(function(){
+  try{
+    var m=localStorage.getItem('astera.motyw')||'dark';
+    var root=document.querySelector('.ui-r1');
+    if(root)root.classList.toggle('theme-light',m==='light');
+    document.querySelectorAll('[data-theme-choice]').forEach(function(b){
+      b.classList.toggle('active',b.dataset.themeChoice===m);
+    });
+  }catch(e){}
+})();
 </script>
 </body>
 </html>
