@@ -874,7 +874,9 @@ addEventListener('pointerup',function(){if(!drag)return;drag=false;vel=Math.max(
         }
         ['ZW','SZ'].forEach(function(s){
           DATA[s].visits=DATA[s].visits.filter(function(v){
-            return v.status==='BLOKADA'||String(v.id).indexOf('REC-')===0;   // zostawiamy udostępnione terminy i wpisy z rezerwacji ręcznej
+            if(v.status==='BLOKADA')return true;                              // udostępnione terminy zostają
+            if(String(v.id).indexOf('REC-')!==0)return false;                  // reszta pochodzi z arkusza - nadpisujemy
+            return v.ts && (Date.now()-v.ts)<15*60*1000;                       // lokalna kopia tylko przez 15 min, potem liczy się arkusz
           });
         });
         var pominiete=[];
