@@ -474,22 +474,42 @@ function wolneGodziny(){
   const w=PULA.filter((_,i)=>((z>>i)&1)===1).slice(0,6);
   return {lista:w.length?w:PULA.slice(0,6),z};
 }
+/* Zespół dnia: bierzemy z tego samego localStorage co panel („kto dziś pracuje”),
+   dzięki temu na ZW jest Kai jeśli ją dodałeś. Gdy brak zapisu — pełna lista salonu. */
+function terapeutkiSalonu(){
+  try{
+    var z=JSON.parse(localStorage.getItem('astera.zespol')||'null');
+    if(z&&z[S.salon]&&z[S.salon].length){
+      var akt=z[S.salon].filter(function(t){return t&&t[2]!==false;}).map(function(t){return t[0];}).filter(Boolean);
+      if(akt.length)return akt;
+    }
+  }catch(e){}
+  return TERAPEUTKI[S.salon];
+}
+function godzinySelect(id){
+  var lista=terapeutkiSalonu();
+  var opcje='<option value="">— wybierz —</option>'+lista.map(function(n){
+    return '<option value="'+n+'"'+(S.terapeutka===n?' selected':'')+'>'+n+'</option>';}).join('');
+  return '<div class="row" style="gap:16px;flex-wrap:wrap;align-items:flex-end">'
+    +'<div><label class="lbl">Godzina</label><br><input type="time" step="300" id="'+id+'godz" value="'+(S.godzina||'')+'" style="padding:10px 12px;border-radius:10px;font-size:15px"></div>'
+    +'<div><label class="lbl">Masażystka · '+salonNazwa(S.salon)+'</label><br><select id="'+id+'ter" style="padding:11px 12px;border-radius:10px;font-size:15px;min-width:190px">'+opcje+'</select></div>'
+    +'</div><div class="pusto" style="margin-top:8px">Wpisz dowolną godzinę i wybierz osobę z dzisiejszego zespołu.</div>';
+}
+function wpiszTermin(id){
+  var g=$('#'+id+'godz'),tr=$('#'+id+'ter');
+  if(g)g.onchange=function(){S.godzina=this.value;odswiez();};
+  if(tr)tr.onchange=function(){S.terapeutka=this.value;odswiez();};
+}
 function generujGodziny(){
-  const box=$('#godziny');if(!box)return;box.innerHTML='';
+  const box=$('#godziny');if(!box)return;
   if(!S.data){box.innerHTML='<div class="pusto">Najpierw wybierz datę.</div>';return}
-  const t=TERAPEUTKI[S.salon],{lista,z}=wolneGodziny();
-  lista.forEach((g,i)=>{
-    const kto=t[(z+i)%t.length];
-    const d=document.createElement('div');
-    d.className='slot'+(S.godzina===g?' sel':'');
-    d.innerHTML='<div class="tick">✓</div><div class="h">'+g+'</div><div class="t">'+kto+'</div>';
-    d.onclick=()=>{S.godzina=g;S.terapeutka=kto;generujGodziny();odswiez();przejdzDalej('s3')};
-    box.appendChild(d);
-  });
+  box.style.display='block';
+  box.innerHTML=godzinySelect('g1');
+  wpiszTermin('g1');
 }
 
 /* ---------- akordeon ---------- */
-function gotowe(id){return id==='s1'?!!(S.imie||S.tel):id==='s2'?!!S.usluga:id==='s3'?!!S.godzina:false}
+function gotowe(id){return id==='s1'?!!(S.imie||S.tel):id==='s2'?!!S.usluga:id==='s3'?!!(S.godzina&&S.terapeutka):false}
 function przejdzDalej(id){
   const k=['s1','s2','s3'],i=k.indexOf(id);
   document.getElementById(id).classList.remove('open');
@@ -626,14 +646,11 @@ function rysujKrok(){
     przerysuj();
   }
   else if(S.krok===3){
-    st.innerHTML='<h3>3. Godzina rezerwacji</h3><p class="lead">Wybierz godzinę — terapeutka przypisana jest do terminu.</p>'+
-      '<div class="row"><div><label class="lbl">Data</label><input type="date" id="k3data" value="'+S.data+'"></div></div><div class="slots" id="k3sloty"></div><div class="grow"></div>'+nawigacja(true,gotowe('s3'));
+    st.innerHTML='<h3>3. Godzina rezerwacji</h3><p class="lead">Wpisz godzinę i wybierz masażystkę z dzisiejszego zespołu.</p>'+
+      '<div class="row"><div><label class="lbl">Data</label><br><input type="date" id="k3data" value="'+S.data+'" style="padding:10px 12px;border-radius:10px"></div></div>'+
+      '<div id="k3sloty" style="margin-top:8px">'+godzinySelect('g3')+'</div><div class="grow"></div>'+nawigacja(true,gotowe('s3'));
     $('#k3data').addEventListener('change',e=>{$('#data').value=e.target.value;$('#data').dispatchEvent(new Event('change'));rysujKrok()});
-    const t=TERAPEUTKI[S.salon],{lista,z}=wolneGodziny(),box=$('#k3sloty');
-    lista.forEach((g,i)=>{const kto=t[(z+i)%t.length];const d=document.createElement('div');
-      d.className='slot'+(S.godzina===g?' sel':'');
-      d.innerHTML='<div class="tick">✓</div><div class="h">'+g+'</div><div class="t">'+kto+'</div>';
-      d.onclick=()=>{S.godzina=g;S.terapeutka=kto;generujGodziny();S.krok=4;odswiez()};box.appendChild(d)});
+    wpiszTermin('g3');
   }
   else if(S.krok===4){
     const os='<svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.5"/><path d="M5 21c0-4 3-6 7-6s7 2 7 6"/></svg>';
