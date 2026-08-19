@@ -846,11 +846,18 @@ addEventListener('pointerup',function(){if(!drag)return;drag=false;vel=Math.max(
     var m=String(t||'').replace(/\s/g,'').replace(',','.').match(/(\d+(?:\.\d+)?)/);
     return m?Math.round(parseFloat(m[1])):null;
   }
+  /* Arkusz pisze 'KAI', panel ma 'Kai' - porownanie musi ignorowac wielkosc liter
+     i ogonki. Zwracamy nazwe Z PANELU, zeby wizyta trafila do istniejacej kolumny. */
+  function r1Bez(s){
+    return String(s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim();
+  }
   function r1PierwszaTerapeutka(t,salon){
     var lista=String(t||'').split(/[,;]+/).map(function(x){return x.trim()}).filter(Boolean);
     var zespol=(DATA[salon]&&DATA[salon].team||[]).map(function(x){return x[0]});
-    for(var i=0;i<lista.length;i++) if(zespol.indexOf(lista[i])>-1) return lista[i];
-    return lista[0]||'';
+    for(var i=0;i<lista.length;i++)
+      for(var j=0;j<zespol.length;j++)
+        if(r1Bez(lista[i])===r1Bez(zespol[j])) return zespol[j];
+    return '';   // nikt z zespolu tego salonu - wizyta nie ma kolumny, zglaszamy to wyzej
   }
   function r1WczytajRezerwacje(ponowka){
     var token='';try{token=localStorage.getItem('asteraReadToken')||''}catch(e){}
@@ -870,10 +877,11 @@ addEventListener('pointerup',function(){if(!drag)return;drag=false;vel=Math.max(
             return v.status==='BLOKADA'||String(v.id).indexOf('REC-')===0;   // zostawiamy udostępnione terminy i wpisy z rezerwacji ręcznej
           });
         });
+        var pominiete=[];
         d.bookings.forEach(function(b,i){
           var d2=DATA[b.salon];if(!d2)return;
           var kto=r1PierwszaTerapeutka(b.therapist,b.salon);
-          if(!kto)return;
+          if(!kto){pominiete.push((b.therapist||'brak masazystki')+' ('+b.date+' '+b.start+')');return;}
           d2.visits.push({
             id:'PROD-'+b.salon+'-'+i,
             booking_id:(b.source==='BOOKSY'?'BOOKSY-':'AST-')+b.salon+'-'+b.date.replace(/-/g,'')+'-'+i,
@@ -895,7 +903,13 @@ addEventListener('pointerup',function(){if(!drag)return;drag=false;vel=Math.max(
             el.innerHTML=el.innerHTML.replace(/DANE PRZYKŁADOWE/i,'DANE Z ARKUSZA').replace(/· makieta/i,'· dane z arkusza');
         });
         renderAll();
-        toast('Wczytano '+d.count+' rezerwacji z arkusza.');
+        if(pominiete.length){
+          toast('<b>Wczytano '+(d.count-pominiete.length)+' z '+d.count+' rezerwacji.</b><br>'+
+            '<span style="color:#c0392b">Pominieto '+pominiete.length+' - masazystka spoza zespolu salonu:</span><br>'+
+            pominiete.slice(0,6).join('<br>')+(pominiete.length>6?'<br>...i '+(pominiete.length-6)+' wiecej':''));
+        } else {
+          toast('Wczytano '+d.count+' rezerwacji z arkusza.');
+        }
       })
       .catch(function(){ if(!ponowka)setTimeout(function(){r1WczytajRezerwacje(true)},4000); });
   }
