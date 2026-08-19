@@ -193,7 +193,7 @@ body> :not(.ui-r1){display:none!important}
 .r1-visit-dot b{font-size:9px;color:var(--r1-gold2);font-weight:500}.r1-visit-dot strong{font-size:8px;margin-top:4px;font-weight:500}.r1-visit-dot span{font-size:7px;color:#8e816c;margin-top:3px;max-width:64px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .r1-board{min-height:0;display:flex;flex-direction:column;overflow:hidden}
 .r1-board-toolbar{height:56px;flex:0 0 56px;display:flex;align-items:center;padding:0 14px;border-bottom:1px solid rgba(205,159,76,.18);gap:10px}.r1-board-toolbar .back{width:34px;height:34px;border:1px solid rgba(205,159,76,.25);border-radius:9px;background:#0c0b09;color:var(--r1-gold2);cursor:pointer;font-size:18px}.r1-board-date{flex:1}.r1-board-date strong{font-family:Georgia,serif;font-size:15px;font-weight:400}.r1-board-date span{display:block;font-size:8px;color:#817563;margin-top:4px}.r1-view-tabs{display:flex;border:1px solid rgba(205,159,76,.23);border-radius:999px;padding:2px}.r1-view-tabs button{border:0;background:transparent;color:#93856f;border-radius:999px;padding:7px 13px;font-size:9px;cursor:pointer}.r1-view-tabs button.active{background:linear-gradient(135deg,#90601e,#c89239);color:white}
-.r1-schedule-wrap{flex:1;min-height:0;padding:10px 12px 12px;overflow:auto}.r1-schedule{min-height:500px;display:grid;grid-template-columns:52px repeat(4,minmax(130px,1fr));grid-template-rows:44px repeat(44,11px);position:relative;border:1px solid rgba(205,159,76,.17);border-radius:12px;overflow:hidden;background:#0d0c0a}
+.r1-schedule-wrap{flex:1;min-height:0;padding:10px 12px 12px;overflow:auto}.r1-schedule{min-height:500px;display:grid;grid-template-columns:52px repeat(4,minmax(130px,1fr));grid-template-rows:44px repeat(48,11px);position:relative;border:1px solid rgba(205,159,76,.17);border-radius:12px;overflow:hidden;background:#0d0c0a}
 .r1-therapist-head{display:flex;align-items:center;justify-content:center;gap:7px;border-left:1px solid rgba(205,159,76,.15);border-bottom:1px solid rgba(205,159,76,.18);background:#12100c;font-size:10px;color:#e0d1b6;z-index:2}.r1-avatar{width:25px;height:25px;border-radius:50%;border:1px solid rgba(205,159,76,.34);display:grid;place-items:center;color:var(--r1-gold2);font-size:8px;background:#17120c}
 .r1-time-label{font-size:8px;color:#847866;padding:5px 5px 0;text-align:right;border-top:1px solid rgba(205,159,76,.10);z-index:1}.r1-time-slot{border-left:1px solid rgba(205,159,76,.10);border-top:1px solid rgba(205,159,76,.10);z-index:0}.r1-time-slot.off{background:repeating-linear-gradient(135deg,rgba(255,255,255,.012) 0 4px,transparent 4px 8px)}
 .r1-appointment{position:relative;margin:2px 5px 2px 7px;border:1px solid rgba(205,159,76,.22);border-left:3px solid #c99031;border-radius:8px;background:linear-gradient(145deg,#21180f,#15110c);padding:7px 8px;overflow:hidden;z-index:3;box-shadow:0 6px 14px rgba(0,0,0,.24);cursor:grab;user-select:none;transition:opacity .16s,transform .16s,box-shadow .16s}
@@ -366,7 +366,7 @@ body> :not(.ui-r1){display:none!important}
             <button>17</button><button>18</button><button class="dot">19</button><button>20</button><button>21</button><button>22</button><button>23</button>
             <button>24</button><button>25</button><button>26</button><button>27</button><button>28</button><button>29</button><button>30</button><button>31</button>
           </div></div>
-          <div class="r1-date-card"><strong>Piątek, 14 sierpnia 2026</strong><span><i class="r1-live-dot"></i><span data-salon-label>Salon SZ</span> · 12:00–22:00 · makieta</span></div>
+          <div class="r1-date-card"><strong>Piątek, 14 sierpnia 2026</strong><span><i class="r1-live-dot"></i><span data-salon-label>Salon SZ</span> · 12:00–23:00 · makieta</span></div>
           <label class="r1-search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6"/><path d="M16 16l5 5"/></svg><input type="tel" placeholder="Wpisz numer telefonu"></label>
           <button class="r1-action primary" data-open-modal="slots"><svg viewBox="0 0 24 24"><rect x="4" y="6" width="16" height="14"/><path d="M8 3v6M16 3v6M4 10h16"/></svg>Udostępnij terminy</button>
           <button class="r1-action" data-open-modal="reception"><svg viewBox="0 0 24 24"><circle cx="10" cy="8" r="3"/><path d="M4 20c0-4 3-6 6-6 2 0 4 1 5 2M18 12v8M14 16h8"/></svg>Rezerwacja ręczna</button>
@@ -383,7 +383,7 @@ body> :not(.ui-r1){display:none!important}
             <div id="r1VisitOrbit"></div>
           </section>
           <section class="r1-panel r1-board">
-            <div class="r1-board-toolbar"><button class="back" data-screen-link="home" aria-label="Wróć">‹</button><div class="r1-board-date"><strong id="r1BoardDate">Piątek, 14 sierpnia 2026</strong><span><span data-salon-label>Salon SZ</span> · 12:00–22:00 · DANE PRZYKŁADOWE</span></div><div class="r1-view-tabs"><button class="active">Dzień</button><button data-not-yet="Widok tygodnia">Tydzień</button><button data-not-yet="Widok miesiąca">Miesiąc</button></div><button class="r1-icon-btn" data-open-modal="availability" aria-label="Wolne terminy — rezerwacja ręczna"><svg viewBox="0 0 24 24"><path d="M4 12h16M12 4v16"/></svg></button></div>
+            <div class="r1-board-toolbar"><button class="back" data-screen-link="home" aria-label="Wróć">‹</button><div class="r1-board-date"><strong id="r1BoardDate">Piątek, 14 sierpnia 2026</strong><span><span data-salon-label>Salon SZ</span> · 12:00–23:00 · DANE PRZYKŁADOWE</span></div><div class="r1-view-tabs"><button class="active">Dzień</button><button data-not-yet="Widok tygodnia">Tydzień</button><button data-not-yet="Widok miesiąca">Miesiąc</button></div><button class="r1-icon-btn" data-open-modal="availability" aria-label="Wolne terminy — rezerwacja ręczna"><svg viewBox="0 0 24 24"><path d="M4 12h16M12 4v16"/></svg></button></div>
             <div class="r1-booking-context" id="r1BookingContext" role="status"><div><b id="r1BookingContextTitle">Powiązana rezerwacja</b><br><span id="r1BookingContextCopy"></span></div><button type="button" id="r1ClearBookingContext" aria-label="Zamknij podgląd kontekstu">×</button></div>
             <div class="r1-schedule-wrap"><div class="r1-schedule" id="r1Schedule"></div></div>
           </section>
@@ -581,7 +581,7 @@ body> :not(.ui-r1){display:none!important}
   <div class="info">
     <span><svg viewBox="0 0 24 24"><path d="M12 2C8 2 5 5 5 9c0 5 7 13 7 13s7-8 7-13c0-4-3-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>Kraków, ul. Zwierzyniecka 14 lok. 7</span>
     <span><svg viewBox="0 0 24 24"><path d="M5 4h4l2 5-3 2c1 3 4 6 7 7l2-3 5 2v4c0 1-1 2-2 2C13 29 3 19 3 8 3 5 4 4 5 4z"/></svg>+48 888 496 495</span>
-    <span><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>Pon.–Niedz. 12:00–22:00</span>
+    <span><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>Pon.–Niedz. 12:00–23:00</span>
   </div>
   <div class="right">
     <div class="soc">
@@ -1313,7 +1313,7 @@ addEventListener('pointerup',function(){if(!drag)return;drag=false;vel=Math.max(
     var kol=d.team.filter(function(t){return t[2]!==false;});if(!kol.length)kol=d.team.slice(0,1);   // tylko aktywne masazystki = tylko ich kolumny (nieaktywne ukryte)
     el.style.gridTemplateColumns='52px repeat('+kol.length+',minmax(130px,1fr))';                    // liczba kolumn idzie za zespolem, nie na sztywno
     kol.forEach(function(t,i){var h=document.createElement('div');h.className='r1-therapist-head';h.style.gridColumn=String(i+2);h.style.gridRow='1';h.innerHTML='<i class="r1-avatar">'+initials(t[0])+'</i><span>'+t[0]+'</span>';el.appendChild(h);});
-    for(var hour=12;hour<=22;hour++){
+    for(var hour=12;hour<=23;hour++){
       var label=document.createElement('div');label.className='r1-time-label';label.style.gridColumn='1';label.style.gridRow=(2+(hour-12)*4)+'/span 4';label.textContent=(hour<10?'0':'')+hour+':00';el.appendChild(label);
       kol.forEach(function(t,i){var slot=document.createElement('div');slot.className='r1-time-slot';slot.style.gridColumn=String(i+2);slot.style.gridRow=(2+(hour-12)*4)+'/span 4';el.appendChild(slot);});
     }
@@ -1438,7 +1438,7 @@ addEventListener('pointerup',function(){if(!drag)return;drag=false;vel=Math.max(
     var stara=el.querySelector('.r1-now');if(stara)stara.parentNode.removeChild(stara);
     if(state.date!==r1DzisIso())return;
     var teraz=new Date(),min=teraz.getHours()*60+teraz.getMinutes();
-    if(min<12*60||min>22*60)return;
+    if(min<12*60||min>23*60)return;
     var od=min-12*60,kwadrans=Math.floor(od/15),ulamek=(od%15)/15;
     var slot=el.querySelector('.r1-time-slot');
     var wysKwadransa=slot?slot.getBoundingClientRect().height/4:14;
