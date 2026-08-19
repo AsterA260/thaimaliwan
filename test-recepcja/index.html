@@ -392,7 +392,7 @@ body> :not(.ui-r1){display:none!important}
         <aside class="r1-panel r1-team">
           <div class="r1-team-top"><h3>Kto dziś pracuje?</h3><button class="r1-icon-btn" data-open-modal="team" aria-label="Edytuj zespół"><svg viewBox="0 0 24 24"><path d="M4 20l4-1 11-11-3-3L5 16l-1 4zM14 7l3 3"/></svg></button></div>
           <div class="r1-team-list" id="r1TeamList"></div>
-          <div class="r1-team-note">To jest lokalna makieta.<br>Zmiany zespołu nie są zapisywane.</div>
+          <div class="r1-team-note">Wybór „kto dziś pracuje" jest zapisywany na tym urządzeniu<br>i przeżywa odświeżenie.</div>
           <button class="r1-team-edit" data-open-modal="team">Edytuj dzisiejszy zespół</button>
         </aside>
       </div>
@@ -859,6 +859,18 @@ addEventListener('pointerup',function(){if(!drag)return;drag=false;vel=Math.max(
         if(r1Bez(lista[i])===r1Bez(zespol[j])) return zespol[j];
     return '';   // nikt z zespolu tego salonu - wizyta nie ma kolumny, zglaszamy to wyzej
   }
+  /* Para = jedna rezerwacja u dwoch masazystek. Zwracamy WSZYSTKIE z zespolu salonu,
+     ktore pasuja (Kai vs KAI) - zeby para pokazala sie w OBU kolumnach, jak w Booksy.
+     NIC nie dokladamy z automatu - zespol ustawiasz recznie. */
+  function r1WszystkieTerapeutki(t,salon){
+    var lista=String(t||'').split(/[,;]+/).map(function(x){return x.trim()}).filter(Boolean);
+    var team=(DATA[salon]&&DATA[salon].team||[]);
+    var out=[];
+    lista.forEach(function(im){
+      team.forEach(function(z){ if(r1Bez(z[0])===r1Bez(im) && out.indexOf(z[0])<0) out.push(z[0]); });
+    });
+    return out;
+  }
   function r1WczytajRezerwacje(ponowka){
     var token='';try{token=localStorage.getItem('asteraReadToken')||''}catch(e){}
     if(!token)return;
@@ -884,19 +896,22 @@ addEventListener('pointerup',function(){if(!drag)return;drag=false;vel=Math.max(
           var d2=DATA[b.salon];if(!d2)return;
           var st=String(b.status||'').toUpperCase();
           if(st.indexOf('ODWO')===0||st.indexOf('ANULOW')===0||st==='CANCELLED')return;  // odwolana wizyta = termin wolny, nie rysujemy jej
-          var kto=r1PierwszaTerapeutka(b.therapist,b.salon);
-          if(!kto){pominiete.push((b.therapist||'brak masazystki')+' ('+b.date+' '+b.start+')');return;}
-          d2.visits.push({
-            id:'PROD-'+b.salon+'-'+i,
-            booking_id:(b.source==='BOOKSY'?'BOOKSY-':'AST-')+b.salon+'-'+b.date.replace(/-/g,'')+'-'+i,
-            source:b.source,date:b.date,t:b.start,end:b.end,who:kto,
-            client:b.client||'(bez nazwiska)',phone:b.phone||'',
-            categoryId:'single',serviceId:'prod',service:b.service||'—',
-            duration:b.minutes||60,price:r1Kwota(b.price),
-            bookToTherapist:false,note:b.note||'',
-            status:(b.status==='ODWOŁANA'?'ODWOŁANA':'REZERWACJA'),
-            settlementStatus:'NIEROZLICZONA',paymentMethod:'',
-            terapeutki:b.therapist||''
+          var ktoLista=r1WszystkieTerapeutki(b.therapist,b.salon);
+          if(!ktoLista.length){pominiete.push((b.therapist||'brak masazystki')+' ('+b.date+' '+b.start+')');return;}
+          var para=ktoLista.length>1;
+          ktoLista.forEach(function(kto,j){                                   // para -> karta u KAZDEJ masazystki (obie kolumny), jak w Booksy
+            d2.visits.push({
+              id:'PROD-'+b.salon+'-'+i+'-'+j,
+              booking_id:(b.source==='BOOKSY'?'BOOKSY-':'AST-')+b.salon+'-'+b.date.replace(/-/g,'')+'-'+i+'-'+j,
+              source:b.source,date:b.date,t:b.start,end:b.end,who:kto,
+              client:b.client||'(bez nazwiska)',phone:b.phone||'',
+              categoryId:'single',serviceId:'prod',service:b.service||'—',
+              duration:b.minutes||60,price:r1Kwota(b.price),
+              bookToTherapist:false,note:b.note||'',
+              status:(b.status==='ODWOŁANA'?'ODWOŁANA':'REZERWACJA'),
+              settlementStatus:'NIEROZLICZONA',paymentMethod:'',
+              terapeutki:b.therapist||'', para:para
+            });
           });
         });
         R1_PROD=true;
@@ -1272,7 +1287,7 @@ addEventListener('pointerup',function(){if(!drag)return;drag=false;vel=Math.max(
   function r3cCancelMove(){r3c.pendingMove=null;document.getElementById('r3cMoveModal').classList.remove('open');}
   function r3cOpenMove(visit,salon,targetWho,targetStart,targetEnd){r3c.pendingMove={salon:salon,id:visit.id,fromTime:visit.t,fromWho:visit.who,toTime:targetStart,toWho:targetWho,toEnd:targetEnd,bookingId:visit.booking_id};document.getElementById('r3cMoveCopy').innerHTML='<b>'+r2Esc(visit.t)+'</b> → <b>'+r2Esc(targetStart)+'</b><br>'+r2Esc(visit.who)+' → '+r2Esc(targetWho);document.getElementById('r3cMoveModal').classList.add('open');}
   function r3cConfirmMove(){var move=r3c.pendingMove,visit=move&&r3cVisit(move.salon,move.id);if(!move||!visit)return r3cCancelMove();var bookingId=visit.booking_id,validation=r3cValidateMove(visit,move.toWho,move.toTime,move.salon);if(!validation.ok){r3cCancelMove();renderSchedule();toast(validation.message);return;}visit.t=move.toTime;visit.end=validation.end;visit.who=move.toWho;visit.booking_id=bookingId;r3cCancelMove();renderAll();toast('Wizyta przeniesiona lokalnie · booking_id bez zmian');}
-  function r3cDropTarget(event){var schedule=document.getElementById('r1Schedule'),rect=schedule.getBoundingClientRect(),data=DATA[state.salon],columnWidth=(rect.width-52)/data.team.length,index=Math.floor((event.clientX-rect.left-52)/columnWidth),quarter=Math.round((event.clientY-rect.top-44)/11);if(index<0||index>=data.team.length)return null;quarter=Math.max(0,Math.min(43,quarter));return {who:data.team[index][0],start:r3cTime(720+quarter*15)};}
+  function r3cDropTarget(event){var schedule=document.getElementById('r1Schedule'),rect=schedule.getBoundingClientRect(),data=DATA[state.salon],kol=data.team.filter(function(t){return t[2]!==false;});if(!kol.length)kol=data.team.slice(0,1);var columnWidth=(rect.width-52)/kol.length,index=Math.floor((event.clientX-rect.left-52)/columnWidth),quarter=Math.round((event.clientY-rect.top-44)/11);if(index<0||index>=kol.length)return null;quarter=Math.max(0,Math.min(43,quarter));return {who:kol[index][0],start:r3cTime(720+quarter*15)};}
   function r3cHandleDrop(event){event.preventDefault();var schedule=document.getElementById('r1Schedule');schedule.classList.remove('r3c-drag-active');var id=(event.dataTransfer&&event.dataTransfer.getData('text/plain'))||r3c.draggingId,visit=r3cVisit(state.salon,id),target=r3cDropTarget(event);if(!visit||!target)return;var validation=r3cValidateMove(visit,target.who,target.start,state.salon);if(!validation.ok){renderSchedule();toast(validation.message+' Karta wróciła na poprzednią pozycję.');return;}r3cOpenMove(visit,state.salon,target.who,target.start,validation.end);}
   function r3cPointerMove(event){var pointer=r3c.pointer;if(!pointer)return;var dx=event.clientX-pointer.x,dy=event.clientY-pointer.y;if(!pointer.moved&&Math.sqrt(dx*dx+dy*dy)<7)return;pointer.moved=true;r3c.suppressClick=true;var card=document.querySelector('[data-visit-id="'+pointer.id+'"]');if(card)card.classList.add('dragging');document.getElementById('r1Schedule').classList.add('r3c-drag-active');event.preventDefault();}
   function r3cPointerUp(event){var pointer=r3c.pointer;if(!pointer)return;r3c.pointer=null;document.getElementById('r1Schedule').classList.remove('r3c-drag-active');var card=document.querySelector('[data-visit-id="'+pointer.id+'"]');if(card)card.classList.remove('dragging');if(!pointer.moved)return;event.preventDefault();var visit=r3cVisit(pointer.salon,pointer.id),target=r3cDropTarget(event);if(!visit||!target){renderSchedule();toast('Karta wróciła na poprzednią pozycję.');setTimeout(function(){r3c.suppressClick=false;},80);return;}var validation=r3cValidateMove(visit,target.who,target.start,pointer.salon);if(!validation.ok){renderSchedule();toast(validation.message+' Karta wróciła na poprzednią pozycję.');setTimeout(function(){r3c.suppressClick=false;},80);return;}r3cOpenMove(visit,pointer.salon,target.who,target.start,validation.end);setTimeout(function(){r3c.suppressClick=false;},80);}
@@ -1295,13 +1310,15 @@ addEventListener('pointerup',function(){if(!drag)return;drag=false;vel=Math.max(
   }
   function renderSchedule(){
     var d=DATA[state.salon],el=document.getElementById('r1Schedule');el.innerHTML='';
-    d.team.forEach(function(t,i){var h=document.createElement('div');h.className='r1-therapist-head';h.style.gridColumn=String(i+2);h.style.gridRow='1';h.innerHTML='<i class="r1-avatar">'+initials(t[0])+'</i><span>'+t[0]+(t[2]===false?' · nieaktywna':'')+'</span>';if(t[2]===false)h.style.opacity='.42';el.appendChild(h);});
+    var kol=d.team.filter(function(t){return t[2]!==false;});if(!kol.length)kol=d.team.slice(0,1);   // tylko aktywne masazystki = tylko ich kolumny (nieaktywne ukryte)
+    el.style.gridTemplateColumns='52px repeat('+kol.length+',minmax(130px,1fr))';                    // liczba kolumn idzie za zespolem, nie na sztywno
+    kol.forEach(function(t,i){var h=document.createElement('div');h.className='r1-therapist-head';h.style.gridColumn=String(i+2);h.style.gridRow='1';h.innerHTML='<i class="r1-avatar">'+initials(t[0])+'</i><span>'+t[0]+'</span>';el.appendChild(h);});
     for(var hour=12;hour<=22;hour++){
       var label=document.createElement('div');label.className='r1-time-label';label.style.gridColumn='1';label.style.gridRow=(2+(hour-12)*4)+'/span 4';label.textContent=(hour<10?'0':'')+hour+':00';el.appendChild(label);
-      d.team.forEach(function(t,i){var slot=document.createElement('div');slot.className='r1-time-slot';slot.style.gridColumn=String(i+2);slot.style.gridRow=(2+(hour-12)*4)+'/span 4';el.appendChild(slot);});
+      kol.forEach(function(t,i){var slot=document.createElement('div');slot.className='r1-time-slot';slot.style.gridColumn=String(i+2);slot.style.gridRow=(2+(hour-12)*4)+'/span 4';el.appendChild(slot);});
     }
     d.visits.filter(function(v){return v.status!=='ODWOŁANA'&&v.date===state.date;}).forEach(function(v){
-      var idx=d.team.findIndex(function(t){return t[0]===v.who;});if(idx<0)return;
+      var idx=kol.findIndex(function(t){return t[0]===v.who;});if(idx<0)return;
       if(v.status==='BLOKADA'&&v.booking_type==='VOUCHER'){
         var release=document.createElement('div');release.className='r1-release-slot';release.style.gridColumn=String(idx+2);release.style.gridRow=quarterRow(v.t)+'/span '+Math.max(2,Math.round((min(v.end)-min(v.t))/15));release.innerHTML='<b>'+r2Esc(v.t)+' – '+r2Esc(v.end)+'</b><strong>Termin udostępniony</strong><span>Widoczny dla klienta</span><button type="button" aria-label="Cofnij udostępniony termin">× Cofnij</button>';
         release.querySelector('button').addEventListener('click',function(event){event.stopPropagation();if(!confirm('Wycofać ten udostępniony termin? Klient przestanie go widzieć.'))return;v.status='ODWOŁANA';renderAll();toast('Termin wycofany z dostępności klienta · DEMO bez zapisu');});el.appendChild(release);return;
@@ -1311,21 +1328,30 @@ addEventListener('pointerup',function(){if(!drag)return;drag=false;vel=Math.max(
       a.addEventListener('click',function(){if(r3c.suppressClick)return;r3cOpenEdit(v,state.salon);});a.addEventListener('keydown',function(event){if(event.key==='Enter'||event.key===' '){event.preventDefault();r3cOpenEdit(v,state.salon);}});a.addEventListener('pointerdown',function(event){if(v.source==='BOOKSY'||event.button!==0)return;r3c.pointer={id:v.id,salon:state.salon,x:event.clientX,y:event.clientY,moved:false};});el.appendChild(a);
     });
   }
+  /* Zapis/odczyt zespolu na tym urzadzeniu - zeby wybor "kto dzis pracuje" przezyl odswiezenie. */
+  function r1ZapiszZespol(){
+    try{var pack={};['ZW','SZ'].forEach(function(s){pack[s]=(DATA[s]&&DATA[s].team)||[];});localStorage.setItem('astera.zespol',JSON.stringify(pack));}catch(e){}
+  }
+  function r1WczytajZespol(){
+    try{var raw=localStorage.getItem('astera.zespol');if(!raw)return;var pack=JSON.parse(raw);
+      ['ZW','SZ'].forEach(function(s){if(pack[s]&&pack[s].length&&DATA[s])DATA[s].team=pack[s];});}catch(e){}
+  }
   function r1SalonFullName(code){return code==='ZW'?'ZW · Zwierzyniecka':'SZ · Szewska';}
   function r1MemberOrigin(member,currentSalon){return member[3]||currentSalon;}
   function r1AddTeamMemberFromOtherSalon(member,originSalon){
     var target=DATA[state.salon];
     if(target.team.some(function(item){return item[0]===member[0];})){toast(member[0]+' jest już w dzisiejszym zespole');return;}
     target.team.push([member[0],member[1],true,originSalon]);
+    r1ZapiszZespol();
     renderAll();
-    toast(member[0]+' dodana z salonu '+r1SalonFullName(originSalon)+' · DEMO bez zapisu');
+    toast(member[0]+' dodana do '+r1SalonFullName(state.salon)+' · zapisane');
   }
   function renderTeam(){
     var d=DATA[state.salon],list=document.getElementById('r1TeamList'),checks=document.getElementById('r1TeamChecks'),transfer=document.getElementById('r1TeamTransfer'),otherSalon=state.salon==='ZW'?'SZ':'ZW';list.innerHTML='';checks.innerHTML='';
     d.team.forEach(function(t){
       var active=t[2]!==false,origin=r1MemberOrigin(t,state.salon),originText=origin!==state.salon?' · z '+r1SalonFullName(origin):'';
       var row=document.createElement('div');row.className='r1-team-row';row.style.opacity=active?'1':'.45';row.innerHTML='<i class="r1-avatar">'+initials(t[0])+'</i><div><strong>'+t[0]+'</strong><span>'+t[1]+originText+'</span></div><em>'+((active)?'●':'○')+'</em>';list.appendChild(row);
-      var c=document.createElement('label');c.className='r1-check';c.innerHTML='<input type="checkbox" '+(active?'checked':'')+'><span>'+t[0]+' · '+t[1]+originText+'</span>';c.querySelector('input').addEventListener('change',function(){t[2]=this.checked;renderSchedule();renderTeam();toast(t[0]+(t[2]?' pracuje dziś':' oznaczona jako nieaktywna'));});checks.appendChild(c);
+      var c=document.createElement('label');c.className='r1-check';c.innerHTML='<input type="checkbox" '+(active?'checked':'')+'><span>'+t[0]+' · '+t[1]+originText+'</span>';c.querySelector('input').addEventListener('change',function(){t[2]=this.checked;r1ZapiszZespol();renderSchedule();renderTeam();toast(t[0]+(t[2]?' pracuje dziś · zapisane':' ukryta z grafiku · zapisane'));});checks.appendChild(c);
     });
     if(!transfer)return;
     transfer.innerHTML='<h4>Dodaj z drugiego salonu</h4><p>Na dziś do '+r1SalonFullName(state.salon)+'. Dodanie nie zmienia grafiku źródłowego ani danych produkcyjnych.</p>';
@@ -1616,6 +1642,7 @@ addEventListener('pointerup',function(){if(!drag)return;drag=false;vel=Math.max(
   (function(){var t=r1DzisIso();
     if(t>='2026-08-01'&&t<='2026-11-30'){var p=r1ParseIso(t);state.date=t;state.calY=p.y;state.calM=p.m;}
   })();
+  r1WczytajZespol();                 // przywroc zapisany wybor "kto dzis pracuje"
   setSalon(state.salon);
   renderAll();
   setInterval(r1RenderNowLine,30000);
