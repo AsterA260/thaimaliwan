@@ -882,6 +882,8 @@ addEventListener('pointerup',function(){if(!drag)return;drag=false;vel=Math.max(
         var pominiete=[];
         d.bookings.forEach(function(b,i){
           var d2=DATA[b.salon];if(!d2)return;
+          var st=String(b.status||'').toUpperCase();
+          if(st.indexOf('ODWO')===0||st.indexOf('ANULOW')===0||st==='CANCELLED')return;  // odwolana wizyta = termin wolny, nie rysujemy jej
           var kto=r1PierwszaTerapeutka(b.therapist,b.salon);
           if(!kto){pominiete.push((b.therapist||'brak masazystki')+' ('+b.date+' '+b.start+')');return;}
           d2.visits.push({
