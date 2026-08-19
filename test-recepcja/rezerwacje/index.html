@@ -669,6 +669,7 @@ function zapiszDoMakiety(){
     var lista=JSON.parse(localStorage.getItem('astera.makietaRezerwacje')||'[]');
     lista.push({
       id:'REC-'+S.salon+'-'+S.data.replace(/-/g,'')+'-'+String(S.godzina).replace(':','')+'-'+lista.length,
+      ts:Date.now(),                       // panel kasuje niepotwierdzone kopie po 15 minutach
       salon:S.salon, date:S.data, t:S.godzina, end:koniec,
       who:(S.wyborTerapeutki==='dowolna'?S.terapeutka:S.terapeutka),
       client:(S.imie||'Klient bez danych'), phone:S.tel||'',
@@ -722,7 +723,7 @@ async function zarezerwuj(){
   if(btn){btn.disabled=true;btn.textContent='Zapisuję…';}
 
   var w=await zapiszNaSerwer();
-  zapiszDoMakiety();               // żeby wizyta była w grafiku od razu, zanim odświeży się most
+  if(!(w&&w.ok)) zapiszDoMakiety(); // lokalna kopia TYLKO gdy serwer odmowil - inaczej wizyta dublowalaby sie w grafiku
 
   var opis=[(S.imie||S.tel),salonNazwa(S.salon),S.usluga,S.min+' min',dataPL(S.data),S.godzina,
             (S.wyborTerapeutki==='dowolna'?'dowolna':S.terapeutka),pln(S.cena)].join(' • ');
