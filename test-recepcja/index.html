@@ -1360,13 +1360,13 @@ addEventListener('pointerup',function(){if(!drag)return;drag=false;vel=Math.max(
     candidates.forEach(function(person){var option=document.createElement('div');option.className='r1-transfer-option';option.innerHTML='<div><strong>'+person[0]+'</strong><span>'+person[1]+' · '+r1SalonFullName(otherSalon)+'</span></div><button type="button">Dodaj</button>';option.querySelector('button').addEventListener('click',function(){r1AddTeamMemberFromOtherSalon(person,otherSalon);});options.appendChild(option);});
     transfer.appendChild(options);
   }
-  function r1ReleasedSlot(data,therapist,start){return data.visits.some(function(v){return v.status==='BLOKADA'&&v.booking_type==='VOUCHER'&&v.who===therapist&&v.t===start;});}
+  function r1ReleasedSlot(data,therapist,start){return data.visits.some(function(v){return v.date===state.date&&v.status==='BLOKADA'&&v.booking_type==='VOUCHER'&&v.who===therapist&&v.t===start;});}
   function r1AddMinutes(start,minutes){var total=min(start)+minutes;return String(Math.floor(total/60)).padStart(2,'0')+':'+String(total%60).padStart(2,'0');}
   function r1ReleaseSlot(therapist,start){
     var data=DATA[state.salon];
     if(r1ReleasedSlot(data,therapist,start)){toast('Ten termin jest już udostępniony.');return;}
     if(!confirm('Udostępnić '+start+'–'+r1AddMinutes(start,60)+' przy '+therapist+' klientom?'))return;
-    data.visits.push({id:'DEMO_RELEASE_'+Date.now(),source:'ASTERA',booking_type:'VOUCHER',date:'2026-08-14',t:start,end:r1AddMinutes(start,60),who:therapist,service:'Termin udostępniony klientowi',status:'BLOKADA'});
+    data.visits.push({id:'DEMO_RELEASE_'+Date.now(),source:'ASTERA',booking_type:'VOUCHER',date:state.date,t:start,end:r1AddMinutes(start,60),who:therapist,service:'Termin udostępniony klientowi',status:'BLOKADA'});
     renderAll();toast('Termin udostępniony w głównym Grafiku · DEMO bez zapisu');
   }
   function renderSlots(){
@@ -1390,14 +1390,14 @@ addEventListener('pointerup',function(){if(!drag)return;drag=false;vel=Math.max(
         var start=String(hour).padStart(2,'0')+':00';
         var stop=r1AddMinutes(start,60);
         var occupied=data.visits.some(function(v){
-          return v.status!=='ODWOŁANA'&&v.who===therapist&&min(start)<min(v.end)&&min(stop)>min(v.t);
+          return v.date===state.date&&v.status!=='ODWOŁANA'&&v.who===therapist&&min(start)<min(v.end)&&min(stop)>min(v.t);
         });
         if(!occupied)result.push({
-          data:'2026-08-14',
+          data:state.date,
           start:start,
           stop:stop,
           terapeutka:therapist,
-          slot_id:'LOCAL-'+state.salon+'-'+therapistIndex+'-'+hour
+          slot_id:'LOCAL-'+state.salon+'-'+state.date+'-'+therapistIndex+'-'+hour
         });
       }
     });
