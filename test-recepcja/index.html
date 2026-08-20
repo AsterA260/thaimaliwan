@@ -1223,7 +1223,7 @@ addEventListener('pointerup',function(){if(!drag)return;drag=false;vel=Math.max(
   }
   function r3dCloseCancel(){document.getElementById('r3dCancelModal').classList.remove('open');r3d.cancellingId='';r3d.cancellingSalon='';r3d.cancelDecision=null;}
   function r3dRequestCancellation(){
-    var visit=r3cVisit(r3c.editingSalon,r3c.editingId);if(!visit||visit.source==='BOOKSY')return;r3d.cancellingId=visit.id;r3d.cancellingSalon=r3c.editingSalon;r3d.cancelDecision=r3dVoucherCancellationDecision(visit,new Date());
+    var visit=r3cVisit(r3c.editingSalon,r3c.editingId);if(!visit)return;r3d.cancellingId=visit.id;r3d.cancellingSalon=r3c.editingSalon;r3d.cancelDecision=r3dVoucherCancellationDecision(visit,new Date());
     var decision=r3d.cancelDecision,hours=Math.max(0,decision.hoursBefore),copy='<b>'+r2Esc(visit.client)+' · '+r2Esc(visit.date+' '+visit.t)+'</b><br>';
     if(!decision.voucher)copy+='Wizyta nie jest opłacana bonem — anulowanie nie zmienia żadnego bonu.';else if(decision.code==='EARLY_CANCEL')copy+='Do wizyty pozostało '+hours.toFixed(1)+' h. Bon wróci do statusu <b>AKTYWNY</b>.';else copy+='Do wizyty pozostało mniej niż 24 h. Bon zostanie automatycznie oznaczony jako <b>WYKORZYSTANY</b>.';
     document.getElementById('r3dCancelResult').innerHTML=copy;document.getElementById('r3cEditModal').classList.remove('open');document.getElementById('r3dCancelModal').classList.add('open');
@@ -1271,11 +1271,11 @@ addEventListener('pointerup',function(){if(!drag)return;drag=false;vel=Math.max(
     document.getElementById('r3cClient').value=visit.client;document.getElementById('r3cPhone').value=visit.phone||'';document.getElementById('r3cSalon').value=salon;document.getElementById('r3cDate').value=visit.date||'2026-08-14';document.getElementById('r3cStart').value=visit.t;
     r3cSetOptions(document.getElementById('r3cTherapist'),DATA[salon].team.map(function(person){return {value:person[0],label:person[0]+(person[2]===false?' · nie pracuje':'')};}),visit.who);
     r3cRenderOfferControls(visit.categoryId,visit.serviceId,visit.duration);document.getElementById('r3cHeart').checked=!!visit.bookToTherapist;document.getElementById('r3cNote').value=visit.note||'';document.getElementById('r3cStatus').value=visit.status||'REZERWACJA';
-    var booksy=visit.source==='BOOKSY',fields=document.querySelectorAll('#r3cEditFields input,#r3cEditFields select,#r3cEditFields textarea');fields.forEach(function(field){field.disabled=booksy;});document.getElementById('r3cSalon').disabled=true;
-    document.getElementById('r3cBooksyNote').classList.toggle('show',booksy);document.getElementById('r3cSaveVisit').style.display=booksy?'none':'';document.getElementById('r3cCancelVisit').style.display=booksy?'none':'';document.getElementById('r3dOpenSettlement').disabled=visit.settlementStatus==='ROZLICZONA';document.getElementById('r3dOpenSettlement').textContent=visit.settlementStatus==='ROZLICZONA'?'Wizyta rozliczona':'Rozlicz wizytę';document.getElementById('r3cEditModal').classList.add('open');
+    var fields=document.querySelectorAll('#r3cEditFields input,#r3cEditFields select,#r3cEditFields textarea');fields.forEach(function(field){field.disabled=false;});document.getElementById('r3cSalon').disabled=true;
+    document.getElementById('r3cBooksyNote').classList.remove('show');document.getElementById('r3cSaveVisit').style.display='';document.getElementById('r3cCancelVisit').style.display='';document.getElementById('r3dOpenSettlement').disabled=visit.settlementStatus==='ROZLICZONA';document.getElementById('r3dOpenSettlement').textContent=visit.settlementStatus==='ROZLICZONA'?'Wizyta rozliczona':'Rozlicz wizytę';document.getElementById('r3cEditModal').classList.add('open');
   }
   function r3cSaveEdit(){
-    var visit=r3cVisit(r3c.editingSalon,r3c.editingId);if(!visit||visit.source==='BOOKSY')return;
+    var visit=r3cVisit(r3c.editingSalon,r3c.editingId);if(!visit)return;
     var client=document.getElementById('r3cClient').value.trim(),who=document.getElementById('r3cTherapist').value,start=document.getElementById('r3cStart').value,duration=+document.getElementById('r3cDuration').value,validation=r3cValidateMove(Object.assign({},visit,{duration:duration}),who,start,r3c.editingSalon);
     if(!client){toast('Podaj klienta');return;}if(!validation.ok){toast(validation.message);document.getElementById('r3cEditModal').classList.add('r3c-invalid');setTimeout(function(){document.getElementById('r3cEditModal').classList.remove('r3c-invalid');},320);return;}
     var bookingId=visit.booking_id,categoryId=document.getElementById('r3cCategory').value,serviceId=document.getElementById('r3cService').value,service=r2OfferService(categoryId,serviceId),price=parseInt(document.getElementById('r3cPrice').value,10)||0;
