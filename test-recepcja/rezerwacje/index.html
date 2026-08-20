@@ -467,13 +467,9 @@ $('#qclr').onclick=()=>{$('#q').value='';S.q='';generujListe();$('#q').focus()};
 
 /* ---------- godziny ---------- */
 function ziarno(t){let h=0;for(let i=0;i<t.length;i++)h=(h*31+t.charCodeAt(i))>>>0;return h}
-/* Godziny w zakresie pracy salonu 12:00-22:00 — te same, po ktorych chodzi grafik w panelu. */
-const PULA=['12:00','12:45','13:30','14:15','15:00','16:30','17:15','18:00','19:00','19:45','20:30'];
-function wolneGodziny(){
-  const z=ziarno(S.data+S.salon+(S.min||60));
-  const w=PULA.filter((_,i)=>((z>>i)&1)===1).slice(0,6);
-  return {lista:w.length?w:PULA.slice(0,6),z};
-}
+/* Wolne terminy do klikniecia: co 30 min w godzinach pracy 12:00–22:30. */
+const SLOTY=['12:00','12:30','13:00','13:30','14:00','14:30','15:00','15:30','16:00','16:30',
+             '17:00','17:30','18:00','18:30','19:00','19:30','20:00','20:30','21:00','21:30','22:00','22:30'];
 /* Zespół dnia: bierzemy z tego samego localStorage co panel („kto dziś pracuje”),
    dzięki temu na ZW jest Kai jeśli ją dodałeś. Gdy brak zapisu — pełna lista salonu. */
 function terapeutkiSalonu(){
@@ -486,14 +482,32 @@ function terapeutkiSalonu(){
   }catch(e){}
   return TERAPEUTKI[S.salon];
 }
+/* Guziki z wolnymi terminami: godzina + masażystka (rotacja po dzisiejszym zespole). */
+function slotyHTML(){
+  var team=terapeutkiSalonu();
+  return '<div class="slots">'+SLOTY.map(function(g,i){
+    var kto=team[i%team.length];
+    var sel=(S.godzina===g&&S.terapeutka===kto)?' sel':'';
+    return '<div class="slot'+sel+'" data-g="'+g+'" data-kto="'+kto+'"><div class="tick">✓</div><div class="h">'+g+'</div><div class="t">'+kto+'</div></div>';
+  }).join('')+'</div>';
+}
+function wpiszSloty(box){
+  box.querySelectorAll('.slot').forEach(function(d){
+    d.onclick=function(){
+      S.godzina=d.dataset.g; S.terapeutka=d.dataset.kto; odswiez();
+      box.querySelectorAll('.slot').forEach(function(x){x.classList.toggle('sel', x.dataset.g===S.godzina && x.dataset.kto===S.terapeutka);});
+    };
+  });
+}
+/* Pole rezerwowe na nietypowa godzine (np. 15:45) — opcjonalne. */
 function godzinySelect(id){
   var lista=terapeutkiSalonu();
   var opcje='<option value="">— wybierz —</option>'+lista.map(function(n){
     return '<option value="'+n+'"'+(S.terapeutka===n?' selected':'')+'>'+n+'</option>';}).join('');
-  return '<div class="row" style="gap:16px;flex-wrap:wrap;align-items:flex-end">'
-    +'<div><label class="lbl">Godzina</label><br><input type="time" step="300" id="'+id+'godz" value="'+(S.godzina||'')+'" style="padding:10px 12px;border-radius:10px;font-size:15px"></div>'
-    +'<div><label class="lbl">Masażystka · '+salonNazwa(S.salon)+'</label><br><select id="'+id+'ter" style="padding:11px 12px;border-radius:10px;font-size:15px;min-width:190px">'+opcje+'</select></div>'
-    +'</div><div class="pusto" style="margin-top:8px">Wpisz dowolną godzinę i wybierz osobę z dzisiejszego zespołu.</div>';
+  return '<div class="row" style="gap:16px;flex-wrap:wrap;align-items:flex-end;margin-top:10px">'
+    +'<div><label class="lbl">Inna godzina</label><br><input type="time" step="300" id="'+id+'godz" value="'+(S.godzina||'')+'" style="padding:10px 12px;border-radius:10px;font-size:15px"></div>'
+    +'<div><label class="lbl">Masażystka</label><br><select id="'+id+'ter" style="padding:11px 12px;border-radius:10px;font-size:15px;min-width:170px">'+opcje+'</select></div>'
+    +'</div>';
 }
 function wpiszTermin(id){
   var g=$('#'+id+'godz'),tr=$('#'+id+'ter');
@@ -504,8 +518,10 @@ function generujGodziny(){
   const box=$('#godziny');if(!box)return;
   if(!S.data){box.innerHTML='<div class="pusto">Najpierw wybierz datę.</div>';return}
   box.style.display='block';
-  box.innerHTML=godzinySelect('g1');
-  wpiszTermin('g1');
+  box.innerHTML=slotyHTML()
+    +'<div class="pusto" style="margin-top:10px">Kliknij termin — godzina i masażystka wskoczą same. (Nietypowa godzina? Wpisz poniżej.)</div>'
+    +godzinySelect('g1');
+  wpiszSloty(box); wpiszTermin('g1');
 }
 
 /* ---------- akordeon ---------- */
@@ -646,11 +662,13 @@ function rysujKrok(){
     przerysuj();
   }
   else if(S.krok===3){
-    st.innerHTML='<h3>3. Godzina rezerwacji</h3><p class="lead">Wpisz godzinę i wybierz masażystkę z dzisiejszego zespołu.</p>'+
+    st.innerHTML='<h3>3. Godzina rezerwacji</h3><p class="lead">Kliknij wolny termin — godzina i masażystka wskoczą same.</p>'+
       '<div class="row"><div><label class="lbl">Data</label><br><input type="date" id="k3data" value="'+S.data+'" style="padding:10px 12px;border-radius:10px"></div></div>'+
-      '<div id="k3sloty" style="margin-top:8px">'+godzinySelect('g3')+'</div><div class="grow"></div>'+nawigacja(true,gotowe('s3'));
+      '<div id="k3sloty" style="margin-top:8px">'+slotyHTML()+
+      '<div class="pusto" style="margin-top:10px">Nietypowa godzina? Wpisz poniżej.</div>'+godzinySelect('g3')+
+      '</div><div class="grow"></div>'+nawigacja(true,gotowe('s3'));
     $('#k3data').addEventListener('change',e=>{$('#data').value=e.target.value;$('#data').dispatchEvent(new Event('change'));rysujKrok()});
-    wpiszTermin('g3');
+    wpiszSloty($('#k3sloty')); wpiszTermin('g3');
   }
   else if(S.krok===4){
     const os='<svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.5"/><path d="M5 21c0-4 3-6 7-6s7 2 7 6"/></svg>';
