@@ -220,7 +220,7 @@ button,input,select{font:inherit}button{cursor:pointer}
         <p>Jeden widok bonu, jego wartości i całego kontekstu rezerwacji.</p>
       </div>
       <div style="display:flex;gap:9px;align-items:center;flex-wrap:wrap;justify-content:flex-end">
-        <button class="ghost" id="openCustomerFlow">Kalendarz klienta · demo →</button>
+        <button class="ghost" id="openCustomerFlow">Kalendarz klienta →</button>
         <span class="badge">◉ Widok lokalny · read only</span>
       </div>
     </div>
@@ -399,7 +399,7 @@ function kartaHTML(v){
       '<div class="blok"><div class="label">Relacja z rezerwacją</div>'+
         (b
           ? '<h3>● '+esc(b.status)+'</h3><p>'+esc(b.date)+' · '+esc(b.start)+'–'+esc(b.end)+' · '+esc(b.therapist)+'</p><div class="bid">'+esc(b.id)+'</div><button class="akcja" data-open-booking="'+esc(b.id)+'">Otwórz rezerwację →</button>'
-          : '<h3>○ Brak aktywnej rezerwacji</h3><p>Bon nie ma relacji Nr Bonu + BOOKING_ID w REZERWACJE.</p>')+
+          : '<h3>○ '+(v.bookingIssue?'Sprawdź powiązanie':'Brak aktywnej rezerwacji')+'</h3><p>'+esc(v.bookingIssue||'Bon nie ma relacji Nr Bonu + BOOKING_ID w REZERWACJE.')+'</p>')+
         '<div class="oś" style="margin-top:11px">'+
           '<div><i></i><span><b>Źródło:</b> '+esc(v.channel)+'</span></div>'+
           '<div><i></i><span><b>Status:</b> '+esc(v.status)+'</span></div>'+
@@ -444,7 +444,7 @@ function renderPartners(){
     box.appendChild(d);
   });
 }
-function openBooking(v){const b=v.booking,q=new URLSearchParams({booking:b.id,salon:v.salon,date:b.date,start:b.start,end:b.end,therapist:b.therapist,client:v.client});location.href='../#'+q.toString()}
+function openBooking(v){const b=v.booking,q=new URLSearchParams({booking:b.id,salon:b.salon||v.salon,date:b.date,start:b.start,end:b.end,therapist:b.therapist,client:b.client||v.client});location.href='../#'+q.toString()}
 function openReleaseFromVoucher(v){const q=new URLSearchParams({mode:'release',voucher:v.n,salon:v.salon});location.href='../#'+q.toString()}
 
 let toastTimer;function toast(msg){const t=$('#toast');t.textContent=msg;t.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove('show'),3600)}
@@ -497,10 +497,10 @@ function asteraVoucherStatus(status){
 function asteraApplyVouchers(list){
   VOUCHERS=(list||[]).map(function(v){var w=(v.finalValue!=null?v.finalValue:v.value);
     return {n:v.n,salon:v.salon,status:asteraVoucherStatus(v.status),statusRaw:v.statusRaw,kind:v.kind,minutes:v.minutes,value:w,
-            client:'—',buyer:v.buyer||'',buyerPhone:v.buyerPhone||'',buyerEmail:v.buyerEmail||'',buyerNote:v.buyerNote||'',email:v.email||'',customerEmail:v.customerEmail||'',customerPhone:v.customerPhone||'',
+            client:v.booking&&v.booking.client||'—',buyer:v.buyer||'',buyerPhone:v.buyerPhone||'',buyerEmail:v.buyerEmail||'',buyerNote:v.buyerNote||'',email:v.email||'',customerEmail:v.customerEmail||'',customerPhone:v.customerPhone||'',
             notes:v.notes||'',sheetFields:Array.isArray(v.sheetFields)?v.sheetFields:[],
             channel:v.channel,category:v.category,issueDate:v.issueDate,discount:v.discount,
-            validUntil:v.validTo||v.validUntil,booking:null};});
+            validUntil:v.validTo||v.validUntil,booking:v.booking||null,bookingIssue:v.bookingIssue||''};});
   window.__ASTERA_BONY_UI_R4__.dataSource='PROD';
   state.otwarty=null;renderMetrics();renderList();
 }

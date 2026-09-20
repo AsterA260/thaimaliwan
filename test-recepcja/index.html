@@ -1363,7 +1363,7 @@ addEventListener('pointerup',function(){if(!drag)return;drag=false;vel=Math.max(
   function r3cCloseEdit(){if(r21Busy)return;document.getElementById('r3cEditModal').classList.remove('open');r3c.editingId='';r3c.editingSalon='';}
   function r3cOpenEdit(visit,salon){
     r3c.editingId=visit.id;r3c.editingSalon=salon;
-    document.getElementById('r3cSource').textContent=visit.source;document.getElementById('r3cBookingId').textContent=visit.booking_id;document.getElementById('r3dSettlementState').textContent=visit.settlementStatus||'NIEROZLICZONA';document.getElementById('r3dVoucherState').textContent=visit.voucherStatus||'—';document.getElementById('r3dVoucherChip').style.display=r3dIsVoucher(visit)?'':'none';
+    document.getElementById('r3cSource').textContent=visit.source;document.getElementById('r3cBookingId').textContent=visit.booking_id;document.getElementById('r3dSettlementState').textContent=visit.settlementStatus||'NIEROZLICZONA';document.getElementById('r3dVoucherState').textContent=visit.voucherNumber||visit.voucherStatus||'—';document.getElementById('r3dVoucherChip').style.display=r3dIsVoucher(visit)?'':'none';
     document.getElementById('r3cClient').value=visit.client;document.getElementById('r3cPhone').value=visit.phone||'';document.getElementById('r3cSalon').value=salon;document.getElementById('r3cDate').value=visit.date||'2026-08-14';document.getElementById('r3cStart').value=visit.t;
     r3cSetOptions(document.getElementById('r3cTherapist'),DATA[salon].team.map(function(person){return {value:person[0],label:person[0]+(person[2]===false?' · nie pracuje':'')};}),visit.who);
     var partner=r1BookingGroup(visit,salon).find(function(v){return v.id!==visit.id;});
@@ -1377,7 +1377,8 @@ addEventListener('pointerup',function(){if(!drag)return;drag=false;vel=Math.max(
       fields.forEach(function(field){field.disabled=!canEdit;});document.getElementById('r3cSalon').disabled=true;document.getElementById('r3cHeart').disabled=true;document.getElementById('r3cStatus').disabled=true;
       document.getElementById('r3dOpenSettlement').disabled=true;
       document.getElementById('r3dOpenSettlement').textContent='Rozliczenia — w przygotowaniu';
-      if(!visit.serviceId){r3cSetOptions(document.getElementById('r3cService'),[{value:'unknown',label:visit.service}],'unknown');r3cSetOptions(document.getElementById('r3cDuration'),[{value:visit.duration,label:visit.duration+' min'}],visit.duration);document.getElementById('r3cPrice').value=visit.price+' zł';}
+      if(r3dIsVoucher(visit)){r3cSetOptions(document.getElementById('r3cService'),[{value:visit.serviceId||'voucher',label:visit.service}],visit.serviceId||'voucher');r3cSetOptions(document.getElementById('r3cDuration'),[{value:visit.duration,label:visit.duration+' min · do zapłaty '+visit.price+' zł'}],visit.duration);document.getElementById('r3cPrice').value=visit.price+' zł';}
+      else if(!visit.serviceId){r3cSetOptions(document.getElementById('r3cService'),[{value:'unknown',label:visit.service}],'unknown');r3cSetOptions(document.getElementById('r3cDuration'),[{value:visit.duration,label:visit.duration+' min'}],visit.duration);document.getElementById('r3cPrice').value=visit.price+' zł';}
     }
     document.getElementById('r21WriteMode').textContent=R1_PROD?(canEdit?'Zapis do bazy':'Podgląd danych z bazy'):'Tryb demonstracyjny';
     document.getElementById('r3cSaveVisit').textContent=R1_PROD?'Zapisz w bazie':'Zapisz lokalnie';document.getElementById('r3cSaveVisit').style.display=canEdit?'':'none';document.getElementById('r3cCancelVisit').style.display=canCancel?'':'none';
@@ -1812,14 +1813,15 @@ addEventListener('pointerup',function(){if(!drag)return;drag=false;vel=Math.max(
     return String(e.value||'').trim();
   }
   function dataPL(iso){var m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(iso||'');return m?m[3]+'.'+m[2]+'.'+m[1]:(iso||'')}
+  function safe(text){return String(text).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
   var sep='<span class="sep">•</span>';
   function odswiez(){
     var kto=val('r3cClient')||'Klient bez danych', tel=val('r3cPhone');
     var linia=[val('r3cSalon'),val('r3cService'),val('r3cDuration'),
                dataPL(val('r3cDate')),val('r3cStart'),val('r3cTherapist')].filter(Boolean);
-    var h='<span class="who">'+kto+'</span>';
-    if(tel)h+=sep+'<span class="what">'+tel+'</span>';
-    if(linia.length)h+='<span class="what" style="flex-basis:100%">'+linia.join(' '+sep+' ')+'</span>';
+    var h='<span class="who">'+safe(kto)+'</span>';
+    if(tel)h+=sep+'<span class="what">'+safe(tel)+'</span>';
+    if(linia.length)h+='<span class="what" style="flex-basis:100%">'+linia.map(safe).join(' '+sep+' ')+'</span>';
     if(box.innerHTML!==h)box.innerHTML=h;
   }
   modal.addEventListener('input',odswiez);
