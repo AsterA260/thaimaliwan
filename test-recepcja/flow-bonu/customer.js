@@ -37,7 +37,7 @@
     const signature=JSON.stringify([state.number,state.salon,state.slot.id,name,phone]);if(!state.request||state.request.signature!==signature)state.request={id:'CUSTOMER-'+crypto.randomUUID(),signature};
     busy(true);notice('Zapisuję wizytę…');
     try{const r=await api({operation:'reserve',number:state.number,salon:state.salon,slot_id:state.slot.id,request_id:state.request.id,name,phone,...bounds()});
-      if(!r.ok){notice(r.uncertain?'Nie otrzymano potwierdzenia. Kliknij ponownie „Potwierdź rezerwację”, zachowując te same dane — system sprawdzi poprzednią próbę.':messages[r.error]||'Nie udało się zapisać wizyty. Sprawdź bon ponownie.');return;}
+      if(!r.ok){notice(messages[r.error]||(r.uncertain?'Nie otrzymano potwierdzenia. Kliknij ponownie „Potwierdź rezerwację”, zachowując te same dane — system sprawdzi poprzednią próbę.':'Nie udało się zapisać wizyty. Sprawdź bon ponownie.'));return;}
       if(r.status!=='CONFIRMED'||!r.booking_id)throw Error('NO_CONFIRMATION');
       state.booking=r;$('#customerDetails').classList.add('hidden');$('#slotChoices').classList.add('hidden');$('#voucherResult').classList.add('hidden');$('#customerState').textContent='Wizyta została zapisana.';
       $('#bookingConfirmation').className='booking-card';$('#bookingConfirmation').innerHTML='<strong>Rezerwacja potwierdzona ✓</strong><p>'+esc(r.date)+' · '+esc(r.start)+'–'+esc(r.end)+'</p><p>Do zapłaty: 0 zł — opłacono bonem.</p><p>Numer rezerwacji: '+esc(r.booking_id)+'</p><button class="outline" id="cancelBooking">Odwołaj wizytę</button>';
