@@ -1069,6 +1069,7 @@ addEventListener('pointerup',function(){if(!drag)return;drag=false;vel=Math.max(
     if(salon!=='ZW'&&salon!=='SZ')return;
     state.releaseContext=null;state.bookingContext={id:id,salon:salon,date:date||'data DEMO',start:start||'—',end:end||'—',therapist:therapist||'—',client:client||'Klient demo'};
     state.salon=salon;
+    if(/^\d{4}-\d{2}-\d{2}$/.test(date||'')){state.date=date;var bookingDate=r1ParseIso(date);state.calY=bookingDate.y;state.calM=bookingDate.m;}
     document.querySelectorAll('[data-salon-picker] button').forEach(function(btn){btn.classList.toggle('active',btn.dataset.salon===salon);});
     document.querySelectorAll('[data-salon-label]').forEach(function(el){el.textContent='Salon '+salon;});
     showScreen('calendar');
