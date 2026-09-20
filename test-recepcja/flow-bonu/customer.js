@@ -48,6 +48,7 @@
     try{const payload={operation:'cancel',number:state.number,salon:state.salon,booking_id:state.booking.booking_id};let r=await api(payload);
       if(r.error==='POZNE_ODWOLANIE'){if(!confirm('Do wizyty zostało mniej niż 24 godziny. Odwołanie oznacza utratę bonu. Czy odwołać?'))return;r=await api({...payload,accept_forfeit:'1'});}
       if(!r.ok){notice('Nie otrzymano potwierdzenia odwołania. Spróbuj ponownie lub skontaktuj się z recepcją.');return;}
+      $('#customerState').textContent='Wizyta została odwołana.';
       $('#bookingConfirmation').textContent=r.forfeited?'Wizyta odwołana po terminie. Bon zostanie zużyty po planowanym końcu wizyty.':'Wizyta odwołana. Bon pozostaje dostępny do ponownej rezerwacji.';state.booking=null;
     }catch(e){notice('Nie udało się potwierdzić odwołania. Spróbuj ponownie.');}finally{busy(false);}
   }
