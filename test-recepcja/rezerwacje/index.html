@@ -798,7 +798,7 @@ async function zapiszNaSerwer(){
   var payload={
     salon:S.salon, data:S.data, start:S.godzina,
     imie:n.imie, nazwisko:n.nazwisko, telefon:S.tel||'',
-    masaz:S.usluga||'', czas:String(S.min||60),
+    masaz:S.usluga||'', czas:String(S.min||60),expected_price:String(S.cena),
     terapeuta:S.terapeutka, category:S.bucket,
     uwagi:'Panel AsterA - rezerwacja reczna'
   };
@@ -858,6 +858,8 @@ async function zarezerwuj(){
            :(w&&w.error==='TERMIN_ZAJETY')?'Ten termin został już zajęty. Odśwież grafik i wybierz inny.'
            :(w&&w.error==='NIEPELNY_GRAFIK')?'W arkuszu brakuje danych potrzebnych do sprawdzenia wolnego terminu.'
            :(w&&w.error==='ZAJETE_SPROBUJ_PONOWNIE')?'Trwa inny zapis. Spróbuj ponownie za chwilę.'
+           :(w&&w.error==='CENA_NIEZGODNA_Z_ARKUSZEM')?'Cena w formularzu różni się od cennika w arkuszu. Recepcja musi wyjaśnić różnicę przed zapisem.'
+           :(w&&w.error==='BRAK_USLUGI_W_CENNIKU')?'Nie znaleziono jednoznacznej usługi i czasu w cenniku arkusza. Recepcja musi sprawdzić tę pozycję.'
            :(w&&w.uncertain)?'Brak potwierdzenia z serwera. Zapis mógł się wykonać — sprawdź arkusz.'
            :(w&&w.error)?String(w.error):'Brak odpowiedzi z serwera.';
   toast('<b>'+(w&&w.uncertain?'Brak potwierdzenia zapisu w arkuszu.':'NIE zapisano w arkuszu.')+'</b><br>'+opis+
