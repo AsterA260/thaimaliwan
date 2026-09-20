@@ -401,7 +401,7 @@ body> :not(.ui-r1){display:none!important}
 
   <footer class="r1-footer"><span>Thai Maliwan · wersja testowa</span><span>Rezerwacje ręczne · zapis po połączeniu z bazą</span><span id="r21ConnectionState">Tryb demonstracyjny</span></footer>
 
-  <div class="r1-modal-shell" id="r1SlotsModal" role="dialog" aria-modal="true"><div class="r1-modal r1-slots-modal"><div class="r1-modal-head"><h3>Udostępnij terminy klientom</h3><button class="r1-close" data-close-modal>×</button></div><p class="r1-modal-sub" id="r1SlotsIntro">To jest tryb edycji tego samego Grafiku. Wybierz wolną godzinę przy masażystce: od razu pojawi się w głównej siatce jako udostępniona. W tej demonstracji dane pozostają lokalne.</p><div class="r1-slot-list" id="r1SlotList"></div></div></div>
+  <div class="r1-modal-shell" id="r1SlotsModal" role="dialog" aria-modal="true"><div class="r1-modal r1-slots-modal"><div class="r1-modal-head"><h3>Udostępnij terminy klientom</h3><button class="r1-close" data-close-modal>×</button></div><p class="r1-modal-sub" id="r1SlotsIntro">To jest tryb edycji tego samego Grafiku. Wybierz wolną godzinę przy masażystce: od razu pojawi się w głównej siatce jako udostępniona. W tej demonstracji dane pozostają lokalne.</p><label class="r1-modal-sub">Długość udostępnionego terminu <select id="r22ReleaseMinutes" style="background:#17130e;color:#e8d6ad;border:1px solid #765e31;border-radius:8px;padding:8px"><option value="60">60 min</option><option value="90">90 min</option><option value="120">120 min</option><option value="150">150 min</option><option value="180">180 min</option></select></label><div class="r1-slot-list" id="r1SlotList"></div></div></div>
   <div class="r1-modal-shell" id="r1AvailabilityModal" role="dialog" aria-modal="true" aria-label="Wolne terminy"><div class="r1-modal r1-slots-modal"><div class="r1-modal-head"><h3>Wolne terminy</h3><button class="r1-close" data-close-modal>×</button></div><p class="r1-modal-sub" id="r1AvailabilityIntro">Wybierz wolne okienko, aby rozpocząć rezerwację ręczną. Data, godzina i masażystka zostaną podstawione.</p><div class="r1-slot-list" id="r1AvailabilityList"></div></div></div>
   <div class="r1-modal-shell" id="r1TeamModal" role="dialog" aria-modal="true"><div class="r1-modal"><div class="r1-modal-head"><h3>Dzisiejszy zespół</h3><button class="r1-close" data-close-modal>×</button></div><p class="r1-modal-sub">Prosty podgląd i lokalna edycja składu dnia. Zmiany pozostają tylko w demonstracji.</p><div class="r1-check-list" id="r1TeamChecks"></div><div class="r1-team-transfer" id="r1TeamTransfer"></div></div></div>
 
@@ -942,10 +942,10 @@ addEventListener('pointerup',function(){if(!drag)return;drag=false;vel=Math.max(
               source:b.source,date:b.date,t:b.start,end:b.end,who:kto,
               client:b.client||'(bez nazwiska)',phone:b.phone||'',
               categoryId:offer?offer.categoryId:'',serviceId:offer?offer.serviceId:'',service:b.service||'—',
-              serverVersion:b.version||'',serverWritable:b.editable===true,booking_type:b.booking_type||'',voucherNumber:b.voucherNo||'',cancelledAt:b.cancelled_at||'',
+              serverVersion:b.version||'',serverWritable:b.editable===true,serverReleasable:b.releasable===true,booking_type:b.booking_type||'',voucherNumber:b.voucherNo||'',cancelledAt:b.cancelled_at||'',
               duration:b.minutes||60,price:r1Kwota(b.price),
               bookToTherapist:false,note:b.note||'',
-              status:cancelled?'ODWOŁANA':(st==='ZREALIZOWANA'?'ZREALIZOWANA':'REZERWACJA'),
+              status:cancelled?'ODWOŁANA':(st==='BLOKADA'?'BLOKADA':(st==='ZREALIZOWANA'?'ZREALIZOWANA':'REZERWACJA')),
               settlementStatus:b.payment?'ROZLICZONA':'NIEROZLICZONA',paymentMethod:b.payment||'',
               terapeutki:b.therapist||'', para:para
             });
@@ -1332,7 +1332,7 @@ addEventListener('pointerup',function(){if(!drag)return;drag=false;vel=Math.max(
       var response=await fetch(R1_API,{method:'POST',body:q,signal:controller.signal}),result=await response.json();
       if(!result||typeof result.ok!=='boolean')return {ok:false,uncertain:true};
       if(result.ok){
-        if(result.booking_id!==payload.booking_id||result.request_id!==request||result.operation!==payload.operation)return {ok:false,uncertain:true};
+        if((payload.operation==='release'?!new RegExp('^AST-'+payload.salon+'-[A-Za-z0-9-]+$').test(result.booking_id||''):result.booking_id!==payload.booking_id)||result.request_id!==request||result.operation!==payload.operation)return {ok:false,uncertain:true};
         try{sessionStorage.removeItem('astera.change.pending');}catch(e){}
       }
       return result;
@@ -1441,8 +1441,8 @@ addEventListener('pointerup',function(){if(!drag)return;drag=false;vel=Math.max(
     d.visits.filter(function(v){return v.status!=='ODWOŁANA'&&v.date===state.date;}).forEach(function(v){
       var idx=kol.findIndex(function(t){return t[0]===v.who;});if(idx<0)return;
       if(v.status==='BLOKADA'&&v.booking_type==='VOUCHER'){
-        var release=document.createElement('div');release.className='r1-release-slot';release.style.gridColumn=String(idx+2);release.style.gridRow=quarterRow(v.t)+'/span '+Math.max(2,Math.round((min(v.end)-min(v.t))/15));release.innerHTML='<b>'+r2Esc(v.t)+' – '+r2Esc(v.end)+'</b><strong>Termin udostępniony</strong><span>Widoczny dla klienta</span><button type="button" aria-label="Cofnij udostępniony termin">× Cofnij</button>';
-        release.querySelector('button').addEventListener('click',function(event){event.stopPropagation();if(!confirm('Wycofać ten udostępniony termin? Klient przestanie go widzieć.'))return;v.status='ODWOŁANA';renderAll();toast('Termin wycofany z dostępności klienta · DEMO bez zapisu');});el.appendChild(release);return;
+        var release=document.createElement('div');release.className='r1-release-slot';release.style.gridColumn=String(idx+2);release.style.gridRow=quarterRow(v.t)+'/span '+Math.max(2,Math.round((min(v.end)-min(v.t))/15));release.innerHTML='<b>'+r2Esc(v.t)+' – '+r2Esc(v.end)+'</b><strong>Termin udostępniony</strong><span>Wydzielony dla bonów</span><button type="button" aria-label="Cofnij udostępniony termin">× Cofnij</button>';
+        release.querySelector('button').addEventListener('click',function(event){event.stopPropagation();r22Retract(v);});el.appendChild(release);return;
       }
       var a=document.createElement('div'),heart=v.bookToTherapist?'<i class="r1-book-heart" title="Klient wybrał konkretnie tę masażystkę" aria-label="Book do masażystki">♥</i>':'',payment=v.settlementStatus==='ROZLICZONA'?r3fPaymentIcon(v.paymentMethod||'inne'):'',icons=(heart||payment)?'<span class="r3f-card-icons">'+heart+payment+'</span>':'',settled=v.settlementStatus==='ROZLICZONA'?'<i class="r3d-payment-mark">ROZLICZONA</i>':'',voucherLabel=v.booking_type==='VOUCHER'?'<i class="r1-voucher-badge">BON</i>':'';
       a.className='r1-appointment'+((heart||payment)?' has-card-icons':'')+(v.bookToTherapist?' book-to-therapist':'')+(v.source==='BOOKSY'?' source-booksy':'')+(v.settlementStatus==='ROZLICZONA'?' r3d-settled':'')+(v.booking_type==='VOUCHER'?' r5-voucher-booking':'');a.setAttribute('data-book-to-therapist',v.bookToTherapist?'true':'false');a.setAttribute('data-visit-id',v.id);a.setAttribute('data-source',v.source);a.setAttribute('data-booking-id',v.booking_id);a.setAttribute('data-settlement-status',v.settlementStatus||'NIEROZLICZONA');a.setAttribute('data-payment-method',v.paymentMethod||'');a.setAttribute('data-draggable',v.source==='BOOKSY'?'false':'true');a.setAttribute('role','button');a.setAttribute('tabindex','0');a.setAttribute('aria-label','Edytuj wizytę '+v.client);a.title=v.source==='BOOKSY'?'Kliknij, aby podejrzeć rezerwację Booksy':'Kliknij, aby edytować · przeciągnij, aby przenieść';a.style.gridColumn=String(idx+2);a.style.gridRow=quarterRow(v.t)+'/span '+Math.max(2,Math.round((min(v.end)-min(v.t))/15));a.innerHTML=icons+settled+'<b>'+r2Esc(v.t)+' – '+r2Esc(v.end)+'</b><strong>'+r2Esc(v.client)+'</strong><span>'+r2Esc(v.service)+'</span>'+voucherLabel;
@@ -1483,27 +1483,49 @@ addEventListener('pointerup',function(){if(!drag)return;drag=false;vel=Math.max(
   }
   function r1ReleasedSlot(data,therapist,start){return data.visits.some(function(v){return v.date===state.date&&v.status==='BLOKADA'&&v.booking_type==='VOUCHER'&&v.who===therapist&&v.t===start;});}
   function r1AddMinutes(start,minutes){var total=min(start)+minutes;return String(Math.floor(total/60)).padStart(2,'0')+':'+String(total%60).padStart(2,'0');}
+  function r22ReleaseMinutes(){return Number(document.getElementById('r22ReleaseMinutes').value)||60;}
+  async function r22SaveRelease(payload){
+    if(r21Busy)return;
+    r21Busy=true;toast('Zapisywanie terminu…');
+    try{
+      var result=await r21SendChange(payload);
+      if(!result.ok){toast(r2Esc(r21Error(result)));return;}
+      R1_READ_INCOMPLETE=true;r1SaveAvailability();
+      var loaded=await r1WczytajRezerwacje(true);
+      toast(loaded?(payload.operation==='release'?'Termin zapisany w bazie jako dostępny dla bonów.':'Wycofanie zapisane w bazie. Termin jest zwolniony.'):'Zapis potwierdzony. Odśwież grafik — odczyt nie powiódł się.');
+    }finally{r21Busy=false;}
+  }
   function r1ReleaseSlot(therapist,start){
-    var data=DATA[state.salon];
+    var data=DATA[state.salon],duration=r22ReleaseMinutes();
     if(r1ReleasedSlot(data,therapist,start)){toast('Ten termin jest już udostępniony.');return;}
-    var validation=r3cValidateMove({date:state.date,duration:60},therapist,start,state.salon);
+    if(R1_PROD&&(R1_READ_INCOMPLETE||R1_LOCAL_DIRTY||Date.now()-R1_READ_AT>300000)){toast('Odśwież grafik przed udostępnieniem terminu.');return;}
+    var validation=r3cValidateMove({date:state.date,duration:duration},therapist,start,state.salon);
     if(!validation.ok){toast(validation.message);return;}
-    if(!confirm('Udostępnić '+start+'–'+r1AddMinutes(start,60)+' przy '+therapist+' klientom?'))return;
-    data.visits.push({id:'DEMO_RELEASE_'+crypto.randomUUID(),source:'ASTERA',booking_type:'VOUCHER',date:state.date,t:start,end:r1AddMinutes(start,60),who:therapist,service:'Termin udostępniony klientowi',status:'BLOKADA',localOnly:true,demoOnly:!R1_PROD});
-    renderAll();toast('Termin udostępniony w głównym Grafiku · DEMO bez zapisu');
+    if(!confirm('Udostępnić '+start+'–'+r1AddMinutes(start,duration)+' przy '+therapist+' klientom z bonem?'))return;
+    if(R1_PROD){return r22SaveRelease({operation:'release',salon:state.salon,data:state.date,start:start,czas:String(duration),terapeuta:therapist});}
+    data.visits.push({id:'DEMO_RELEASE_'+crypto.randomUUID(),source:'ASTERA',booking_type:'VOUCHER',date:state.date,t:start,end:r1AddMinutes(start,duration),duration:duration,who:therapist,service:'Termin dla bonu',status:'BLOKADA',localOnly:true,demoOnly:true});
+    renderAll();toast('Termin udostępniony · DEMO bez zapisu w bazie');
+  }
+  function r22Retract(visit){
+    if(R1_PROD&&!visit.serverReleasable){toast('Ten termin wymaga odświeżenia lub osobnej obsługi.');return;}
+    if(!confirm('Wycofać ten udostępniony termin?'))return;
+    if(R1_PROD)return r22SaveRelease({operation:'retract',salon:state.salon,booking_id:visit.booking_id,expected_version:visit.serverVersion});
+    visit.status='ODWOŁANA';renderAll();toast('Termin wycofany · DEMO bez zapisu w bazie');
   }
   function renderSlots(){
-    var el=document.getElementById('r1SlotList'),intro=document.getElementById('r1SlotsIntro'),data=DATA[state.salon];
-    intro.textContent=state.releaseContext?'Kontekst: bon '+state.releaseContext.voucher+'. Udostępniasz wspólny wolny termin w głównym Grafiku — zobaczą go klienci z ważnym bonem, nie tylko ten numer.':'To jest tryb edycji tego samego Grafiku. Wybierz wolną godzinę przy masażystce: od razu pojawi się w głównej siatce jako udostępniona. W tej demonstracji dane pozostają lokalne.';
+    var el=document.getElementById('r1SlotList'),intro=document.getElementById('r1SlotsIntro'),data=DATA[state.salon],duration=r22ReleaseMinutes();
+    intro.textContent=(state.releaseContext?'Kontekst: bon '+state.releaseContext.voucher+'. ':'')+'Wybierz długość i wolny termin jednej masażystki. Udostępnienie jest wspólne dla bonów i blokuje rezerwacje ręczne. '+(R1_PROD?'Zapis do bazy nastąpi po potwierdzeniu.':'DEMO — zapis tylko lokalny.');
     el.innerHTML='';
-    data.team.forEach(function(person){
-      var therapist=person[0],column=document.createElement('section'),head=document.createElement('div'),times=document.createElement('div'),own=data.slots.filter(function(s){return s[1]===therapist&&(r1ReleasedSlot(data,therapist,s[0])||r3cValidateMove({date:state.date,duration:60},therapist,s[0],state.salon).ok);});
+    data.team.filter(function(person){return person[2]!==false;}).forEach(function(person){
+      var therapist=person[0],column=document.createElement('section'),head=document.createElement('div'),times=document.createElement('div'),own=[];
+      for(var minute=720;minute+duration<=1380;minute+=30){var time=r3cTime(minute);if(r1ReleasedSlot(data,therapist,time)||r3cValidateMove({date:state.date,duration:duration},therapist,time,state.salon).ok)own.push(time);}
       column.className='r1-slot-column';head.className='r1-slot-person';times.className='r1-slot-times';head.innerHTML='<i>'+r2Esc(initials(therapist))+'</i><strong>'+r2Esc(therapist)+'</strong>';column.appendChild(head);
-      if(!own.length){times.innerHTML='<span class="r1-slot-empty">Brak wolnych godzin</span>';}
-      own.forEach(function(s){var already=r1ReleasedSlot(data,therapist,s[0]),b=document.createElement('button');b.className='r1-slot';b.disabled=already;b.innerHTML='<b>'+r2Esc(s[0])+'</b><span>'+(already?'już udostępniony':'udostępnij klientowi')+'</span>';b.onclick=function(){r1ReleaseSlot(therapist,s[0]);};times.appendChild(b);});
+      if(!own.length)times.innerHTML='<span class="r1-slot-empty">Brak wolnych godzin</span>';
+      own.forEach(function(start){var already=r1ReleasedSlot(data,therapist,start),button=document.createElement('button');button.className='r1-slot';button.disabled=already;button.innerHTML='<b>'+r2Esc(start)+'</b><span>'+(already?'już udostępniony':duration+' min · udostępnij')+'</span>';button.onclick=function(){r1ReleaseSlot(therapist,start);};times.appendChild(button);});
       column.appendChild(times);el.appendChild(column);
     });
   }
+  document.getElementById('r22ReleaseMinutes').addEventListener('change',renderSlots);
   function r1AvailableSlots(data){
     var result=[];
     data.team.forEach(function(member,therapistIndex){
