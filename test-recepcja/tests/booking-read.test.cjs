@@ -7,7 +7,7 @@ const ctx=vm.createContext({Date,Promise,console,encodeURIComponent,setTimeout:(
  DATA:{ZW:{visits:[]},SZ:{visits:[{id:'old',localOnly:true,demoOnly:false}]}},
  r1Iso:(y,m,d)=>new Date(y,m,d).toISOString().slice(0,10),r1WszystkieTerapeutki:s=>s?s.split(', '):[],r1Kwota:v=>v,
  r21MatchOffer:()=>({categoryId:'couples',serviceId:'couple-classic'}),
- document:{querySelectorAll:()=>[]},renderAll:()=>{},toast:()=>{},r1SaveAvailability:()=>availability++,
+ document:{querySelectorAll:()=>[],getElementById:()=>({})},renderAll:()=>{},toast:()=>{},r1SaveAvailability:()=>availability++,
  fetch:async()=>{if(fail)throw Error('network');return{json:async()=>response};}
 });vm.runInContext(source.slice(a,b),ctx);
 vm.runInContext(source.slice(source.indexOf('  function r3eCancelledVisits(){'),source.indexOf('  function r3eRenderCancelled()')),ctx);

@@ -399,7 +399,7 @@ body> :not(.ui-r1){display:none!important}
     </section>
   </main>
 
-  <footer class="r1-footer"><span>Thai Maliwan Internal · UI-R3F · tylko makieta</span><span>Backend zamrożony · zero POST / deploy</span><span>Stan lokalny <i class="ok"></i></span></footer>
+  <footer class="r1-footer"><span>Thai Maliwan · wersja testowa</span><span>Rezerwacje ręczne · zapis po połączeniu z bazą</span><span id="r21ConnectionState">Tryb demonstracyjny</span></footer>
 
   <div class="r1-modal-shell" id="r1SlotsModal" role="dialog" aria-modal="true"><div class="r1-modal r1-slots-modal"><div class="r1-modal-head"><h3>Udostępnij terminy klientom</h3><button class="r1-close" data-close-modal>×</button></div><p class="r1-modal-sub" id="r1SlotsIntro">To jest tryb edycji tego samego Grafiku. Wybierz wolną godzinę przy masażystce: od razu pojawi się w głównej siatce jako udostępniona. W tej demonstracji dane pozostają lokalne.</p><div class="r1-slot-list" id="r1SlotList"></div></div></div>
   <div class="r1-modal-shell" id="r1AvailabilityModal" role="dialog" aria-modal="true" aria-label="Wolne terminy"><div class="r1-modal r1-slots-modal"><div class="r1-modal-head"><h3>Wolne terminy</h3><button class="r1-close" data-close-modal>×</button></div><p class="r1-modal-sub" id="r1AvailabilityIntro">Wybierz wolne okienko, aby rozpocząć rezerwację ręczną. Data, godzina i masażystka zostaną podstawione.</p><div class="r1-slot-list" id="r1AvailabilityList"></div></div></div>
@@ -922,7 +922,7 @@ addEventListener('pointerup',function(){if(!drag)return;drag=false;vel=Math.max(
       .then(function(d){
         if(!d||d.ok!==true||!Array.isArray(d.bookings)){
           if(!ponowka)setTimeout(function(){r1WczytajRezerwacje(true)},4000);
-          R1_READ_INCOMPLETE=true;r1SaveAvailability();return false;
+          R1_READ_INCOMPLETE=true;r1SaveAvailability();document.getElementById('r21ConnectionState').textContent='Brak aktualnego odczytu';return false;
         }
         // Potwierdzony odczyt zastępuje lokalne makiety — nie blokują rzeczywistych terminów.
         ['ZW','SZ'].forEach(function(s){DATA[s].visits=[];});
@@ -952,6 +952,7 @@ addEventListener('pointerup',function(){if(!drag)return;drag=false;vel=Math.max(
           });
         });
         R1_LOCAL_DIRTY=false;R1_READ_INCOMPLETE=pominiete.length>0;R1_PROD=true;R1_READ_AT=Date.now();R1_READ_FROM=od;R1_READ_TO=doD;
+        document.getElementById('r21ConnectionState').textContent=R1_READ_INCOMPLETE?'Niepełny odczyt bazy':'Połączono z bazą';
         document.querySelectorAll('[data-salon-label]').forEach(function(el){});
         var znaczniki=document.querySelectorAll('.r1-board-date span, .r1-date-card span');
         znaczniki.forEach(function(el){
@@ -968,7 +969,7 @@ addEventListener('pointerup',function(){if(!drag)return;drag=false;vel=Math.max(
         }
         return true;
       })
-      .catch(function(){R1_READ_INCOMPLETE=true;r1SaveAvailability();if(!ponowka)setTimeout(function(){r1WczytajRezerwacje(true)},4000);return false;});
+      .catch(function(){R1_READ_INCOMPLETE=true;r1SaveAvailability();document.getElementById('r21ConnectionState').textContent='Brak aktualnego odczytu';if(!ponowka)setTimeout(function(){r1WczytajRezerwacje(true)},4000);return false;});
   }
 
   /* ═══ KŁÓDKA SALONU ══════════════════════════════════════════════════════
