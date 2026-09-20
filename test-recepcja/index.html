@@ -883,7 +883,7 @@ addEventListener('pointerup',function(){if(!drag)return;drag=false;vel=Math.max(
   }
 
   function r1Kwota(t){
-    var m=String(t||'').replace(/\s/g,'').replace(',','.').match(/(\d+(?:\.\d+)?)/);
+    var m=String(t==null?'':t).replace(/\s/g,'').replace(',','.').match(/(\d+(?:\.\d+)?)/);
     return m?Math.round(parseFloat(m[1])):null;
   }
   /* Arkusz pisze 'KAI', panel ma 'Kai' - porownanie musi ignorowac wielkosc liter
