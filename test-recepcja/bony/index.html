@@ -474,9 +474,14 @@ window.__ASTERA_BONY_UI_R4__={productionWrites:false,version:'UI-R4-BONY',relati
 
 /* ── most produkcyjny (read-only) ── */
 function asteraProdInfo(msg){try{toast(msg)}catch(e){}}
+function asteraVoucherStatus(status){
+  var text=String(status==null?'':status).trim();
+  // API zwraca również „Wazny”. Nie zmieniamy znaczenia innych statusów.
+  return text.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toUpperCase()==='WAZNY'?'Ważny':text;
+}
 function asteraApplyVouchers(list){
   VOUCHERS=(list||[]).map(function(v){var w=(v.finalValue!=null?v.finalValue:v.value);
-    return {n:v.n,salon:v.salon,status:v.status,statusRaw:v.statusRaw,kind:v.kind,minutes:v.minutes,value:w,
+    return {n:v.n,salon:v.salon,status:asteraVoucherStatus(v.status),statusRaw:v.statusRaw,kind:v.kind,minutes:v.minutes,value:w,
             client:'—',channel:v.channel,category:v.category,issueDate:v.issueDate,discount:v.discount,
             validUntil:v.validTo||v.validUntil,booking:null};});
   window.__ASTERA_BONY_UI_R4__.dataSource='PROD';
