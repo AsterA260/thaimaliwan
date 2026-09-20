@@ -332,7 +332,7 @@ mark{background:rgba(205,159,76,.24);color:var(--r1-gold2);border-radius:3px;pad
 
   <footer class="r1-footer">
     <span>Thai Maliwan Internal · UI-R3F · rezerwacja ręczna</span>
-    <span>Zapis do arkusza aktywny · REZERWACJE ZW / SZ</span>
+    <span id="zapisStatus">Sprawdzanie trybu zapisu…</span>
     <span>Stan lokalny <i class="ok"></i></span>
   </footer>
 
@@ -470,32 +470,54 @@ function ziarno(t){let h=0;for(let i=0;i<t.length;i++)h=(h*31+t.charCodeAt(i))>>
 /* Wolne terminy do klikniecia: co 30 min w godzinach pracy 12:00–22:30. */
 const SLOTY=['12:00','12:30','13:00','13:30','14:00','14:30','15:00','15:30','16:00','16:30',
              '17:00','17:30','18:00','18:30','19:00','19:30','20:00','20:30','21:00','21:30','22:00','22:30'];
-/* Zespół dnia: bierzemy z tego samego localStorage co panel („kto dziś pracuje”),
-   dzięki temu na ZW jest Kai jeśli ją dodałeś. Gdy brak zapisu — pełna lista salonu. */
-function terapeutkiSalonu(){
+/* Wspólny odczyt grafiku; brak danych nigdy nie oznacza wolnego terminu. */
+function odczytGrafiku(){
   try{
-    var z=JSON.parse(localStorage.getItem('astera.zespol')||'null');
-    if(z&&z[S.salon]&&z[S.salon].length){
-      var akt=z[S.salon].filter(function(t){return t&&t[2]!==false;}).map(function(t){return t[0];}).filter(Boolean);
-      if(akt.length)return akt;
-    }
-  }catch(e){}
-  return TERAPEUTKI[S.salon];
+    const pack=JSON.parse(localStorage.getItem('astera.dostepnosc')||'null');
+    if(!pack||!pack.salons||!pack.salons[S.salon])return {error:'Otwórz grafik w panelu, aby wczytać dostępność.'};
+    if(asteraToken()&&pack.source!=='arkusz')return {error:'Grafik nie został jeszcze wczytany z arkusza. Wróć do panelu.'};
+    if(pack.source==='arkusz'&&(pack.incomplete||Date.now()-pack.readAt>5*60*1000))return {error:'Odśwież grafik w panelu — odczyt jest niepełny albo ma ponad 5 minut.'};
+    if(S.data<pack.from||S.data>pack.to)return {error:'Wybrana data jest poza zakresem wczytanego grafiku. Wróć do panelu.'};
+    const salon=pack.salons[S.salon];
+    const rows=new Map(salon.visits.map(r=>[r.id,r]));
+    const local=JSON.parse(localStorage.getItem('astera.makietaRezerwacje')||'[]');
+    local.filter(r=>r.salon===S.salon&&(pack.source!=='arkusz'||!r.demoOnly)).forEach(r=>rows.set(r.id,r));
+    return {source:pack.source,team:salon.team.filter(t=>t[2]!==false).map(t=>t[0]),visits:[...rows.values()]};
+  }catch(e){return {error:'Nie udało się odczytać grafiku. Wróć do panelu i odśwież dane.'};}
 }
-/* Guziki z wolnymi terminami: godzina + masażystka (rotacja po dzisiejszym zespole). */
+function dwieTerapeutki(){return S.bucket==='couples'||/czteroręczny/i.test(S.usluga||'');}
+function wybraneTerapeutki(){return S.terapeutka.split(',').map(n=>n.trim()).filter(Boolean);}
+function terapeutkiSalonu(){return odczytGrafiku().team||[];}
+function html(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function konfliktWGrafiku(g,kto,grafik){
+  if(grafik.error||!grafik.team.includes(kto))return true;
+  const min=t=>{const p=String(t).split(':');return Number(p[0])*60+Number(p[1]);};
+  const start=min(g),stop=start+Number(S.min);
+  return grafik.visits.some(r=>r.date===S.data&&r.who===kto&&r.status!=='ODWOŁANA'&&start<min(r.end)&&stop>min(r.t));
+}
 function slotyHTML(){
-  var team=terapeutkiSalonu();
-  return '<div class="slots">'+SLOTY.map(function(g,i){
-    var kto=team[i%team.length];
-    var sel=(S.godzina===g&&S.terapeutka===kto)?' sel':'';
-    return '<div class="slot'+sel+'" data-g="'+g+'" data-kto="'+kto+'"><div class="tick">✓</div><div class="h">'+g+'</div><div class="t">'+kto+'</div></div>';
-  }).join('')+'</div>';
+  if(!S.data)return '<div class="pusto">Najpierw wybierz datę.</div>';
+  if(!S.usluga)return '<div class="pusto">Najpierw wybierz usługę.</div>';
+  const grafik=odczytGrafiku();
+  if(grafik.error)return '<div class="pusto">'+html(grafik.error)+'</div>';
+  const slots=[];
+  SLOTY.forEach(g=>{
+    if(!godzinaMiesciUsluge(g))return;
+    const wolne=grafik.team.filter(kto=>!konfliktWGrafiku(g,kto,grafik));
+    const wybor=dwieTerapeutki()?wolne.flatMap((a,i)=>wolne.slice(i+1).map(b=>a+', '+b)):wolne;
+    wybor.forEach(kto=>{
+      const sel=S.godzina===g&&S.terapeutka===kto?' sel':'';
+      slots.push('<div class="slot'+sel+'" data-g="'+g+'" data-kto="'+html(kto)+'"><div class="tick">✓</div><div class="h">'+g+'</div><div class="t">'+html(kto)+'</div></div>');
+    });
+  });
+  return '<div class="pusto">'+(grafik.source==='arkusz'?'Dostępność według ostatniego odczytu arkusza.':'TEST — dostępność z grafiku demonstracyjnego.')+'</div>'+
+    (slots.length?'<div class="slots">'+slots.join('')+'</div>':'<div class="pusto">Brak wolnego terminu dla wybranej usługi i zespołu.</div>');
 }
 function wpiszSloty(box){
   box.querySelectorAll('.slot').forEach(function(d){
     d.onclick=function(){
       S.godzina=d.dataset.g; S.terapeutka=d.dataset.kto; odswiez();
-      box.querySelectorAll('.slot').forEach(function(x){x.classList.toggle('sel', x.dataset.g===S.godzina && x.dataset.kto===S.terapeutka);});
+      $$('.slot').forEach(function(x){x.classList.toggle('sel', x.dataset.g===S.godzina && x.dataset.kto===S.terapeutka);});
     };
   });
 }
@@ -516,16 +538,26 @@ function wpiszTermin(id){
 }
 function generujGodziny(){
   const box=$('#godziny');if(!box)return;
+  if(S.usluga&&S.godzina&&(!godzinaMiesciUsluge(S.godzina)||lokalnyKonflikt(S.godzina,S.terapeutka))){S.godzina='';S.terapeutka='';}
   if(!S.data){box.innerHTML='<div class="pusto">Najpierw wybierz datę.</div>';return}
   box.style.display='block';
   box.innerHTML=slotyHTML()
-    +'<div class="pusto" style="margin-top:10px">Kliknij termin — godzina i masażystka wskoczą same. (Nietypowa godzina? Wpisz poniżej.)</div>'
-    +godzinySelect('g1');
-  wpiszSloty(box); wpiszTermin('g1');
+    +'<div class="pusto" style="margin-top:10px">Kliknij termin — godzina i masażystka wskoczą same.</div>';
+  wpiszSloty(box);
 }
 
 /* ---------- akordeon ---------- */
-function gotowe(id){return id==='s1'?!!(S.imie||S.tel):id==='s2'?!!S.usluga:id==='s3'?!!(S.godzina&&S.terapeutka):false}
+function godzinaMiesciUsluge(g){
+  if(!/^\d{2}:\d{2}$/.test(g||''))return false;
+  const [h,m]=g.split(':').map(Number),czas=Number(S.min);
+  return h<24&&m<60&&czas>0&&h*60+m>=720&&h*60+m+czas<=1380;
+}
+function lokalnyKonflikt(g,kto){
+  const osoby=String(kto||'').split(',').map(n=>n.trim()).filter(Boolean),grafik=odczytGrafiku();
+  return osoby.length!==(dwieTerapeutki()?2:1)||new Set(osoby).size!==osoby.length||osoby.some(n=>konfliktWGrafiku(g,n,grafik));
+}
+function gotowe(id){return id==='s1'?!!(S.imie||S.tel):id==='s2'?!!S.usluga:id==='s3'?!!(S.data&&S.godzina&&S.terapeutka&&godzinaMiesciUsluge(S.godzina)&&!lokalnyKonflikt(S.godzina,S.terapeutka)):false}
+function kompletnaRezerwacja(){return gotowe('s1')&&gotowe('s2')&&gotowe('s3')}
 function przejdzDalej(id){
   const k=['s1','s2','s3'],i=k.indexOf(id);
   document.getElementById(id).classList.remove('open');
@@ -550,7 +582,7 @@ function odswiez(){
     : '<span>wybierz termin</span>';
   $('#s3').classList.toggle('done',gotowe('s3'));
 
-  const ok=gotowe('s1')&&gotowe('s2')&&gotowe('s3');
+  const ok=kompletnaRezerwacja();
   $('#foot').innerHTML = ok
     ? ['<b>'+(S.imie||S.tel)+'</b>',salonNazwa(S.salon),S.usluga,S.min+' min',dataPL(S.data),'<b>'+S.godzina+'</b>',S.terapeutka,'<b>'+pln(S.cena)+'</b>'].join(sep())
     : '<span>brakuje: '+['s1','s2','s3'].filter(x=>!gotowe(x)).map(x=>({s1:'klient',s2:'usługa',s3:'termin'})[x]).join(', ')+'</span>';
@@ -558,7 +590,15 @@ function odswiez(){
 
   const k=KLIENCI[cyfry(S.tel)];
   $('#powtorzBtn').classList.toggle('hidden',!(k&&k.ostatnia));
-  if(S.tryb==='kroki')rysujKrok();
+  if(S.tryb==='kroki'){
+    const pole=document.activeElement;
+    if(S.krok===1&&pole&&(pole.id==='k1tel'||pole.id==='k1imie')){
+      // Podczas pisania zachowaj pole i kursor, zamiast odtwarzać cały krok.
+      if(pole.id==='k1tel')$('#k1imie').value=S.imie;
+      $('#k1hint').textContent=S.staly?'Rozpoznany stały klient.':'Nowy klient albo wpis bez danych.';
+      $('#stage2 .navrow .cta').disabled=!gotowe('s1');
+    }else rysujKrok();
+  }
 }
 function cyfry(t){return String(t||'').replace(/\D/g,'').replace(/^48/,'')}
 
@@ -577,7 +617,8 @@ $('#anonBtn').onclick=()=>{S.imie='Klient bez danych';S.tel='';S.staly=false;$('
 $('#powtorzBtn').onclick=e=>{
   e.stopPropagation();
   const k=KLIENCI[cyfry(S.tel)];if(!k||!k.ostatnia)return;
-  const o=k.ostatnia;S.bucket=o.bucket;S.salon=o.salon;S.usluga=o.nazwa;S.min=o.min;S.cena=o.cena;
+  const o=k.ostatnia;S.bucket=o.bucket;S.salon=blokadaSalonu||o.salon;S.usluga=o.nazwa;S.min=o.min;S.cena=o.cena;
+  S.godzina='';S.terapeutka='';
   $$('[data-bucket]').forEach(b=>b.classList.toggle('active',b.dataset.bucket===S.bucket));
   $$('[data-salon]').forEach(b=>b.classList.toggle('active',b.dataset.salon===S.salon));
   generujListe();generujGodziny();odswiez();
@@ -592,13 +633,21 @@ $$('[data-bucket]').forEach(b=>b.onclick=()=>{
   S.bucket=b.dataset.bucket;$$('[data-bucket]').forEach(x=>x.classList.toggle('active',x===b));generujListe();
 });
 $$('[data-salon]').forEach(b=>b.onclick=()=>{
+  if(blokadaSalonu&&b.dataset.salon!==blokadaSalonu)return;
   S.salon=b.dataset.salon;$$('[data-salon]').forEach(x=>x.classList.toggle('active',x===b));
   S.godzina='';S.terapeutka='';generujGodziny();odswiez();
 });
 
 /* ---------- data ---------- */
-const iso=new Date().toISOString().slice(0,10);
-$('#data').value=iso;S.data=iso;
+const dzis=new Date(),iso=[dzis.getFullYear(),String(dzis.getMonth()+1).padStart(2,'0'),String(dzis.getDate()).padStart(2,'0')].join('-');
+const kontekst=new URLSearchParams(location.search);
+let blokadaSalonu='';try{blokadaSalonu=localStorage.getItem('astera.salonLock')||'';}catch(e){}
+if(['ZW','SZ'].includes(kontekst.get('salon')))S.salon=kontekst.get('salon');
+if(['ZW','SZ'].includes(blokadaSalonu))S.salon=blokadaSalonu;
+S.data=/^\d{4}-\d{2}-\d{2}$/.test(kontekst.get('date')||'')?kontekst.get('date'):iso;
+S.godzina=kontekst.get('start')||'';S.terapeutka=kontekst.get('therapist')||'';
+$('#data').value=S.data;
+$$('[data-salon]').forEach(b=>{b.classList.toggle('active',b.dataset.salon===S.salon);b.disabled=!!blokadaSalonu&&b.dataset.salon!==S.salon;});
 $('#data').addEventListener('change',e=>{S.data=e.target.value;S.godzina='';S.terapeutka='';generujGodziny();odswiez()});
 
 /* ---------- akordeon klik ---------- */
@@ -608,7 +657,8 @@ $$('[data-toggle]').forEach(h=>h.addEventListener('click',e=>{
 }));
 
 /* ---------- nawigacja: powrót do panelu ---------- */
-$('#wrocBtn').onclick=()=>{location.href='../index.html'};
+function adresPanelu(){return '../index.html#'+new URLSearchParams({mode:'calendar',salon:S.salon,date:S.data});}
+$('#wrocBtn').onclick=()=>{location.href=adresPanelu()};
 $$('[data-idz]').forEach(b=>b.onclick=()=>{location.href=b.getAttribute('data-idz')});
 $$('[data-poza]').forEach(b=>b.onclick=()=>toast(b.getAttribute('data-poza')+' pozostaje poza zakresem tej makiety.'));
 
@@ -635,7 +685,7 @@ function rysujKrok(){
     st.innerHTML='<h3>1. Klient</h3><p class="lead">Numer telefonu wystarczy — resztę system dopowie sam.</p>'+
       '<div class="row"><div><label class="lbl">Telefon</label><input type="tel" id="k1tel" value="'+(S.tel||'')+'"></div>'+
       '<div><label class="lbl">Imię</label><input type="text" id="k1imie" value="'+(S.imie||'')+'"></div></div>'+
-      '<div class="hint"><i>✦</i>'+(S.staly?'Rozpoznany stały klient.':'Nowy klient albo wpis bez danych.')+'</div><div class="grow"></div>'+nawigacja(false,gotowe('s1'));
+      '<div class="hint"><i>✦</i><span id="k1hint">'+(S.staly?'Rozpoznany stały klient.':'Nowy klient albo wpis bez danych.')+'</span></div><div class="grow"></div>'+nawigacja(false,gotowe('s1'));
     $('#k1tel').addEventListener('input',e=>{$('#tel').value=e.target.value;$('#tel').dispatchEvent(new Event('input'))});
     $('#k1imie').addEventListener('input',e=>{$('#imie').value=e.target.value;$('#imie').dispatchEvent(new Event('input'))});
   }
@@ -665,17 +715,16 @@ function rysujKrok(){
     st.innerHTML='<h3>3. Godzina rezerwacji</h3><p class="lead">Kliknij wolny termin — godzina i masażystka wskoczą same.</p>'+
       '<div class="row"><div><label class="lbl">Data</label><br><input type="date" id="k3data" value="'+S.data+'" style="padding:10px 12px;border-radius:10px"></div></div>'+
       '<div id="k3sloty" style="margin-top:8px">'+slotyHTML()+
-      '<div class="pusto" style="margin-top:10px">Nietypowa godzina? Wpisz poniżej.</div>'+godzinySelect('g3')+
       '</div><div class="grow"></div>'+nawigacja(true,gotowe('s3'));
     $('#k3data').addEventListener('change',e=>{$('#data').value=e.target.value;$('#data').dispatchEvent(new Event('change'));rysujKrok()});
-    wpiszSloty($('#k3sloty')); wpiszTermin('g3');
+    wpiszSloty($('#k3sloty'));
   }
   else if(S.krok===4){
     const os='<svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.5"/><path d="M5 21c0-4 3-6 7-6s7 2 7 6"/></svg>';
-    st.innerHTML='<h3>4. Terapeutka</h3><p class="lead">Opcjonalnie — wybierz osobę tylko wtedy, gdy klient wyraźnie o to prosi.</p>'+
+    st.innerHTML='<h3>4. '+(dwieTerapeutki()?'Masażystki':'Masażystka')+'</h3><p class="lead">Opcjonalnie — wybierz osobę tylko wtedy, gdy klient wyraźnie o to prosi.</p>'+
       '<div class="picks">'+
       '<div class="pick'+(S.wyborTerapeutki==='z-terminu'?' sel':'')+'" data-w="z-terminu"><div class="tick">✓</div><div class="av">'+os+'</div><div class="ttl">Z terminu</div><div class="sub" style="color:var(--r1-text)">'+(S.godzina||'—')+' • '+(S.terapeutka||'—')+'</div><div class="sub">najprostszy wybór</div></div>'+
-      '<div class="pick'+(S.wyborTerapeutki==='dowolna'?' sel':'')+'" data-w="dowolna"><div class="tick">✓</div><div class="av">'+os+'</div><div class="ttl">Dowolna</div><div class="sub">system przydzieli bez preferencji</div></div>'+
+      '<div class="pick'+(S.wyborTerapeutki==='dowolna'?' sel':'')+'" data-w="dowolna"><div class="tick">✓</div><div class="av">'+os+'</div><div class="ttl">Dowolna</div><div class="sub">wybrany termin · bez preferencji osoby</div></div>'+
       '</div><div class="hint"><i>✦</i>Godzina już zawiera terapeutkę — ten krok można pominąć.</div><div class="grow"></div>'+nawigacja(true,true);
     $$('.pick').forEach(p=>p.onclick=()=>{S.wyborTerapeutki=p.dataset.w;rysujKrok()});
   }
@@ -685,11 +734,11 @@ function rysujKrok(){
       wiersz('Klient',(S.imie||'—')+(S.tel?' · '+S.tel:''))+wiersz('Salon',salonNazwa(S.salon))+
       wiersz('Usługa',S.usluga||'—')+wiersz('Czas',S.min?S.min+' min':'—')+
       wiersz('Termin',dataPL(S.data)+(S.godzina?' • '+S.godzina:''))+
-      wiersz('Terapeutka',S.wyborTerapeutki==='dowolna'?'dowolna':(S.terapeutka||'—'))+
+      wiersz(dwieTerapeutki()?'Masażystki':'Masażystka',(S.terapeutka||'—')+(S.wyborTerapeutki==='dowolna'?' · bez preferencji':''))+
       wiersz('Cena',pln(S.cena)||'—')+'</div>'+
       '<div class="okline"><i>✓</i>Po zapisaniu wizyta pojawi się w grafiku dnia.</div><div class="grow"></div>'+
       '<div class="navrow"><button class="back" onclick="S.krok=4;rysujKrok()">Wstecz</button>'+
-      '<button class="cta" onclick="zarezerwuj()" '+(gotowe('s3')?'':'disabled')+'>Zarezerwuj →</button></div>';
+      '<button class="cta" onclick="zarezerwuj()" '+(kompletnaRezerwacja()?'':'disabled')+'>Zarezerwuj →</button></div>';
   }
 }
 
@@ -702,15 +751,15 @@ function zapiszDoMakiety(){
     var min=parseInt(String(S.godzina).split(':')[0],10)*60+parseInt(String(S.godzina).split(':')[1],10)+(S.min||60);
     var koniec=(Math.floor(min/60)<10?'0':'')+Math.floor(min/60)+':'+(min%60<10?'0':'')+(min%60);
     var lista=JSON.parse(localStorage.getItem('astera.makietaRezerwacje')||'[]');
-    lista.push({
-      id:'REC-'+S.salon+'-'+S.data.replace(/-/g,'')+'-'+String(S.godzina).replace(':','')+'-'+lista.length,
-      ts:Date.now(),                       // panel kasuje niepotwierdzone kopie po 15 minutach
+    const bookingId='REC-'+S.salon+'-'+crypto.randomUUID();
+    wybraneTerapeutki().forEach((osoba,i)=>lista.push({
+      id:bookingId+'-'+i,booking_id:bookingId,localOnly:true,demoOnly:odczytGrafiku().source==='demo',status:'REZERWACJA',categoryId:S.bucket,
+      ts:Date.now(),                       // kopia lokalna nie oznacza potwierdzenia w arkuszu
       salon:S.salon, date:S.data, t:S.godzina, end:koniec,
-      who:(S.wyborTerapeutki==='dowolna'?S.terapeutka:S.terapeutka),
+      who:osoba,terapeutki:S.terapeutka,para:dwieTerapeutki(),
       client:(S.imie||'Klient bez danych'), phone:S.tel||'',
       service:S.usluga, duration:S.min, price:S.cena
-    });
-    if(lista.length>40)lista=lista.slice(-40);
+    }));
     localStorage.setItem('astera.makietaRezerwacje',JSON.stringify(lista));
     return true;
   }catch(e){return false}
@@ -746,40 +795,61 @@ async function zapiszNaSerwer(){
     terapeuta:S.terapeutka, status:'OCZEKUJE',
     uwagi:'Panel AsterA - rezerwacja reczna'
   });
+  const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),15000);
   try{
-    var r=await fetch(ASTERA_MOST+'?'+q.toString());
+    var r=await fetch(ASTERA_MOST+'?'+q.toString(),{signal:controller.signal});
     return await r.json();
-  }catch(e){return{ok:false,error:String(e)}}
+  }catch(e){return{ok:false,error:'BRAK_POTWIERDZENIA',uncertain:true};}
+  finally{clearTimeout(timer);}
 }
 
+let zapisTrwa=false;
+document.addEventListener('click',e=>{if(zapisTrwa){e.preventDefault();e.stopImmediatePropagation();}},true);
 async function zarezerwuj(){
+  if(zapisTrwa)return;
+  if(!kompletnaRezerwacja()){
+    toast('Uzupełnij klienta, usługę i termin przed rezerwacją.');
+    return;
+  }
+  if(lokalnyKonflikt(S.godzina,S.terapeutka)){
+    toast('Nie można zapisać: lokalny termin jest zajęty albo nie udało się odczytać lokalnych wizyt.');
+    S.godzina='';S.terapeutka='';generujGodziny();odswiez();
+    return;
+  }
   var btn=document.querySelector('.navrow .cta')||$('#rezerwuj');
   var etykieta=btn?btn.textContent:'';
   if(btn){btn.disabled=true;btn.textContent='Zapisuję…';}
 
+  zapisTrwa=true;
+  document.querySelectorAll('input,button,select').forEach(el=>{el.dataset.przedZapisem=el.disabled?'1':'0';el.disabled=true;});
   var w=await zapiszNaSerwer();
-  if(!(w&&w.ok)) zapiszDoMakiety(); // lokalna kopia TYLKO gdy serwer odmowil - inaczej wizyta dublowalaby sie w grafiku
+  var lokalnie=false;
+  if(!(w&&w.ok)) lokalnie=zapiszDoMakiety(); // lokalna kopia TYLKO gdy serwer odmowil - inaczej wizyta dublowalaby sie w grafiku
 
   var opis=[(S.imie||S.tel),salonNazwa(S.salon),S.usluga,S.min+' min',dataPL(S.data),S.godzina,
-            (S.wyborTerapeutki==='dowolna'?'dowolna':S.terapeutka),pln(S.cena)].join(' • ');
+            S.terapeutka,pln(S.cena)].join(' • ');
 
   if(w&&w.ok){
     toast('<b>Zapisano w arkuszu.</b><br>'+opis+
-      '<br><span style="color:var(--r1-gold2)">Wiersz '+w.row+' w REZERWACJE '+S.salon+'. Wizyta jest już w grafiku dnia.</span>');
-    setTimeout(function(){location.href='../index.html'},2600);
+      '<br><span style="color:var(--r1-gold2)">Wiersz '+w.row+' w REZERWACJE '+S.salon+'. Potwierdzenie widoczności sprawdź po powrocie do grafiku.</span>');
+    setTimeout(function(){location.href=adresPanelu()},2600);
     return;
   }
 
+  zapisTrwa=false;
+  document.querySelectorAll('[data-przed-zapisem]').forEach(el=>{el.disabled=el.dataset.przedZapisem==='1';delete el.dataset.przedZapisem;});
   if(btn){btn.disabled=false;btn.textContent=etykieta||'Zarezerwuj →';}
   var powod=(w&&w.error==='BRAK_TOKENA')?'Ten komputer nie ma tokenu recepcji.'
            :(w&&w.error==='UNAUTHORIZED')?'Token odrzucony przez serwer.'
+           :(w&&w.uncertain)?'Brak potwierdzenia z serwera. Zapis mógł się wykonać — sprawdź arkusz.'
            :(w&&w.error)?String(w.error):'Brak odpowiedzi z serwera.';
-  toast('<b>NIE zapisano w arkuszu.</b><br>'+opis+
+  toast('<b>'+(w&&w.uncertain?'Brak potwierdzenia zapisu w arkuszu.':'NIE zapisano w arkuszu.')+'</b><br>'+opis+
     '<br><span style="color:#c0392b">'+powod+'</span>'+
-    '<br><span style="color:var(--r1-muted)">Wizyta jest widoczna tylko w tym panelu — wpisz ją ręcznie w arkuszu.</span>');
+    '<br><span style="color:var(--r1-muted)">'+(lokalnie?'Wizyta jest zapisana tylko w tej przeglądarce. Arkusz jej nie potwierdził — sprawdź go przed ponownym zapisem.':'Nie udało się też zapisać kopii lokalnej. Wizyta nie jest zapisana.')+'</span>');
 }
 $('#rezerwuj').onclick=zarezerwuj;
 
+$('#zapisStatus').textContent=asteraToken()?'Zapis wymaga potwierdzenia arkusza · REZERWACJE ZW / SZ':'Tryb lokalny · brak połączenia do zapisu w arkuszu';
 generujListe();generujGodziny();odswiez();
 
 /* Motyw dziedziczymy po panelu - jeden wybor obowiazuje na wszystkich ekranach. */
