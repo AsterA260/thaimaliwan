@@ -244,7 +244,7 @@ button,input,select{font:inherit}button{cursor:pointer}
         <option value="Wykorzystany">Wykorzystany</option>
         <option value="Anulowany">Anulowany</option>
       </select>
-      <div class="szukaj"><span class="ico">⌕</span><input id="search" placeholder="numer bonu, klient, booking_id…" autocomplete="off"></div>
+      <div class="szukaj"><span class="ico">⌕</span><input id="search" placeholder="numer bonu, nabywca, e-mail, telefon…" autocomplete="off"></div>
       <select class="pill" id="dateFilter" aria-label="Data wydania">
         <option value="ALL">Cały okres</option>
         <option value="TODAY">Dziś</option>
@@ -347,7 +347,7 @@ function filtered(){
     wZakresie(v)&&
     (state.salon==='ALL'||v.salon===state.salon)&&
     (state.status==='ALL'||v.status===state.status)&&
-    (!q||[v.n,v.client,v.kind,v.channel,v.booking&&v.booking.id].filter(Boolean).join(' ').toLowerCase().includes(q)));
+    (!q||[v.n,v.client,v.buyer,v.email,v.customerEmail,v.customerPhone,v.kind,v.channel,v.booking&&v.booking.id].filter(Boolean).join(' ').toLowerCase().includes(q)));
 }
 function tag(s){
   const c=s==='Ważny'?'valid':s==='Wykorzystany'?'used':s==='Anulowany'?'cancelled':'other';
@@ -364,6 +364,14 @@ function renderMetrics(){
 }
 
 /* Karta bonu rozwija się POD swoim wierszem — bez skakania na dół strony. */
+function voucherFieldHTML(label,value){
+  return '<div class="fakt" style="min-width:0"><span>'+esc(label)+'</span><b style="overflow-wrap:anywhere;white-space:pre-wrap">'+esc(value==null||value===''?'Brak w arkuszu':String(value))+'</b></div>';
+}
+function voucherSourceHTML(v){
+  var fields=Array.isArray(v.sheetFields)?v.sheetFields:[];
+  if(!fields.length)return '';
+  return '<details class="blok" style="grid-column:1/-1;order:4"><summary>Wszystkie zapisane pola z arkusza ('+fields.length+')</summary><div class="fakty" style="margin-top:12px">'+fields.map(function(f){return voucherFieldHTML(f.label+' · '+f.column,f.value)}).join('')+'</div></details>';
+}
 function kartaHTML(v){
   const b=v.booking, moznaUdostepnic=v.status==='Ważny';
   return '<div class="karta">'+
@@ -373,9 +381,14 @@ function kartaHTML(v){
       '<div class="blok"><div class="label">Bon</div><div class="fakty">'+
         '<div class="fakt"><span>Usługa</span><b>'+esc(v.kind||'—')+'</b></div>'+
         '<div class="fakt"><span>Wartość</span><b>'+(v.value!=null?v.value+' zł':'—')+(v.minutes?' · '+v.minutes+' min':'')+'</b></div>'+
-        '<div class="fakt"><span>Klient</span><b>'+esc(v.client||'—')+'</b></div>'+
+        voucherFieldHTML('Nabywca — imię i nazwisko / firma',v.buyer)+
+        voucherFieldHTML('E-mail z arkusza',v.email)+
+        voucherFieldHTML('Telefon klienta',v.customerPhone)+
+        (v.customerEmail?voucherFieldHTML('E-mail klienta',v.customerEmail):'')+
+        (v.client&&v.client!=='—'?voucherFieldHTML('Klient wizyty',v.client):'')+
+        voucherFieldHTML('Uwagi',v.notes)+
         '<div class="fakt"><span>Wydany</span><b>'+esc(v.issueDate||'—')+'</b></div>'+'<div class="fakt"><span>Ważny do</span><b>'+esc(v.validUntil||'—')+'</b></div>'+
-      '</div></div>'+
+      '</div></div>'+voucherSourceHTML(v)+
       '<div class="blok"><div class="label">Udostępnianie terminu</div>'+
         (moznaUdostepnic
           ? '<h3>○ Przez główny Grafik</h3><p>Wybierasz masażystkę i godzinę w tym samym grafiku Rezerwacji. Termin będzie wspólny dla klientów z ważnym bonem.</p><button class="akcja" data-release-for="'+esc(v.n)+'">Przejdź do Grafiku i udostępnij →</button>'
@@ -406,7 +419,7 @@ function renderList(){
     b.innerHTML='<span class="nr">'+esc(v.n)+'</span>'+tag(v.status)+
       '<span class="cell opt">'+esc(v.kind||'—')+(v.minutes?' <span class="cell dim">· '+v.minutes+' min</span>':'')+'</span>'+
       '<span class="cell kwota">'+(v.value!=null?v.value+' zł':'—')+'</span>'+
-      '<span class="cell dim opt">'+esc(v.channel||'—')+(v.client&&v.client!=='—'?' · '+esc(v.client):'')+'</span>'+
+      '<span class="cell dim opt">'+esc(v.channel||'—')+(v.buyer?' · '+esc(v.buyer):v.client&&v.client!=='—'?' · '+esc(v.client):'')+'</span>'+
       '<span class="chev">⌄</span>';
     b.onclick=()=>{state.otwarty=(state.otwarty===v.n?null:v.n);renderList();};
     box.appendChild(b);
@@ -482,7 +495,9 @@ function asteraVoucherStatus(status){
 function asteraApplyVouchers(list){
   VOUCHERS=(list||[]).map(function(v){var w=(v.finalValue!=null?v.finalValue:v.value);
     return {n:v.n,salon:v.salon,status:asteraVoucherStatus(v.status),statusRaw:v.statusRaw,kind:v.kind,minutes:v.minutes,value:w,
-            client:'—',channel:v.channel,category:v.category,issueDate:v.issueDate,discount:v.discount,
+            client:'—',buyer:v.buyer||'',email:v.email||'',customerEmail:v.customerEmail||'',customerPhone:v.customerPhone||'',
+            notes:v.notes||'',sheetFields:Array.isArray(v.sheetFields)?v.sheetFields:[],
+            channel:v.channel,category:v.category,issueDate:v.issueDate,discount:v.discount,
             validUntil:v.validTo||v.validUntil,booking:null};});
   window.__ASTERA_BONY_UI_R4__.dataSource='PROD';
   state.otwarty=null;renderMetrics();renderList();
