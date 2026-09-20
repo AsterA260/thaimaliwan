@@ -765,9 +765,9 @@ function zapiszDoMakiety(){
   }catch(e){return false}
 }
 
-/* ── ZAPIS DO ARKUSZA (produkcja) ─────────────────────────────
-   Woła ten sam most co panel: ?action=bookings&zapisz=1, który po
-   stronie Apps Script wywołuje istniejącą zapiszRezerwacje().
+/* ── ZAPIS DO ARKUSZA ────────────────────────────────────────
+   POST do mostu panelu. Serwer sprawdza kolizje i REQUEST_ID.
+   Ponowienie po utracie odpowiedzi używa tego samego REQUEST_ID.
    Token bierzemy z localStorage — nigdy nie ma go w kodzie. */
 var ASTERA_MOST='https://script.google.com/macros/s/AKfycbz1DIfrEuALN3wJ0MFJ_bmoWHFbWg3FKQH-OGvAGZSPOa5ej52XfbvrH-1tdTxxHy90DA/exec';
 
@@ -782,23 +782,37 @@ function rozbijImie(pelne){
   return{imie:s.slice(0,i),nazwisko:s.slice(i+1)};
 }
 
+function manualRequestId(payload){
+  const signature=JSON.stringify(payload),key='astera.manual.pending';
+  let previous=null;try{previous=JSON.parse(sessionStorage.getItem(key)||'null');}catch(e){}
+  if(previous&&previous.signature===signature&&previous.id)return previous.id;
+  const id='MANUAL-'+crypto.randomUUID();
+  sessionStorage.setItem(key,JSON.stringify({signature,id}));
+  return id;
+}
 async function zapiszNaSerwer(){
   var t=asteraToken();
   if(!t)return{ok:false,error:'BRAK_TOKENA'};
   if(!S.salon||!S.data||!S.godzina||!S.terapeutka)return{ok:false,error:'NIEKOMPLETNE_DANE'};
   var n=rozbijImie(S.imie);
-  var q=new URLSearchParams({
-    action:'bookings', zapisz:'1', token:t,
+  var payload={
     salon:S.salon, data:S.data, start:S.godzina,
     imie:n.imie, nazwisko:n.nazwisko, telefon:S.tel||'',
     masaz:S.usluga||'', czas:String(S.min||60),
-    terapeuta:S.terapeutka, status:'OCZEKUJE',
+    terapeuta:S.terapeutka, category:S.bucket,
     uwagi:'Panel AsterA - rezerwacja reczna'
-  });
-  const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),15000);
+  };
+  let requestId;try{requestId=manualRequestId(payload);}catch(e){return{ok:false,error:'Nie można zachować identyfikatora zapisu. Sprawdź pamięć przeglądarki.'};}
+  var q=new URLSearchParams(Object.assign({action:'bookings',zapisz:'1',token:t,request_id:requestId},payload));
+  const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),45000);
   try{
-    var r=await fetch(ASTERA_MOST+'?'+q.toString(),{signal:controller.signal});
-    return await r.json();
+    var r=await fetch(ASTERA_MOST,{method:'POST',body:q,signal:controller.signal});
+    var result=await r.json();
+    if(result&&result.ok){
+      if(!result.booking_id||result.request_id!==requestId)return{ok:false,error:'BRAK_POTWIERDZENIA',uncertain:true};
+      try{sessionStorage.removeItem('astera.manual.pending');}catch(e){}
+    }
+    return result;
   }catch(e){return{ok:false,error:'BRAK_POTWIERDZENIA',uncertain:true};}
   finally{clearTimeout(timer);}
 }
@@ -824,7 +838,7 @@ async function zarezerwuj(){
   document.querySelectorAll('input,button,select').forEach(el=>{el.dataset.przedZapisem=el.disabled?'1':'0';el.disabled=true;});
   var w=await zapiszNaSerwer();
   var lokalnie=false;
-  if(!(w&&w.ok)) lokalnie=zapiszDoMakiety(); // lokalna kopia TYLKO gdy serwer odmowil - inaczej wizyta dublowalaby sie w grafiku
+  if(w&&w.error==='BRAK_TOKENA')lokalnie=zapiszDoMakiety(); // demonstracja; odmowa serwera nie tworzy pozornej wizyty
 
   var opis=[(S.imie||S.tel),salonNazwa(S.salon),S.usluga,S.min+' min',dataPL(S.data),S.godzina,
             S.terapeutka,pln(S.cena)].join(' • ');
@@ -841,11 +855,14 @@ async function zarezerwuj(){
   if(btn){btn.disabled=false;btn.textContent=etykieta||'Zarezerwuj →';}
   var powod=(w&&w.error==='BRAK_TOKENA')?'Ten komputer nie ma tokenu recepcji.'
            :(w&&w.error==='UNAUTHORIZED')?'Token odrzucony przez serwer.'
+           :(w&&w.error==='TERMIN_ZAJETY')?'Ten termin został już zajęty. Odśwież grafik i wybierz inny.'
+           :(w&&w.error==='NIEPELNY_GRAFIK')?'W arkuszu brakuje danych potrzebnych do sprawdzenia wolnego terminu.'
+           :(w&&w.error==='ZAJETE_SPROBUJ_PONOWNIE')?'Trwa inny zapis. Spróbuj ponownie za chwilę.'
            :(w&&w.uncertain)?'Brak potwierdzenia z serwera. Zapis mógł się wykonać — sprawdź arkusz.'
            :(w&&w.error)?String(w.error):'Brak odpowiedzi z serwera.';
   toast('<b>'+(w&&w.uncertain?'Brak potwierdzenia zapisu w arkuszu.':'NIE zapisano w arkuszu.')+'</b><br>'+opis+
     '<br><span style="color:#c0392b">'+powod+'</span>'+
-    '<br><span style="color:var(--r1-muted)">'+(lokalnie?'Wizyta jest zapisana tylko w tej przeglądarce. Arkusz jej nie potwierdził — sprawdź go przed ponownym zapisem.':'Nie udało się też zapisać kopii lokalnej. Wizyta nie jest zapisana.')+'</span>');
+    '<br><span style="color:var(--r1-muted)">'+(lokalnie?'Wizyta jest zapisana tylko w tej przeglądarce.':(w&&w.uncertain?'Sprawdź grafik. Ponowienie tych samych danych zachowa identyfikator zapisu.':'Nie utworzono zastępczej wizyty lokalnej.'))+'</span>');
 }
 $('#rezerwuj').onclick=zarezerwuj;
 

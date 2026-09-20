@@ -943,8 +943,8 @@ addEventListener('pointerup',function(){if(!drag)return;drag=false;vel=Math.max(
           var para=ktoLista.length>1;
           ktoLista.forEach(function(kto,j){                                   // para -> karta u KAZDEJ masazystki (obie kolumny), jak w Booksy
             d2.visits.push({
-              id:'PROD-'+b.salon+'-'+i+'-'+j,groupId:'PROD-'+b.salon+'-'+i,
-              booking_id:(b.source==='BOOKSY'?'BOOKSY-':'AST-')+b.salon+'-'+b.date.replace(/-/g,'')+'-'+i+'-'+j,
+              id:b.booking_id?b.booking_id+'-'+j:'PROD-'+b.salon+'-'+i+'-'+j,groupId:b.booking_id||'PROD-'+b.salon+'-'+i,
+              booking_id:b.booking_id||(b.source==='BOOKSY'?'BOOKSY-':'AST-')+b.salon+'-'+b.date.replace(/-/g,'')+'-'+i+'-'+j,
               source:b.source,date:b.date,t:b.start,end:b.end,who:kto,
               client:b.client||'(bez nazwiska)',phone:b.phone||'',
               categoryId:'single',serviceId:'prod',service:b.service||'—',
