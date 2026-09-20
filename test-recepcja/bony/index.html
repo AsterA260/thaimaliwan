@@ -347,7 +347,7 @@ function filtered(){
     wZakresie(v)&&
     (state.salon==='ALL'||v.salon===state.salon)&&
     (state.status==='ALL'||v.status===state.status)&&
-    (!q||[v.n,v.client,v.buyer,v.email,v.customerEmail,v.customerPhone,v.kind,v.channel,v.booking&&v.booking.id].filter(Boolean).join(' ').toLowerCase().includes(q)));
+    (!q||[v.n,v.client,v.buyer,v.buyerEmail,v.buyerPhone,v.email,v.customerEmail,v.customerPhone,v.kind,v.channel,v.booking&&v.booking.id].filter(Boolean).join(' ').toLowerCase().includes(q)));
 }
 function tag(s){
   const c=s==='Ważny'?'valid':s==='Wykorzystany'?'used':s==='Anulowany'?'cancelled':'other';
@@ -382,8 +382,10 @@ function kartaHTML(v){
         '<div class="fakt"><span>Usługa</span><b>'+esc(v.kind||'—')+'</b></div>'+
         '<div class="fakt"><span>Wartość</span><b>'+(v.value!=null?v.value+' zł':'—')+(v.minutes?' · '+v.minutes+' min':'')+'</b></div>'+
         voucherFieldHTML('Nabywca — imię i nazwisko / firma',v.buyer)+
-        voucherFieldHTML('E-mail z arkusza',v.email)+
-        voucherFieldHTML('Telefon klienta',v.customerPhone)+
+        voucherFieldHTML('E-mail nabywcy',v.buyerEmail||v.email)+
+        voucherFieldHTML('Telefon nabywcy',v.buyerPhone)+
+        (v.customerPhone?voucherFieldHTML('Telefon klienta zapisany w arkuszu',v.customerPhone):'')+
+        (v.buyerNote?voucherFieldHTML('Uwagi kupującego z CMS',v.buyerNote):'')+
         (v.customerEmail?voucherFieldHTML('E-mail klienta',v.customerEmail):'')+
         (v.client&&v.client!=='—'?voucherFieldHTML('Klient wizyty',v.client):'')+
         voucherFieldHTML('Uwagi',v.notes)+
@@ -495,7 +497,7 @@ function asteraVoucherStatus(status){
 function asteraApplyVouchers(list){
   VOUCHERS=(list||[]).map(function(v){var w=(v.finalValue!=null?v.finalValue:v.value);
     return {n:v.n,salon:v.salon,status:asteraVoucherStatus(v.status),statusRaw:v.statusRaw,kind:v.kind,minutes:v.minutes,value:w,
-            client:'—',buyer:v.buyer||'',email:v.email||'',customerEmail:v.customerEmail||'',customerPhone:v.customerPhone||'',
+            client:'—',buyer:v.buyer||'',buyerPhone:v.buyerPhone||'',buyerEmail:v.buyerEmail||'',buyerNote:v.buyerNote||'',email:v.email||'',customerEmail:v.customerEmail||'',customerPhone:v.customerPhone||'',
             notes:v.notes||'',sheetFields:Array.isArray(v.sheetFields)?v.sheetFields:[],
             channel:v.channel,category:v.category,issueDate:v.issueDate,discount:v.discount,
             validUntil:v.validTo||v.validUntil,booking:null};});

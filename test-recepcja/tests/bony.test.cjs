@@ -43,3 +43,9 @@ check('all source strings are escaped, missing contacts stay visibly missing',()
   ctx.asteraApplyVouchers([{...voucher('Wazny'),buyer:'<img onerror=bad()>',notes:'<script>bad()</script>',sheetFields:[{column:'Z',label:'<svg>',value:'<iframe>'}]}]);
   const card=ctx.kartaHTML(ctx.VOUCHERS[0]);assert.doesNotMatch(card,/<img|<script|<svg|<iframe/);assert.match(card,/&lt;img/);assert.match(card,/Brak w arkuszu/);
 });
+check('CMS buyer contact is distinct from voucher visitor contact',()=>{
+  ctx.state.salon='ALL';ctx.state.query='';
+  ctx.asteraApplyVouchers([{...voucher('Wazny'),buyer:'Kupujący',buyerEmail:'buyer@example.invalid',buyerPhone:'+48111111111',buyerNote:'Dla innej osoby',customerEmail:'recipient@example.invalid',customerPhone:'+48222222222'}]);
+  const card=ctx.kartaHTML(ctx.VOUCHERS[0]);for(const val of ['buyer@example.invalid','+48111111111','recipient@example.invalid','+48222222222','Dla innej osoby','E-mail nabywcy','Telefon nabywcy'])assert.ok(card.includes(val),val);
+  ctx.state.query='buyer@example.invalid';assert.equal(ctx.filtered().length,1);ctx.state.query='';assert.equal(ctx.VOUCHERS[0].client,'—');
+});
