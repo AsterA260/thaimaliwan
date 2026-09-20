@@ -481,7 +481,7 @@ body> :not(.ui-r1){display:none!important}
   <div class="r1-modal-shell" id="r3cEditModal" role="dialog" aria-modal="true" aria-label="Edytuj wizytę">
     <div class="r1-modal r3c-edit-modal">
       <div class="r1-modal-head"><h3>Edytuj wizytę</h3><button class="r1-close" data-r3c-close-edit aria-label="Zamknij">×</button></div>
-      <div class="r3c-meta"><span class="r3c-chip tech">SOURCE: <b id="r3cSource">—</b></span><span class="r3c-chip tech">booking_id: <b id="r3cBookingId">—</b></span><span class="r3c-chip">ROZLICZENIE: <b id="r3dSettlementState">—</b></span><span class="r3c-chip" id="r3dVoucherChip">BON: <b id="r3dVoucherState">—</b></span><span class="r3c-chip tech">Tryb lokalny · zero POST</span></div>
+      <div class="r3c-meta"><span class="r3c-chip tech">SOURCE: <b id="r3cSource">—</b></span><span class="r3c-chip tech">booking_id: <b id="r3cBookingId">—</b></span><span class="r3c-chip">ROZLICZENIE: <b id="r3dSettlementState">—</b></span><span class="r3c-chip" id="r3dVoucherChip">BON: <b id="r3dVoucherState">—</b></span><span class="r3c-chip" id="r21WriteMode">Tryb demonstracyjny</span></div>
       <div class="r3c-booksy-note" id="r3cBooksyNote"><b>Rezerwacja pochodzi z Booksy.</b><br>Dane źródłowe można tylko podejrzeć. Rozliczenie recepcyjne jest osobną lokalną operacją; zmiana wizyty wymaga procesu w Booksy.</div>
       <div class="r3c-grid" id="r3cEditFields">
         <div class="r3c-summary" id="r3cSummary"></div>
@@ -784,39 +784,39 @@ addEventListener('pointerup',function(){if(!drag)return;drag=false;vel=Math.max(
   ];
   var OFFER_CATALOG=[
     {id:'single',label:'DLA 1 OSOBY',icon:'1',services:[
-      {id:'thai-traditional',name:'Tradycyjny tajski masaż',salons:['ZW','SZ'],variants:[{minutes:60,price:210},{minutes:90,price:270},{minutes:120,price:330}]},
-      {id:'aroma-oil',name:'Masaż olejami aromatycznymi',salons:['ZW','SZ'],variants:[{minutes:60,price:240},{minutes:90,price:300},{minutes:120,price:360}]},
-      {id:'hot-stones',name:'Masaż gorącymi kamieniami',salons:['ZW','SZ'],variants:[{minutes:60,price:250},{minutes:90,price:320},{minutes:120,price:380}]},
-      {id:'candle',name:'Masaż świecami',salons:['ZW','SZ'],variants:[{minutes:60,price:240},{minutes:90,price:300},{minutes:120,price:390}]},
-      {id:'sport',name:'Masaż sportowy',salons:['ZW','SZ'],variants:[{minutes:60,price:270},{minutes:90,price:330},{minutes:120,price:390}]},
-      {id:'lomi-lomi',name:'Masaż Lomi-Lomi Nui',salons:['ZW','SZ'],variants:[{minutes:60,price:270},{minutes:90,price:330},{minutes:120,price:390}]},
-      {id:'herbal-stamps',name:'Masaż stemplami ziołowymi',salons:['ZW','SZ'],variants:[{minutes:60,price:250},{minutes:90,price:320},{minutes:120,price:380}]},
-      {id:'senior',name:'Masaż tajski dla seniorów',salons:['ZW','SZ'],variants:[{minutes:60,price:200},{minutes:90,price:260},{minutes:120,price:320}]},
-      {id:'children',name:'Masaż dla dzieci i młodzieży',salons:['ZW','SZ'],variants:[{minutes:60,price:180},{minutes:90,price:250}]},
-      {id:'four-hands',name:'Masaż czteroręczny',salons:['ZW','SZ'],variants:[{minutes:60,price:390},{minutes:90,price:480}]},
-      {id:'prenatal',name:'Masaż prenatalny',salons:['ZW','SZ'],variants:[{minutes:60,price:210},{minutes:90,price:260}]},
-      {id:'kobido-thai',name:'Tajski masaż twarzy i głowy / Kobido Thai',salons:['ZW','SZ'],variants:[{minutes:60,price:220},{minutes:90,price:270}]},
-      {id:'head-back-shoulders',name:'Masaż głowy, pleców i ramion',salons:['ZW','SZ'],variants:[{minutes:60,price:190},{minutes:90,price:260}]},
-      {id:'head-reflexology',name:'Refleksoterapia – tajski masaż głowy',salons:['ZW','SZ'],variants:[{minutes:60,price:190},{minutes:90,price:240}]},
-      {id:'foot-reflexology',name:'Refleksoterapia stóp',salons:['ZW','SZ'],variants:[{minutes:60,price:190},{minutes:90,price:240}]},
-      {id:'slimming',name:'Masaż wyszczuplający',salons:['ZW','SZ'],variants:[{minutes:60,price:250},{minutes:90,price:320},{minutes:120,price:390}]}
+      {id:'thai-traditional',name:'Tradycyjny tajski masaż',sheetName:'Tajski Klasyczny',salons:['ZW','SZ'],variants:[{minutes:60,price:210},{minutes:90,price:270},{minutes:120,price:330}]},
+      {id:'aroma-oil',name:'Masaż olejami aromatycznymi',sheetName:'Oil Aromatyczny',salons:['ZW','SZ'],variants:[{minutes:60,price:240},{minutes:90,price:300},{minutes:120,price:360}]},
+      {id:'hot-stones',name:'Masaż gorącymi kamieniami',sheetName:'Gorącymi Kamieniami',salons:['ZW','SZ'],variants:[{minutes:60,price:250},{minutes:90,price:320},{minutes:120,price:380}]},
+      {id:'candle',name:'Masaż świecami',sheetName:'Świecą',salons:['ZW','SZ'],variants:[{minutes:60,price:240},{minutes:90,price:300},{minutes:120,price:390}]},
+      {id:'sport',name:'Masaż sportowy',sheetName:'Sportowy',salons:['ZW','SZ'],variants:[{minutes:60,price:270},{minutes:90,price:330},{minutes:120,price:390}]},
+      {id:'lomi-lomi',name:'Masaż Lomi-Lomi Nui',sheetName:'Lomi Lomi',salons:['ZW','SZ'],variants:[{minutes:60,price:270},{minutes:90,price:330},{minutes:120,price:390}]},
+      {id:'herbal-stamps',name:'Masaż stemplami ziołowymi',sheetName:'Stemplami Ziołowymi',salons:['ZW','SZ'],variants:[{minutes:60,price:250},{minutes:90,price:320},{minutes:120,price:380}]},
+      {id:'senior',name:'Masaż tajski dla seniorów',sheetName:'Dla Seniorów',salons:['ZW','SZ'],variants:[{minutes:60,price:200},{minutes:90,price:260},{minutes:120,price:320}]},
+      {id:'children',name:'Masaż dla dzieci i młodzieży',sheetName:'Dla Dzieci/Młodzieży',salons:['ZW','SZ'],variants:[{minutes:60,price:180},{minutes:90,price:250}]},
+      {id:'four-hands',name:'Masaż czteroręczny',sheetName:'Czteroręczny',salons:['ZW','SZ'],variants:[{minutes:60,price:390},{minutes:90,price:480}]},
+      {id:'prenatal',name:'Masaż prenatalny',sheetName:'Dla Kobiet w Ciąży',salons:['ZW','SZ'],variants:[{minutes:60,price:210},{minutes:90,price:260}]},
+      {id:'kobido-thai',name:'Tajski masaż twarzy i głowy / Kobido Thai',sheetName:'Kobido Głowa+Twarz',salons:['ZW','SZ'],variants:[{minutes:60,price:220},{minutes:90,price:270}]},
+      {id:'head-back-shoulders',name:'Masaż głowy, pleców i ramion',sheetName:'Głowa+Plecy+Ramiona',salons:['ZW','SZ'],variants:[{minutes:60,price:190},{minutes:90,price:260}]},
+      {id:'head-reflexology',name:'Refleksoterapia – tajski masaż głowy',sheetName:'Masaż Głowy',salons:['ZW','SZ'],variants:[{minutes:60,price:190},{minutes:90,price:240}]},
+      {id:'foot-reflexology',name:'Refleksoterapia stóp',sheetName:'Masaż Stóp',salons:['ZW','SZ'],variants:[{minutes:60,price:190},{minutes:90,price:240}]},
+      {id:'slimming',name:'Masaż wyszczuplający',sheetName:'Wyszczuplający',salons:['ZW','SZ'],variants:[{minutes:60,price:250},{minutes:90,price:320},{minutes:120,price:390}]}
     ]},
     {id:'couples',label:'DLA DWOJGA',icon:'2',services:[
-      {id:'couple-classic',name:'Masaż tajski klasyczny dla par',salons:['ZW','SZ'],variants:[{minutes:60,price:380},{minutes:90,price:500},{minutes:120,price:620}]},
-      {id:'couple-oil',name:'Masaż tajski olejkami dla par',salons:['ZW','SZ'],variants:[{minutes:60,price:460},{minutes:90,price:600},{minutes:120,price:720}]},
-      {id:'couple-hot-stones',name:'Masaż gorącymi kamieniami dla par',salons:['ZW','SZ'],variants:[{minutes:60,price:480},{minutes:90,price:630},{minutes:120,price:760}]},
-      {id:'couple-candle',name:'Masaż świecą aromatyczną dla par',salons:['ZW','SZ'],variants:[{minutes:60,price:460},{minutes:90,price:600},{minutes:120,price:720}]},
-      {id:'couple-herbal-stamps',name:'Masaż stemplami ziołowymi dla par',salons:['ZW','SZ'],variants:[{minutes:60,price:460},{minutes:90,price:600},{minutes:120,price:720}]},
-      {id:'romantic-ritual',name:'Rytuał Romantyczny Maliwan™',salons:['ZW','SZ'],variants:[{minutes:60,price:520},{minutes:90,price:670},{minutes:120,price:820}]}
+      {id:'couple-classic',name:'Masaż tajski klasyczny dla par',sheetName:'Tajski Klasyczny (Para)',salons:['ZW','SZ'],variants:[{minutes:60,price:380},{minutes:90,price:500},{minutes:120,price:620}]},
+      {id:'couple-oil',name:'Masaż tajski olejkami dla par',sheetName:'Oil Aroma (Para)',salons:['ZW','SZ'],variants:[{minutes:60,price:460},{minutes:90,price:600},{minutes:120,price:720}]},
+      {id:'couple-hot-stones',name:'Masaż gorącymi kamieniami dla par',sheetName:'Gorącymi Kamieniami (Para)',salons:['ZW','SZ'],variants:[{minutes:60,price:480},{minutes:90,price:630},{minutes:120,price:760}]},
+      {id:'couple-candle',name:'Masaż świecą aromatyczną dla par',sheetName:'Świecą (Para)',salons:['ZW','SZ'],variants:[{minutes:60,price:460},{minutes:90,price:600},{minutes:120,price:720}]},
+      {id:'couple-herbal-stamps',name:'Masaż stemplami ziołowymi dla par',sheetName:'Stemplami Ziołowymi (Para)',salons:['ZW','SZ'],variants:[{minutes:60,price:460},{minutes:90,price:600},{minutes:120,price:720}]},
+      {id:'romantic-ritual',name:'Rytuał Romantyczny Maliwan™',sheetName:'Rytuał Romantyczny (Para)',salons:['ZW','SZ'],variants:[{minutes:60,price:520},{minutes:90,price:670},{minutes:120,price:820}]}
     ]},
     {id:'rituals',label:'RYTUAŁY MALIWAN',icon:'✦',services:[
-      {id:'royal-thai-spa',name:'Rytuał Królewski Thai Spa',salons:['ZW','SZ'],variants:[{minutes:150,price:490}]},
-      {id:'stones-herbs-ritual',name:'Rytuał Gorące Kamienie i Zioła',salons:['ZW','SZ'],variants:[{minutes:120,price:420}]},
-      {id:'detox-renewal',name:'Rytuał Detoks i Odnowa',salons:['ZW','SZ'],variants:[{minutes:120,price:420}]},
-      {id:'flower-soul',name:'Rytuał Kwiat Duszy',salons:['ZW','SZ'],variants:[{minutes:120,price:420}]},
-      {id:'ocean-breath',name:'Rytuał Ocean Breath',salons:['ZW','SZ'],variants:[{minutes:90,price:290}]},
-      {id:'classic-maliwan-spa',name:'Klasyczna Maliwan Spa Terapia™',salons:['ZW','SZ'],variants:[{minutes:120,price:370}]},
-      {id:'oil-aroma-relax',name:'Oil Aroma Relaks Spa™',salons:['ZW','SZ'],variants:[{minutes:120,price:390}]}
+      {id:'royal-thai-spa',name:'Rytuał Królewski Thai Spa',sheetName:'Rytuał Królewski Thai Spa',salons:['ZW','SZ'],variants:[{minutes:150,price:490}]},
+      {id:'stones-herbs-ritual',name:'Rytuał Gorące Kamienie i Zioła',sheetName:'Rytuał Gorące Kamienie i Zioła',salons:['ZW','SZ'],variants:[{minutes:120,price:420}]},
+      {id:'detox-renewal',name:'Rytuał Detoks i Odnowa',sheetName:'Rytuał Detoks i Odnowa',salons:['ZW','SZ'],variants:[{minutes:120,price:420}]},
+      {id:'flower-soul',name:'Rytuał Kwiat Duszy',sheetName:'Rytuał Kwiat Duszy (dla kobiet)',salons:['ZW','SZ'],variants:[{minutes:120,price:420}]},
+      {id:'ocean-breath',name:'Rytuał Ocean Breath',sheetName:'Rytuał Ocean Breath (energetyczny)',salons:['ZW','SZ'],variants:[{minutes:90,price:290}]},
+      {id:'classic-maliwan-spa',name:'Klasyczna Maliwan Spa Terapia™',sheetName:'Klasyczna Maliwan Spa Terapia',salons:['ZW','SZ'],variants:[{minutes:120,price:370}]},
+      {id:'oil-aroma-relax',name:'Oil Aroma Relaks Spa™',sheetName:'Oil Aroma Relaks SPA',salons:['ZW','SZ'],variants:[{minutes:120,price:390}]}
     ]}
   ];
   var ASTERA_API_URL='__ASTERA_R3A_DEPLOYMENT_URL__';
@@ -835,10 +835,10 @@ addEventListener('pointerup',function(){if(!drag)return;drag=false;vel=Math.max(
     if(active)active.classList.add('active');
     if(name==='calendar'){renderAll();}
   }
-  /* ═══ PRAWDZIWE REZERWACJE Z ARKUSZA (read-only) ═══════════════════════════
+  /* ═══ PRAWDZIWE REZERWACJE Z ARKUSZA ═══════════════════════════
      Most `action=bookings` czyta BOOKSY-NOWE + REZERWACJE ZW/SZ i oddaje
      wizyty. Token wyłącznie z localStorage — bez niego zostają dane
-     przykładowe. Zero zapisu: panel tylko czyta.                            */
+     przykładowe. Edycja ręczna R21 wymaga potwierdzenia serwera.                            */
   var R1_API='https://script.google.com/macros/s/AKfycbz1DIfrEuALN3wJ0MFJ_bmoWHFbWg3FKQH-OGvAGZSPOa5ej52XfbvrH-1tdTxxHy90DA/exec';
   var R1_PROD=false;
   var R1_READ_AT=0,R1_READ_FROM='',R1_READ_TO='',R1_READ_INCOMPLETE=false,R1_LOCAL_DIRTY=false;
@@ -913,32 +913,27 @@ addEventListener('pointerup',function(){if(!drag)return;drag=false;vel=Math.max(
   }
   function r1WczytajRezerwacje(ponowka){
     var token='';try{token=localStorage.getItem('asteraReadToken')||''}catch(e){}
-    if(!token)return;
+    if(!token)return Promise.resolve(false);
     var dzis=new Date();
     var od=r1Iso(dzis.getFullYear(),dzis.getMonth()-1,1);
     var doD=r1Iso(dzis.getFullYear(),dzis.getMonth()+3,1);
-    fetch(R1_API+'?action=bookings&from='+od+'&to='+doD+'&token='+encodeURIComponent(token))
+    return fetch(R1_API+'?action=bookings&from='+od+'&to='+doD+'&token='+encodeURIComponent(token))
       .then(function(r){return r.json()})
       .then(function(d){
         if(!d||d.ok!==true||!Array.isArray(d.bookings)){
           if(!ponowka)setTimeout(function(){r1WczytajRezerwacje(true)},4000);
-          return;
+          R1_READ_INCOMPLETE=true;r1SaveAvailability();return false;
         }
-        ['ZW','SZ'].forEach(function(s){
-          DATA[s].visits=DATA[s].visits.filter(function(v){
-            if(v.localOnly)return !v.demoOnly;
-            if(v.status==='BLOKADA')return false;                              // przykładowe blokady nie należą do danych z arkusza
-            if(String(v.id).indexOf('REC-')!==0)return false;                  // reszta pochodzi z arkusza - nadpisujemy
-            return v.ts && (Date.now()-v.ts)<15*60*1000;                       // lokalna kopia tylko przez 15 min, potem liczy się arkusz
-          });
-        });
+        // Potwierdzony odczyt zastępuje lokalne makiety — nie blokują rzeczywistych terminów.
+        ['ZW','SZ'].forEach(function(s){DATA[s].visits=[];});
         var pominiete=[];
         d.bookings.forEach(function(b,i){
           var d2=DATA[b.salon];if(!d2)return;
           var st=String(b.status||'').toUpperCase();
-          if(st.indexOf('ODWO')===0||st.indexOf('ANULOW')===0||st==='CANCELLED')return;  // odwolana wizyta = termin wolny, nie rysujemy jej
+          var cancelled=/^(ODWO|ANUL|CANCEL)/.test(st),offer=r21MatchOffer(b.service,b.minutes,b.salon);
           var ktoLista=r1WszystkieTerapeutki(b.therapist,b.salon);
-          if(!ktoLista.length){pominiete.push((b.therapist||'brak masazystki')+' ('+b.date+' '+b.start+')');return;}
+          if(!ktoLista.length&&!cancelled){pominiete.push((b.therapist||'brak masazystki')+' ('+b.date+' '+b.start+')');return;}
+          if(!ktoLista.length)ktoLista=[b.therapist||'—'];
           var para=ktoLista.length>1;
           ktoLista.forEach(function(kto,j){                                   // para -> karta u KAZDEJ masazystki (obie kolumny), jak w Booksy
             d2.visits.push({
@@ -946,11 +941,12 @@ addEventListener('pointerup',function(){if(!drag)return;drag=false;vel=Math.max(
               booking_id:b.booking_id||(b.source==='BOOKSY'?'BOOKSY-':'AST-')+b.salon+'-'+b.date.replace(/-/g,'')+'-'+i+'-'+j,
               source:b.source,date:b.date,t:b.start,end:b.end,who:kto,
               client:b.client||'(bez nazwiska)',phone:b.phone||'',
-              categoryId:'single',serviceId:'prod',service:b.service||'—',
+              categoryId:offer?offer.categoryId:'',serviceId:offer?offer.serviceId:'',service:b.service||'—',
+              serverVersion:b.version||'',serverWritable:b.editable===true,booking_type:b.booking_type||'',voucherNumber:b.voucherNo||'',cancelledAt:b.cancelled_at||'',
               duration:b.minutes||60,price:r1Kwota(b.price),
               bookToTherapist:false,note:b.note||'',
-              status:(b.status==='ODWOŁANA'?'ODWOŁANA':'REZERWACJA'),
-              settlementStatus:'NIEROZLICZONA',paymentMethod:'',
+              status:cancelled?'ODWOŁANA':(st==='ZREALIZOWANA'?'ZREALIZOWANA':'REZERWACJA'),
+              settlementStatus:b.payment?'ROZLICZONA':'NIEROZLICZONA',paymentMethod:b.payment||'',
               terapeutki:b.therapist||'', para:para
             });
           });
@@ -970,8 +966,9 @@ addEventListener('pointerup',function(){if(!drag)return;drag=false;vel=Math.max(
         } else {
           toast('Wczytano '+d.count+' rezerwacji z arkusza.');
         }
+        return true;
       })
-      .catch(function(){ if(!ponowka)setTimeout(function(){r1WczytajRezerwacje(true)},4000); });
+      .catch(function(){R1_READ_INCOMPLETE=true;r1SaveAvailability();if(!ponowka)setTimeout(function(){r1WczytajRezerwacje(true)},4000);return false;});
   }
 
   /* ═══ KŁÓDKA SALONU ══════════════════════════════════════════════════════
@@ -1239,7 +1236,7 @@ addEventListener('pointerup',function(){if(!drag)return;drag=false;vel=Math.max(
     var voucher=id==='bon';document.getElementById('r3dVoucherBox').classList.toggle('show',voucher);document.getElementById('r3dConfirmSettlement').disabled=false;
   }
   function r3dOpenSettlement(){
-    var visit=r3cVisit(r3c.editingSalon,r3c.editingId);if(!visit)return;
+    var visit=r3cVisit(r3c.editingSalon,r3c.editingId);if(!visit)return;if(R1_PROD){toast('Zapis rozliczeń jest jeszcze w przygotowaniu.');return;}
     r3d.settlingId=visit.id;r3d.settlingSalon=r3c.editingSalon;r3d.selectedPayment='';
     document.getElementById('r3dSettlementSummary').innerHTML='<strong>'+r2Esc(visit.client)+' · '+r2Esc(visit.service)+'</strong>'+r2Esc(visit.t+'–'+visit.end+' · '+visit.who)+'<br>Do rozliczenia: <b>'+r2Esc(String(visit.price))+' zł</b> · booking_id pozostaje '+r2Esc(visit.booking_id);
     var voucher=r3dIsVoucher(visit),grid=document.getElementById('r3dPaymentGrid');grid.innerHTML='';grid.style.display=voucher?'none':'';
@@ -1252,24 +1249,32 @@ addEventListener('pointerup',function(){if(!drag)return;drag=false;vel=Math.max(
   }
   function r3dConfirmSettlement(){
     var visit=r3cVisit(r3d.settlingSalon,r3d.settlingId),method=r3d.selectedPayment;if(!visit||!method)return;
+    if(R1_PROD){toast('Rozliczenie w bazie nie jest jeszcze dostępne.');return;}
     var automaticVoucher=method==='voucher_auto',voucherNumber=document.getElementById('r3dVoucherNumber').value.trim();if(automaticVoucher&&!voucherNumber){toast('Brak numeru bonu w rekordzie — rozliczenie zatrzymane');return;}
     var selected=SETTLEMENT_METHODS.find(function(item){return item.id===method;})||{},bookingId=visit.booking_id;visit.paymentMethod=automaticVoucher?'bon':method;visit.paymentSource=automaticVoucher?'BON_REDEMPTION':(selected.source||'');visit.settlementStatus='ROZLICZONA';visit.settledAt=new Date().toISOString();visit.status='ZREALIZOWANA';if(automaticVoucher){visit.voucherNumber=voucherNumber;visit.voucherStatus='WYKORZYSTANY';}visit.booking_id=bookingId;
     r1MarkLocalChange(visit);r3dCloseSettlement();r3cCloseEdit();renderAll();toast('Wizyta rozliczona lokalnie · '+r3dMethodLabel(method)+(automaticVoucher?' · bon wykorzystany automatycznie':''));
   }
-  function r3dCloseCancel(){document.getElementById('r3dCancelModal').classList.remove('open');r3d.cancellingId='';r3d.cancellingSalon='';r3d.cancelDecision=null;}
+  function r3dCloseCancel(){if(r21Busy)return;document.getElementById('r3dCancelModal').classList.remove('open');r3d.cancellingId='';r3d.cancellingSalon='';r3d.cancelDecision=null;}
   function r3dRequestCancellation(){
-    var visit=r3cVisit(r3c.editingSalon,r3c.editingId);if(!visit)return;r3d.cancellingId=visit.id;r3d.cancellingSalon=r3c.editingSalon;r3d.cancelDecision=r3dVoucherCancellationDecision(visit,new Date());
+    var visit=r3cVisit(r3c.editingSalon,r3c.editingId);if(!visit)return;if(R1_PROD&&!r21CanCancel(visit)){toast('Ta wizyta wymaga osobnej obsługi odwołania.');return;}r3d.cancellingId=visit.id;r3d.cancellingSalon=r3c.editingSalon;r3d.cancelDecision=r3dVoucherCancellationDecision(visit,new Date());
     var decision=r3d.cancelDecision,hours=Math.max(0,decision.hoursBefore),copy='<b>'+r2Esc(visit.client)+' · '+r2Esc(visit.date+' '+visit.t)+'</b><br>';
     if(!decision.voucher)copy+='Wizyta nie jest opłacana bonem — anulowanie nie zmienia żadnego bonu.';else if(decision.code==='EARLY_CANCEL')copy+='Do wizyty pozostało '+hours.toFixed(1)+' h. Bon wróci do statusu <b>AKTYWNY</b>.';else copy+='Do wizyty pozostało mniej niż 24 h. Bon zostanie automatycznie oznaczony jako <b>WYKORZYSTANY</b>.';
     document.getElementById('r3dCancelResult').innerHTML=copy;document.getElementById('r3cEditModal').classList.remove('open');document.getElementById('r3dCancelModal').classList.add('open');
   }
   function r3dConfirmCancellation(){
     var visit=r3cVisit(r3d.cancellingSalon,r3d.cancellingId),decision=r3d.cancelDecision;if(!visit||!decision||!decision.ok)return;
+    if(R1_PROD){r21Apply(visit,r3d.cancellingSalon,'cancel');return;}
     var bookingId=visit.booking_id;visit.status='ODWOŁANA';visit.cancelledAt=new Date().toISOString();visit.cancellationPolicy=decision.code;visit.cancellationHoursBefore=decision.hoursBefore;if(decision.voucher)visit.voucherStatus=decision.voucherStatus;visit.booking_id=bookingId;r1MarkLocalChange(visit);
     var message=decision.voucher?(decision.code==='EARLY_CANCEL'?'Wizyta odwołana · bon ponownie aktywny':'Wizyta odwołana <24 h · bon wykorzystany'):'Wizyta odwołana — rekord zachowany, bez DELETE';r3dCloseCancel();r3cCloseEdit();renderAll();toast(message);
   }
-  function r3eCancelledVisits(){var rows=[];Object.keys(DATA).forEach(function(salon){DATA[salon].visits.forEach(function(visit){if(visit.status==='ODWOŁANA')rows.push({salon:salon,visit:visit});});});return rows.sort(function(a,b){return String(b.visit.cancelledAt||'').localeCompare(String(a.visit.cancelledAt||''));});}
-  function r3eRenderCancelled(){var rows=r3eCancelledVisits(),list=document.getElementById('r3eCancelledList'),count=document.getElementById('r3eCancelledCount');count.textContent=String(rows.length);list.innerHTML='';if(!rows.length){list.innerHTML='<div class="r3e-empty">Brak odwołanych wizyt w tej lokalnej sesji.</div>';return;}rows.forEach(function(row){var v=row.visit,card=document.createElement('article');card.className='r3e-cancelled-card';card.dataset.bookingId=v.booking_id||'';card.innerHTML='<i class="r3e-cancelled-badge">ODWOŁANA</i><div><strong>'+r2Esc(v.client)+'</strong><span>'+r2Esc(v.service)+' · '+r2Esc(String(v.duration))+' min · '+r2Esc(String(v.price))+' zł</span></div><div><b>'+r2Esc(row.salon)+' · '+r2Esc(v.date)+'</b><span>'+r2Esc(v.t)+'–'+r2Esc(v.end)+' · '+r2Esc(v.who)+'</span></div><div><b>Źródło: '+r2Esc(v.source)+'</b><span>booking_id: '+r2Esc(v.booking_id||'brak')+'</span></div><div><b>'+r2Esc(v.cancellationPolicy||'ODWOŁANA')+'</b><span>'+(r3dIsVoucher(v)?'Bon: '+r2Esc(v.voucherStatus||'—')+' · '+r2Esc(v.voucherNumber||'bez numeru'):'Bez bonu')+'</span></div>';list.appendChild(card);});}
+  function r3eCancelledVisits(){
+    var rows=[],groups=new Map();Object.keys(DATA).forEach(function(salon){DATA[salon].visits.forEach(function(visit){
+      if(visit.status!=='ODWOŁANA')return;var key=salon+'|'+(visit.groupId||visit.booking_id||visit.id),existing=groups.get(key);
+      if(existing){var people=existing.visit.who.split(', ');if(!people.includes(visit.who))existing.visit.who+=', '+visit.who;return;}
+      var row={salon:salon,visit:Object.assign({},visit)};groups.set(key,row);rows.push(row);
+    });});return rows.sort(function(a,b){return String(b.visit.cancelledAt||'').localeCompare(String(a.visit.cancelledAt||''));});
+  }
+  function r3eRenderCancelled(){var rows=r3eCancelledVisits(),list=document.getElementById('r3eCancelledList'),count=document.getElementById('r3eCancelledCount');count.textContent=String(rows.length);list.innerHTML='';if(!rows.length){list.innerHTML='<div class="r3e-empty">Brak odwołanych wizyt w pobranym okresie.</div>';return;}rows.forEach(function(row){var v=row.visit,card=document.createElement('article');card.className='r3e-cancelled-card';card.dataset.bookingId=v.booking_id||'';card.innerHTML='<i class="r3e-cancelled-badge">ODWOŁANA</i><div><strong>'+r2Esc(v.client)+'</strong><span>'+r2Esc(v.service)+' · '+r2Esc(String(v.duration))+' min · '+r2Esc(String(v.price))+' zł</span></div><div><b>'+r2Esc(row.salon)+' · '+r2Esc(v.date)+'</b><span>'+r2Esc(v.t)+'–'+r2Esc(v.end)+' · '+r2Esc(v.who)+'</span></div><div><b>Źródło: '+r2Esc(v.source)+'</b><span>booking_id: '+r2Esc(v.booking_id||'brak')+'</span></div><div><b>'+r2Esc(v.cancellationPolicy||'ODWOŁANA')+'</b><span>'+(r3dIsVoucher(v)?'Bon: '+r2Esc(v.voucherStatus||'—')+' · '+r2Esc(v.voucherNumber||'bez numeru'):'Bez bonu')+'</span></div>';list.appendChild(card);});}
   function r3eOpenCancelled(){r3eRenderCancelled();document.getElementById('r3eCancelledModal').classList.add('open');}
   function r3eCloseCancelled(){document.getElementById('r3eCancelledModal').classList.remove('open');}
   function r3eRenderQrLog(){var list=document.getElementById('r3eQrLog');list.innerHTML='';r3e.qrEntries.slice().reverse().forEach(function(entry){var row=document.createElement('div');row.className='r3e-qr-entry';row.innerHTML='<span><strong>'+r2Esc(entry.client)+'</strong><br>'+r2Esc(entry.salon)+' · source='+r2Esc(entry.source)+' · booking_id niewymagany</span><strong>'+r2Esc(String(entry.amount))+' zł</strong>';list.appendChild(row);});}
@@ -1300,7 +1305,61 @@ addEventListener('pointerup',function(){if(!drag)return;drag=false;vel=Math.max(
     if(!durationSelect.value&&variants.length)durationSelect.value=String(variants[0].minutes);
     var selected=variants.find(function(variant){return variant.minutes===+durationSelect.value;})||variants[0];document.getElementById('r3cPrice').value=selected?selected.price+' zł':'—';
   }
-  function r3cCloseEdit(){document.getElementById('r3cEditModal').classList.remove('open');r3c.editingId='';r3c.editingSalon='';}
+
+  // R21: każda zmiana w danych z arkusza wymaga potwierdzenia serwera.
+  var r21Busy=false;
+  function r21MatchOffer(name,minutes,salon){
+    var found=[];OFFER_CATALOG.forEach(function(category){category.services.forEach(function(service){
+      if((service.sheetName===name||service.name===name)&&service.salons.includes(salon)&&r2OfferVariants(service,salon).some(function(v){return v.minutes===Number(minutes);}))found.push({categoryId:category.id,serviceId:service.id});
+    });});return found.length===1?found[0]:null;
+  }
+  function r21CanCancel(visit){return !!(visit&&visit.serverWritable&&visit.serverVersion&&visit.status==='REZERWACJA'&&!r3dIsVoucher(visit));}
+  function r21CanEdit(visit){return r21CanCancel(visit)&&!!visit.serviceId;}
+  function r21RequestId(payload){
+    var signature=JSON.stringify(payload),key='astera.change.pending',previous=null;
+    try{previous=JSON.parse(sessionStorage.getItem(key)||'null');}catch(e){}
+    if(previous&&previous.signature===signature&&previous.id)return previous.id;
+    var id='CHANGE-'+crypto.randomUUID();sessionStorage.setItem(key,JSON.stringify({signature:signature,id:id}));return id;
+  }
+  async function r21SendChange(payload){
+    var token='';try{token=localStorage.getItem('asteraReadToken')||'';}catch(e){}
+    if(!token)return {ok:false,error:'BRAK_TOKENA'};
+    var request;try{request=r21RequestId(payload);}catch(e){return {ok:false,error:'BRAK_PAMIECI_PRZEGLADARKI'};}
+    var q=new URLSearchParams(Object.assign({action:'bookings',zapisz:'1',token:token,request_id:request},payload));
+    var controller=new AbortController(),timer=setTimeout(function(){controller.abort();},45000);
+    try{
+      var response=await fetch(R1_API,{method:'POST',body:q,signal:controller.signal}),result=await response.json();
+      if(!result||typeof result.ok!=='boolean')return {ok:false,uncertain:true};
+      if(result.ok){
+        if(result.booking_id!==payload.booking_id||result.request_id!==request||result.operation!==payload.operation)return {ok:false,uncertain:true};
+        try{sessionStorage.removeItem('astera.change.pending');}catch(e){}
+      }
+      return result;
+    }catch(e){return {ok:false,uncertain:true};}finally{clearTimeout(timer);}
+  }
+  function r21Error(result){
+    if(result.uncertain)return 'Brak potwierdzenia zapisu. Ponów tę samą operację — system sprawdzi, czy została już wykonana.';
+    var messages={TERMIN_ZAJETY:'Termin jest już zajęty. Wybierz inną godzinę.',REZERWACJA_ZMIENIONA_ODSWIEZ:'Ta rezerwacja została już zmieniona. Zamknij kartę, odśwież grafik i sprawdź aktualne dane.',CENA_NIEZGODNA_Z_ARKUSZEM:'Cena różni się od cennika w bazie. Zapis zatrzymany.',WYMAGA_ODREBNEGO_OBIEGU:'Ta wizyta wymaga osobnej obsługi. Zapis zatrzymany.',REZERWACJA_NIEAKTYWNA:'Wizyta nie jest już aktywna.',NIEPELNY_GRAFIK:'Brakuje danych grafiku. Zapis zatrzymany.',ZAJETE_SPROBUJ_PONOWNIE:'Trwa inny zapis. Spróbuj ponownie.'};
+    return messages[result.error]||'Zmiana nie została potwierdzona. '+String(result.error||'Spróbuj ponownie.');
+  }
+  async function r21Apply(visit,salon,operation,fields){
+    if(r21Busy)return;
+    if(!(operation==='cancel'?r21CanCancel(visit):r21CanEdit(visit))){toast('Ta wizyta jest dostępna tylko do podglądu.');return;}
+    r21Busy=true;var button=document.getElementById(operation==='cancel'?'r3dConfirmCancellation':'r3cSaveVisit'),label=button&&button.textContent;
+    if(button){button.disabled=true;button.textContent='Zapisywanie…';}
+    var result;
+    try{result=await r21SendChange(Object.assign({operation:operation,booking_id:visit.booking_id,expected_version:visit.serverVersion,salon:salon},fields||{}));
+      if(result.ok){
+        R1_READ_INCOMPLETE=true;r1SaveAvailability();var refreshed=await r1WczytajRezerwacje(true);
+        r21Busy=false;r3dCloseCancel();r3cCloseEdit();
+        toast(refreshed?(operation==='cancel'?'Odwołanie zapisane w bazie. Termin został zwolniony.':'Zmiana zapisana w bazie i wczytana ponownie.'):'Zapis potwierdzony w bazie. Odśwież grafik — nie udało się pobrać aktualnego widoku.');
+      }else{toast(r2Esc(r21Error(result)));}
+    }finally{r21Busy=false;if(button){button.disabled=false;button.textContent=label;}}
+  }
+  document.addEventListener('click',function(e){if(r21Busy){e.preventDefault();e.stopImmediatePropagation();}},true);
+  document.addEventListener('keydown',function(e){if(r21Busy){e.preventDefault();e.stopImmediatePropagation();}},true);
+
+  function r3cCloseEdit(){if(r21Busy)return;document.getElementById('r3cEditModal').classList.remove('open');r3c.editingId='';r3c.editingSalon='';}
   function r3cOpenEdit(visit,salon){
     r3c.editingId=visit.id;r3c.editingSalon=salon;
     document.getElementById('r3cSource').textContent=visit.source;document.getElementById('r3cBookingId').textContent=visit.booking_id;document.getElementById('r3dSettlementState').textContent=visit.settlementStatus||'NIEROZLICZONA';document.getElementById('r3dVoucherState').textContent=visit.voucherStatus||'—';document.getElementById('r3dVoucherChip').style.display=r3dIsVoucher(visit)?'':'none';
@@ -1312,9 +1371,20 @@ addEventListener('pointerup',function(){if(!drag)return;drag=false;vel=Math.max(
     r3cRenderOfferControls(visit.categoryId,visit.serviceId,visit.duration);document.getElementById('r3cHeart').checked=!!visit.bookToTherapist;document.getElementById('r3cNote').value=visit.note||'';document.getElementById('r3cStatus').value=visit.status||'REZERWACJA';
     var fields=document.querySelectorAll('#r3cEditFields input,#r3cEditFields select,#r3cEditFields textarea');fields.forEach(function(field){field.disabled=false;});document.getElementById('r3cSalon').disabled=true;
     document.getElementById('r3cBooksyNote').classList.remove('show');document.getElementById('r3cSaveVisit').style.display='';document.getElementById('r3cCancelVisit').style.display='';document.getElementById('r3dOpenSettlement').disabled=visit.settlementStatus==='ROZLICZONA';document.getElementById('r3dOpenSettlement').textContent=visit.settlementStatus==='ROZLICZONA'?'Wizyta rozliczona':'Rozlicz wizytę';document.getElementById('r3cEditModal').classList.add('open');
+    var canEdit=!R1_PROD||r21CanEdit(visit),canCancel=!R1_PROD||r21CanCancel(visit);
+    if(R1_PROD){
+      fields.forEach(function(field){field.disabled=!canEdit;});document.getElementById('r3cSalon').disabled=true;document.getElementById('r3cHeart').disabled=true;document.getElementById('r3cStatus').disabled=true;
+      document.getElementById('r3dOpenSettlement').disabled=true;
+      document.getElementById('r3dOpenSettlement').textContent='Rozliczenia — w przygotowaniu';
+      if(!visit.serviceId){r3cSetOptions(document.getElementById('r3cService'),[{value:'unknown',label:visit.service}],'unknown');r3cSetOptions(document.getElementById('r3cDuration'),[{value:visit.duration,label:visit.duration+' min'}],visit.duration);document.getElementById('r3cPrice').value=visit.price+' zł';}
+    }
+    document.getElementById('r21WriteMode').textContent=R1_PROD?(canEdit?'Zapis do bazy':'Podgląd danych z bazy'):'Tryb demonstracyjny';
+    document.getElementById('r3cSaveVisit').textContent=R1_PROD?'Zapisz w bazie':'Zapisz lokalnie';document.getElementById('r3cSaveVisit').style.display=canEdit?'':'none';document.getElementById('r3cCancelVisit').style.display=canCancel?'':'none';
+    document.getElementById('r3cBooksyNote').classList.toggle('show',R1_PROD&&!canEdit);
+    document.getElementById('r3cBooksyNote').textContent=visit.source==='BOOKSY'?'Rezerwacja pochodzi z Booksy. Zmiany wymagają obsługi w Booksy.':'Ta wizyta wymaga osobnej obsługi. Wyświetlamy zapisane dane; edycja w panelu jest zablokowana.';
   }
   function r3cSaveEdit(){
-    var visit=r3cVisit(r3c.editingSalon,r3c.editingId);if(!visit)return;
+    var visit=r3cVisit(r3c.editingSalon,r3c.editingId);if(!visit||r21Busy)return;if(R1_PROD&&!r21CanEdit(visit)){toast('Ta wizyta jest dostępna tylko do podglądu.');return;}
     var group=r1BookingGroup(visit,r3c.editingSalon),partner=group.find(function(v){return v.id!==visit.id;}),secondWho=document.getElementById('r3cSecondTherapist').value;
     var chosenService=r2OfferService(document.getElementById('r3cCategory').value,document.getElementById('r3cService').value);
     var needsTwo=document.getElementById('r3cCategory').value==='couples'||/czteroręczny/i.test(chosenService&&chosenService.name||'');
@@ -1328,6 +1398,7 @@ addEventListener('pointerup',function(){if(!drag)return;drag=false;vel=Math.max(
     if(!client){toast('Podaj klienta');return;}if(!validation.ok){toast(validation.message);document.getElementById('r3cEditModal').classList.add('r3c-invalid');setTimeout(function(){document.getElementById('r3cEditModal').classList.remove('r3c-invalid');},320);return;}
     var bookingId=visit.booking_id,categoryId=document.getElementById('r3cCategory').value,serviceId=document.getElementById('r3cService').value,service=r2OfferService(categoryId,serviceId),price=parseInt(document.getElementById('r3cPrice').value,10)||0;
     var requestedStatus=document.getElementById('r3cStatus').value;if(requestedStatus==='ODWOŁANA'){r3dRequestCancellation();return;}if(requestedStatus==='ZREALIZOWANA'&&visit.settlementStatus!=='ROZLICZONA'){toast('Najpierw użyj „Rozlicz wizytę” i wybierz metodę płatności.');return;}
+    if(R1_PROD){var parts=client.split(/\s+/);r21Apply(visit,r3c.editingSalon,'update',{data:document.getElementById('r3cDate').value,start:start,imie:parts.shift()||'',nazwisko:parts.join(' '),telefon:document.getElementById('r3cPhone').value.trim(),masaz:service.name,czas:String(duration),expected_price:String(price),terapeuta:[who].concat(partner?[secondWho]:[]).join(', '),category:categoryId,uwagi:document.getElementById('r3cNote').value.trim()});return;}
     visit.client=client;visit.phone=document.getElementById('r3cPhone').value.trim();visit.date=document.getElementById('r3cDate').value;visit.t=start;visit.end=validation.end;visit.who=who;visit.categoryId=categoryId;visit.serviceId=serviceId;visit.service=service?service.name:visit.service;visit.duration=duration;visit.price=price;visit.bookToTherapist=document.getElementById('r3cHeart').checked;visit.note=document.getElementById('r3cNote').value.trim();visit.status=requestedStatus;visit.booking_id=bookingId;
     if(partner)partner.who=secondWho;
     r1MarkLocalChange(visit);r3cCloseEdit();renderAll();toast(visit.status==='ODWOŁANA'?'Wizyta odwołana — rekord zachowany':'Zmiany zapisane tylko lokalnie');
@@ -1335,7 +1406,7 @@ addEventListener('pointerup',function(){if(!drag)return;drag=false;vel=Math.max(
   function r3cCancelVisit(){r3dRequestCancellation();}
   function r3cCancelMove(){r3c.pendingMove=null;document.getElementById('r3cMoveModal').classList.remove('open');}
   function r3cOpenMove(visit,salon,targetWho,targetStart,targetEnd){r3c.pendingMove={salon:salon,id:visit.id,fromTime:visit.t,fromWho:visit.who,toTime:targetStart,toWho:targetWho,toEnd:targetEnd,bookingId:visit.booking_id};document.getElementById('r3cMoveCopy').innerHTML='<b>'+r2Esc(visit.t)+'</b> → <b>'+r2Esc(targetStart)+'</b><br>'+r2Esc(visit.who)+' → '+r2Esc(targetWho);document.getElementById('r3cMoveModal').classList.add('open');}
-  function r3cConfirmMove(){var move=r3c.pendingMove,visit=move&&r3cVisit(move.salon,move.id);if(!move||!visit)return r3cCancelMove();if(r1BookingGroup(visit,move.salon).length>1){r3cCancelMove();renderSchedule();r3cOpenEdit(visit,move.salon);toast('Zmień termin obu masażystek w karcie rezerwacji.');return;}var bookingId=visit.booking_id,validation=r3cValidateMove(visit,move.toWho,move.toTime,move.salon);if(!validation.ok){r3cCancelMove();renderSchedule();toast(validation.message);return;}visit.t=move.toTime;visit.end=validation.end;visit.who=move.toWho;visit.booking_id=bookingId;r1MarkLocalChange(visit);r3cCancelMove();renderAll();toast('Wizyta przeniesiona lokalnie · booking_id bez zmian');}
+  function r3cConfirmMove(){var move=r3c.pendingMove,visit=move&&r3cVisit(move.salon,move.id);if(!move||!visit)return r3cCancelMove();if(R1_PROD){r3cCancelMove();renderSchedule();r3cOpenEdit(visit,move.salon);if(r21CanEdit(visit)){document.getElementById('r3cStart').value=move.toTime;document.getElementById('r3cTherapist').value=move.toWho;toast('Sprawdź termin i zapisz zmianę w bazie.');}return;}if(r1BookingGroup(visit,move.salon).length>1){r3cCancelMove();renderSchedule();r3cOpenEdit(visit,move.salon);toast('Zmień termin obu masażystek w karcie rezerwacji.');return;}var bookingId=visit.booking_id,validation=r3cValidateMove(visit,move.toWho,move.toTime,move.salon);if(!validation.ok){r3cCancelMove();renderSchedule();toast(validation.message);return;}visit.t=move.toTime;visit.end=validation.end;visit.who=move.toWho;visit.booking_id=bookingId;r1MarkLocalChange(visit);r3cCancelMove();renderAll();toast('Wizyta przeniesiona lokalnie · booking_id bez zmian');}
   function r3cDropTarget(event){var schedule=document.getElementById('r1Schedule'),rect=schedule.getBoundingClientRect(),data=DATA[state.salon],kol=data.team.filter(function(t){return t[2]!==false;});if(!kol.length)kol=data.team.slice(0,1);var columnWidth=(rect.width-52)/kol.length,index=Math.floor((event.clientX-rect.left-52)/columnWidth),quarter=Math.round((event.clientY-rect.top-44)/11);if(index<0||index>=kol.length)return null;quarter=Math.max(0,Math.min(43,quarter));return {who:kol[index][0],start:r3cTime(720+quarter*15)};}
   function r3cHandleDrop(event){event.preventDefault();var schedule=document.getElementById('r1Schedule');schedule.classList.remove('r3c-drag-active');var id=(event.dataTransfer&&event.dataTransfer.getData('text/plain'))||r3c.draggingId,visit=r3cVisit(state.salon,id),target=r3cDropTarget(event);if(!visit||!target)return;var validation=r3cValidateMove(visit,target.who,target.start,state.salon);if(!validation.ok){renderSchedule();toast(validation.message+' Karta wróciła na poprzednią pozycję.');return;}r3cOpenMove(visit,state.salon,target.who,target.start,validation.end);}
   function r3cPointerMove(event){var pointer=r3c.pointer;if(!pointer)return;var dx=event.clientX-pointer.x,dy=event.clientY-pointer.y;if(!pointer.moved&&Math.sqrt(dx*dx+dy*dy)<7)return;pointer.moved=true;r3c.suppressClick=true;var card=document.querySelector('[data-visit-id="'+pointer.id+'"]');if(card)card.classList.add('dragging');document.getElementById('r1Schedule').classList.add('r3c-drag-active');event.preventDefault();}
@@ -1665,7 +1736,7 @@ addEventListener('pointerup',function(){if(!drag)return;drag=false;vel=Math.max(
   document.querySelectorAll('[data-close-modal]').forEach(function(el){el.addEventListener('click',function(){el.closest('.r1-modal-shell').classList.remove('open');});});
   document.querySelectorAll('.r1-modal-shell').forEach(function(el){el.addEventListener('click',function(e){if(e.target===el)el.classList.remove('open');});});
   document.querySelectorAll('[data-not-yet]').forEach(function(el){el.addEventListener('click',function(){toast(el.dataset.notYet+' — następny etap, bez implementacji w UI-R1');});});
-  window.__ASTERA_R3C__={version:'UI-R3C',productionWrites:false,integrationEnabled:ASTERA_INTEGRATION_ENABLED,validateMove:function(salon,id,who,start){var visit=r3cVisit(salon,id);return visit?r3cValidateMove(visit,who,start,salon):{ok:false,code:'NOT_FOUND'};},visit:function(salon,id){var visit=r3cVisit(salon,id);return visit?{id:visit.id,booking_id:visit.booking_id,source:visit.source,status:visit.status,t:visit.t,end:visit.end,who:visit.who,duration:visit.duration,price:visit.price,bookToTherapist:visit.bookToTherapist}:null;},catalogCount:function(){return OFFER_CATALOG.reduce(function(total,category){return total+category.services.length;},0);}};
+  window.__ASTERA_R3C__={version:'UI-R21',productionWrites:'manual-update-cancel',integrationEnabled:ASTERA_INTEGRATION_ENABLED,validateMove:function(salon,id,who,start){var visit=r3cVisit(salon,id);return visit?r3cValidateMove(visit,who,start,salon):{ok:false,code:'NOT_FOUND'};},visit:function(salon,id){var visit=r3cVisit(salon,id);return visit?{id:visit.id,booking_id:visit.booking_id,source:visit.source,status:visit.status,t:visit.t,end:visit.end,who:visit.who,duration:visit.duration,price:visit.price,bookToTherapist:visit.bookToTherapist}:null;},catalogCount:function(){return OFFER_CATALOG.reduce(function(total,category){return total+category.services.length;},0);}};
   window.__ASTERA_R3D__={version:'UI-R3D',productionWrites:false,methods:SETTLEMENT_METHODS.map(function(method){return {id:method.id,label:method.label};}),cancellationDecision:function(visit,cancelledAt){return r3dVoucherCancellationDecision(visit,new Date(cancelledAt));},visit:function(salon,id){var visit=r3cVisit(salon,id);return visit?{id:visit.id,booking_id:visit.booking_id,status:visit.status,settlementStatus:visit.settlementStatus||'NIEROZLICZONA',paymentMethod:visit.paymentMethod||'',voucherNumber:visit.voucherNumber||'',voucherStatus:visit.voucherStatus||''}:null;}};
   window.__ASTERA_R3E__={version:'UI-R3E',productionWrites:false,methods:SETTLEMENT_METHODS.map(function(method){return {id:method.id,label:method.label,source:method.source||'',requiresBooking:method.requiresBooking!==false};}),voucherButtons:false,cancelled:function(){return r3eCancelledVisits().map(function(row){return {salon:row.salon,id:row.visit.id,booking_id:row.visit.booking_id,status:row.visit.status,voucherStatus:row.visit.voucherStatus||''};});},qrEntries:function(){return r3e.qrEntries.map(function(entry){return {id:entry.id,source:entry.source,booking_id:entry.booking_id,requiresBooking:entry.requiresBooking,salon:entry.salon,client:entry.client,amount:entry.amount,status:entry.status};});}};
   window.__ASTERA_R3F__={version:'UI-R3F',productionWrites:false,paymentIcon:function(method){return r3fPaymentIcon(method);},supportedMethods:SETTLEMENT_METHODS.map(function(method){return method.id;}).concat(['bon'])};
