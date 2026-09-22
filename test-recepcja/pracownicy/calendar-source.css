@@ -1,0 +1,2 @@
+.staff-calendar-connection{display:flex;flex-shrink:0;flex-wrap:wrap;gap:10px;align-items:center;padding:10px 18px;background:#14110a;color:#e5d3a7;font:13px system-ui;position:relative;z-index:10}
+.staff-calendar-connection span{flex:1;min-width:200px}.staff-calendar-connection button,.staff-calendar-connection a{border:1px solid #8d703b;background:#241b0d;border-radius:16px;padding:7px 12px;color:#f4dfac;text-decoration:none;font:inherit;cursor:pointer}.staff-calendar-connection [hidden]{display:none}

@@ -108,7 +108,7 @@ body.drag{cursor:grabbing}
 /* ASTERA UI-R1 — lokalna makieta. Zero backendu, zero wywołań sieciowych. */
 html,body{width:100%;height:100%;overflow:hidden;background:#080706;color:#f5ead6}
 body{cursor:default;touch-action:auto;user-select:none;-webkit-user-select:none}
-body> :not(.ui-r1){display:none!important}
+body> :not(.ui-r1):not(.staff-editor){display:none!important}
 .ui-r1{--r1-bg:#090806;--r1-panel:#12100c;--r1-panel2:#17130e;--r1-gold:#c99742;--r1-gold2:#f0cc81;--r1-line:rgba(205,159,76,.28);--r1-muted:#a79576;--r1-text:#f6ead3;position:fixed;inset:0;display:flex;flex-direction:column;z-index:100;background:
   radial-gradient(circle at 50% 42%,rgba(101,65,20,.18),transparent 29%),
   radial-gradient(circle at 0 100%,rgba(107,68,22,.10),transparent 30%),
@@ -303,7 +303,7 @@ body> :not(.ui-r1){display:none!important}
 @media(max-width:760px){.r3c-grid,.r3e-form-grid{grid-template-columns:1fr}.r3c-field.wide,.r3e-form-grid .wide{grid-column:auto}.r3c-actions{align-items:stretch;flex-direction:column}.r3c-actions-right{justify-content:flex-end}.r3d-payment-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.r3e-cancelled-card{grid-template-columns:1fr}}
 @media(max-height:820px) and (min-width:761px){.r1-home-title{top:10px}.r1-home-title .lotus{width:42px;height:42px}.r1-home-title h1{font-size:22px}.r1-mandala{height:500px;margin-top:45px;transform:scale(.88)}.r1-statbar{height:72px}.r1-stat{padding:4px}.r1-calendar-main{grid-template-rows:176px minmax(0,1fr)}.r1-day-hub{width:158px;height:158px}.r1-day-hub svg{width:40px;height:40px}.r1-visit-dot{width:62px;height:62px}}
 </style>
-</head>
+<style>.r34-outside-shift{border-right:3px solid #daaa53}.r34-shift-warning{color:#f2c471!important;font-size:8px!important}.r34-day-team{padding:8px;border:1px solid #806634;border-radius:8px;background:#211b13;color:#e9c882}.r1-team-list .staff-day-row{grid-template-columns:1fr auto}.r1-team-list .staff-day-row span{grid-row:2;grid-column:1/-1}@media(max-width:760px){.r1-nav #r34Employees{display:flex!important}}</style></head>
 <body>
 <div class="ui-r1" id="uiR1">
   <div class="r1-lotus-bg left" aria-hidden="true"><svg viewBox="0 0 100 100"><path d="M50 14c9 18 12 37 6 55-8-14-11-35-6-55zM32 24c13 13 19 30 18 47-14-10-22-29-18-47zM68 24c2 18-5 37-18 47 0-17 6-34 18-47zM14 43c17 6 30 20 34 38-18-4-31-17-34-38zM86 43c-4 21-17 34-34 38 4-18 17-32 34-38z"/></svg></div>
@@ -318,9 +318,9 @@ body> :not(.ui-r1){display:none!important}
       <button class="active" data-screen-link="home"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="6" height="6"/><rect x="14" y="4" width="6" height="6"/><rect x="4" y="14" width="6" height="6"/><rect x="14" y="14" width="6" height="6"/></svg><span>Pulpit</span></button>
       <button data-open-calendar><svg viewBox="0 0 24 24"><rect x="4" y="6" width="16" height="14" rx="2"/><path d="M8 3v6M16 3v6M4 10h16"/></svg><span>Rezerwacje</span></button>
       <button data-open-calendar><svg viewBox="0 0 24 24"><path d="M12 3c3 5 4 10 2 15-3-3-4-9-2-15zM5 8c4 2 7 6 7 11-4-1-7-5-7-11zM19 8c0 6-3 10-7 11 0-5 3-9 7-11z"/></svg><span>Grafik dnia</span></button>
-      <button data-not-yet="Klienci"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.5"/><path d="M5 21c0-4 3-6 7-6s7 2 7 6"/></svg><span>Klienci</span></button>
+      <button data-clients-link><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.5"/><path d="M5 21c0-4 3-6 7-6s7 2 7 6"/></svg><span>Klienci</span></button>
       <button data-not-yet="Raporty"><svg viewBox="0 0 24 24"><path d="M5 20V10M10 20V5M15 20v-8M20 20V3"/></svg><span>Raporty</span></button>
-      <button data-not-yet="Ustawienia"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19 13.5l2 1.5-2 3-2.5-1M13.5 19l-1.5 2-3-2 1-2.5M5 13.5L3 15l2 3 2.5-1M10.5 5L9 3l-3 2 1 2.5M18 6l-2-2-2 2"/></svg><span>Ustawienia</span></button>
+      <button data-not-yet="Ustawienia"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19 13.5l2 1.5-2 3-2.5-1M13.5 19l-1.5 2-3-2 1-2.5M5 13.5L3 15l2 3 2.5-1M10.5 5L9 3l-3 2 1 2.5M18 6l-2-2-2 2"/></svg><span>Ustawienia</span></button><button type="button" id="r34Employees"><span>Pracownicy</span></button>
     </nav>
     <div class="r1-top-actions">
       <div class="r1-theme-switch" role="group" aria-label="Wersja kolorystyczna">
@@ -342,7 +342,7 @@ body> :not(.ui-r1){display:none!important}
         <button class="r1-home-node" style="--x:80%;--y:55%" data-not-yet="Booksy"><svg viewBox="0 0 24 24"><rect x="5" y="4" width="14" height="16" rx="4"/><path d="M9 8v8h4a3 3 0 0 0 0-6H9"/></svg><strong>Booksy</strong><span>podgląd kanału</span></button>
         <button class="r1-home-node" style="--x:67%;--y:82%" data-not-yet="Potwierdzenia"><svg viewBox="0 0 24 24"><path d="M4 6h16v12H4zM4 7l8 6 8-6"/></svg><strong>Potwierdzenia</strong><span>maile</span></button>
         <button class="r1-home-node" style="--x:33%;--y:82%" data-not-yet="Retencja"><svg viewBox="0 0 24 24"><path d="M12 20S4 15 4 9c0-3 4-4 6-1 2-3 6-2 6 1 0 6-4 11-4 11z"/></svg><strong>Retencja</strong><span>dzisiaj</span></button>
-        <button class="r1-home-node" style="--x:20%;--y:55%" data-not-yet="Stały klient"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.5"/><path d="M5 21c0-4 3-6 7-6s7 2 7 6"/></svg><strong>Stały klient</strong><span>podgląd</span></button>
+        <button class="r1-home-node" style="--x:20%;--y:55%" data-clients-link><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.5"/><path d="M5 21c0-4 3-6 7-6s7 2 7 6"/></svg><strong>Klienci</strong><span>karty i historia</span></button>
         <div class="r1-time-dot" style="--x:50%;--y:9%">11:30</div><div class="r1-time-dot" style="--x:88%;--y:49%">15:30</div><div class="r1-time-dot" style="--x:50%;--y:94%">17:15</div><div class="r1-time-dot" style="--x:12%;--y:49%">09:00</div>
       </div>
       <div class="r1-statbar">
@@ -383,17 +383,17 @@ body> :not(.ui-r1){display:none!important}
             <div id="r1VisitOrbit"></div>
           </section>
           <section class="r1-panel r1-board">
-            <div class="r1-board-toolbar"><button class="back" data-screen-link="home" aria-label="Wróć">‹</button><div class="r1-board-date"><strong id="r1BoardDate">Piątek, 14 sierpnia 2026</strong><span><span data-salon-label>Salon SZ</span> · 12:00–23:00 · DANE PRZYKŁADOWE</span></div><div class="r1-view-tabs"><button class="active">Dzień</button><button data-not-yet="Widok tygodnia">Tydzień</button><button data-not-yet="Widok miesiąca">Miesiąc</button></div><button class="r1-icon-btn" data-open-modal="availability" aria-label="Wolne terminy — rezerwacja ręczna"><svg viewBox="0 0 24 24"><path d="M4 12h16M12 4v16"/></svg></button></div>
+            <div class="r1-board-toolbar"><button class="back" data-screen-link="home" aria-label="Wróć">‹</button><div class="r1-board-date"><strong id="r1BoardDate">Piątek, 14 sierpnia 2026</strong><span><span data-salon-label>Salon SZ</span> · 12:00–23:00 · DANE PRZYKŁADOWE</span></div><div class="r1-view-tabs"><button class="active">Dzień</button><button data-not-yet="Widok tygodnia">Tydzień</button><button data-not-yet="Widok miesiąca">Miesiąc</button></div><button type="button" data-open-modal="team" class="r34-day-team">Zespół dnia</button><button class="r1-icon-btn" data-open-modal="availability" aria-label="Wolne terminy — rezerwacja ręczna"><svg viewBox="0 0 24 24"><path d="M4 12h16M12 4v16"/></svg></button></div>
             <div class="r1-booking-context" id="r1BookingContext" role="status"><div><b id="r1BookingContextTitle">Powiązana rezerwacja</b><br><span id="r1BookingContextCopy"></span></div><button type="button" id="r1ClearBookingContext" aria-label="Zamknij podgląd kontekstu">×</button></div>
             <div class="r1-schedule-wrap"><div class="r1-schedule" id="r1Schedule"></div></div>
           </section>
         </div>
 
         <aside class="r1-panel r1-team">
-          <div class="r1-team-top"><h3>Kto dziś pracuje?</h3><button class="r1-icon-btn" data-open-modal="team" aria-label="Edytuj zespół"><svg viewBox="0 0 24 24"><path d="M4 20l4-1 11-11-3-3L5 16l-1 4zM14 7l3 3"/></svg></button></div>
+          <div class="r1-team-top"><h3>Zespół wybranego dnia</h3><button class="r1-icon-btn" data-open-modal="team" aria-label="Edytuj zespół"><svg viewBox="0 0 24 24"><path d="M4 20l4-1 11-11-3-3L5 16l-1 4zM14 7l3 3"/></svg></button></div>
           <div class="r1-team-list" id="r1TeamList"></div>
-          <div class="r1-team-note">Wybór „kto dziś pracuje" jest zapisywany na tym urządzeniu<br>i przeżywa odświeżenie.</div>
-          <button class="r1-team-edit" data-open-modal="team">Edytuj dzisiejszy zespół</button>
+          <div class="r1-team-note">Grafik jest zapisany lokalnie, osobno dla każdej daty.<br>Podłączenie AWS w przygotowaniu.</div>
+          <button class="r1-team-edit" data-open-modal="team">Edytuj zespół dnia</button>
         </aside>
       </div>
     </section>
@@ -403,7 +403,7 @@ body> :not(.ui-r1){display:none!important}
 
   <div class="r1-modal-shell" id="r1SlotsModal" role="dialog" aria-modal="true"><div class="r1-modal r1-slots-modal"><div class="r1-modal-head"><h3>Udostępnij terminy klientom</h3><button class="r1-close" data-close-modal>×</button></div><p class="r1-modal-sub" id="r1SlotsIntro">To jest tryb edycji tego samego Grafiku. Wybierz wolną godzinę przy masażystce: od razu pojawi się w głównej siatce jako udostępniona. W tej demonstracji dane pozostają lokalne.</p><label class="r1-modal-sub">Długość udostępnionego terminu <select id="r22ReleaseMinutes" style="background:#17130e;color:#e8d6ad;border:1px solid #765e31;border-radius:8px;padding:8px"><option value="60">60 min</option><option value="90">90 min</option><option value="120">120 min</option><option value="150">150 min</option><option value="180">180 min</option></select></label><div class="r1-slot-list" id="r1SlotList"></div></div></div>
   <div class="r1-modal-shell" id="r1AvailabilityModal" role="dialog" aria-modal="true" aria-label="Wolne terminy"><div class="r1-modal r1-slots-modal"><div class="r1-modal-head"><h3>Wolne terminy</h3><button class="r1-close" data-close-modal>×</button></div><p class="r1-modal-sub" id="r1AvailabilityIntro">Wybierz wolne okienko, aby rozpocząć rezerwację ręczną. Data, godzina i masażystka zostaną podstawione.</p><div class="r1-slot-list" id="r1AvailabilityList"></div></div></div>
-  <div class="r1-modal-shell" id="r1TeamModal" role="dialog" aria-modal="true"><div class="r1-modal"><div class="r1-modal-head"><h3>Dzisiejszy zespół</h3><button class="r1-close" data-close-modal>×</button></div><p class="r1-modal-sub">Prosty podgląd i lokalna edycja składu dnia. Zmiany pozostają tylko w demonstracji.</p><div class="r1-check-list" id="r1TeamChecks"></div><div class="r1-team-transfer" id="r1TeamTransfer"></div></div></div>
+  <div class="r1-modal-shell" id="r1TeamModal" role="dialog" aria-modal="true"><div class="r1-modal"><div class="r1-modal-head"><h3>Zespół wybranego dnia</h3><button class="r1-close" data-close-modal>×</button></div><p class="r1-modal-sub">Grafik wybranego dnia. Zapis lokalny; podłączenie AWS w przygotowaniu.</p><div class="r1-check-list" id="r1TeamChecks"></div><div class="r1-team-transfer" id="r1TeamTransfer"></div></div></div>
 
   <div class="r1-modal-shell" id="r2ReceptionModal" role="dialog" aria-modal="true" aria-label="Recepcja — rezerwacja lub sprzedaż bonu">
     <div class="r1-modal r2-reception">
@@ -500,7 +500,7 @@ body> :not(.ui-r1){display:none!important}
           <label class="r3c-field"><span>Czas masażu</span><select id="r3cDuration"></select></label>
           <label class="r3c-field"><span>Cena</span><input id="r3cPrice" readonly></label>
           <label class="r3c-field"><span>Preferowana masażystka</span><span class="r3c-heart-choice"><input id="r3cHeart" type="checkbox"> ♥ klient wybrał konkretną osobę</span></label>
-          <label class="r3c-field wide"><span>Krótka notatka operacyjna</span><textarea id="r3cNote" maxlength="240" placeholder="Opcjonalnie"></textarea></label>
+          <label class="r3c-field wide"><span>Notatka do tej rezerwacji · wewnętrzna</span><textarea id="r3cNote" maxlength="240" placeholder="Opcjonalnie"></textarea></label>
         </div>
       </div>
       <div class="r3c-actions"><button class="r2-btn r3c-danger" id="r3cCancelVisit" type="button">Anuluj wizytę</button><div class="r3c-actions-right"><button class="r2-btn" data-r3c-close-edit type="button">Zamknij</button><button class="r2-btn" id="r3dOpenSettlement" type="button">Rozlicz wizytę</button><button class="r2-btn primary" id="r3cSaveVisit" type="button">Zapisz lokalnie</button></div></div>
@@ -720,6 +720,12 @@ addEventListener('pointerdown',function(e){drag=true;lastX=e.clientX;dragV=0;doc
 addEventListener('pointermove',function(e){if(!drag)return;const dx=e.clientX-lastX;lastX=e.clientX;dragV=dx*0.14;rot+=dragV;});
 addEventListener('pointerup',function(){if(!drag)return;drag=false;vel=Math.max(-1.6,Math.min(1.6,dragV))||0.02;document.body.classList.remove('drag');});
 </script>
+<link rel="stylesheet" href="pracownicy/style.css">
+<script src="pracownicy/model.js"></script>
+<link rel="stylesheet" href="pracownicy/calendar-source.css">
+<script src="klienci/auth.js" data-config="https://core.thaimaliwan.pl/api/reception/calendar/config?screen=calendar"></script>
+<script src="pracownicy/calendar-source.js"></script>
+<script src="pracownicy/editor.js"></script>
 <script id="ui-r1-script">
 (function(){
   'use strict';
@@ -904,11 +910,8 @@ addEventListener('pointerup',function(){if(!drag)return;drag=false;vel=Math.max(
      NIC nie dokladamy z automatu - zespol ustawiasz recznie. */
   function r1WszystkieTerapeutki(t,salon){
     var lista=String(t||'').split(/[,;]+/).map(function(x){return x.trim()}).filter(Boolean);
-    var team=(DATA[salon]&&DATA[salon].team||[]);
     var out=[];
-    lista.forEach(function(im){
-      team.forEach(function(z){ if(r1Bez(z[0])===r1Bez(im) && out.indexOf(z[0])<0) out.push(z[0]); });
-    });
+    lista.forEach(function(im){var known=StaffSchedule.staff.find(function(p){return r1Bez(p.name)===r1Bez(im);});var name=known?known.name:im;if(out.indexOf(name)<0)out.push(name);});
     return out;
   }
   function r1WczytajRezerwacje(ponowka){
@@ -1285,13 +1288,15 @@ addEventListener('pointerup',function(){if(!drag)return;drag=false;vel=Math.max(
   function r3eSaveQr(){var raw=document.getElementById('r3eQrAmount').value.replace(',','.'),amount=Number(raw);if(!isFinite(amount)||amount<=0){toast('Podaj kwotę płatności QR');return;}var id='QR_LOCAL_'+String(Date.now()),entry={id:id,source:'PAYMENT_QR',booking_id:'',requiresBooking:false,salon:document.getElementById('r3eQrSalon').value,client:document.getElementById('r3eQrClient').value.trim()||'Klient bez rezerwacji',phone:document.getElementById('r3eQrPhone').value.trim(),amount:Math.round(amount*100)/100,note:document.getElementById('r3eQrNote').value.trim(),status:'ROZLICZONA',createdAt:new Date().toISOString()};r3e.qrEntries.push(entry);r3eRenderQrLog();document.getElementById('r3eQrClient').value='';document.getElementById('r3eQrPhone').value='';document.getElementById('r3eQrAmount').value='';document.getElementById('r3eQrNote').value='';toast('Płatność QR zapisana wyłącznie lokalnie · bez rezerwacji');}
   function r3cStatusLabel(value){return value==='REZERWACJA'?'POTWIERDZONA':value;}
   function r3cValidateMove(visit,targetWho,targetStart,salon){
-    var data=DATA[salon],team=data&&data.team.find(function(person){return person[0]===targetWho;});
+    if(window.CalendarStaff&&CalendarStaff.mode()!=='LOCAL'&&(!R1_PROD||R1_READ_INCOMPLETE||Date.now()-R1_READ_AT>300000||!CalendarStaff.coverage(visit.date,r34Visits())))return {ok:false,code:'INCOMPLETE_SCHEDULE',message:'Odśwież pełny grafik wizyt i godzin pracy.'};
+    var data=DATA[salon],team=StaffSchedule.staff.find(function(person){return (person.id===targetWho||person.name===targetWho)&&person.active!==false;});
     if(!/^\d{4}-\d{2}-\d{2}$/.test(visit.date||''))return {ok:false,code:'INVALID_DATE',message:'Wybierz datę wizyty.'};
-    if(!team||team[2]===false)return {ok:false,code:'INACTIVE_THERAPIST',message:'Wybrana masażystka nie pracuje dziś.'};
+    if(!team)return {ok:false,code:'INACTIVE_THERAPIST',message:'Wybrana masażystka nie pracuje dziś.'};
     if(!/^\d{2}:\d{2}$/.test(targetStart))return {ok:false,code:'INVALID_TIME',message:'Wybierz poprawną godzinę.'};
     var start=min(targetStart),duration=+visit.duration||min(visit.end)-min(visit.t),stop=start+duration;
     if(!Number.isFinite(duration)||duration<=0||Number(targetStart.slice(0,2))>23||Number(targetStart.slice(3))>59||start<720||stop>1380)return {ok:false,code:'OUT_OF_HOURS',message:'Wizyta wychodzi poza godziny pracy 12:00–23:00.'};
-    var conflict=data.visits.find(function(other){if(other.id===visit.id||(visit.groupIds||[]).includes(other.id)||other.status==='ODWOŁANA'||other.who!==targetWho||other.date!==visit.date)return false;var otherStart=min(other.t),otherStop=min(other.end);return start<otherStop&&stop>otherStart;});
+    if(!StaffSchedule.covers(r34Read(),visit.date,salon,targetWho,targetStart,r3cTime(stop)))return {ok:false,code:'OUTSIDE_SHIFT',message:'Brak ustalonych godzin pracy tej masażystki dla całej wizyty.'};
+    var conflict=r34Visits().find(function(other){if(other.id===visit.id||(visit.groupIds||[]).includes(other.id)||other.status==='ODWOŁANA'||!StaffSchedule.samePerson(other.who,targetWho)||other.date!==visit.date)return false;var otherStart=min(other.t),otherStop=min(other.end);return start<otherStop&&stop>otherStart;});
     if(conflict){var conflictStart=min(conflict.t);if(start<conflictStart&&stop>conflictStart)return {ok:false,code:'NO_SPACE',message:'Brak wystarczającej długości wolnego slotu przed następną wizytą.'};return {ok:false,code:'COLLISION',message:'Ten termin koliduje z wizytą '+conflict.t+'–'+conflict.end+'.'};}
     return {ok:true,code:'OK',end:r3cTime(stop)};
   }
@@ -1366,7 +1371,7 @@ addEventListener('pointerup',function(){if(!drag)return;drag=false;vel=Math.max(
     r3c.editingId=visit.id;r3c.editingSalon=salon;
     document.getElementById('r3cSource').textContent=visit.source;document.getElementById('r3cBookingId').textContent=visit.booking_id;document.getElementById('r3dSettlementState').textContent=visit.settlementStatus||'NIEROZLICZONA';document.getElementById('r3dVoucherState').textContent=visit.voucherNumber||visit.voucherStatus||'—';document.getElementById('r3dVoucherChip').style.display=r3dIsVoucher(visit)?'':'none';
     document.getElementById('r3cClient').value=visit.client;document.getElementById('r3cPhone').value=visit.phone||'';document.getElementById('r3cSalon').value=salon;document.getElementById('r3cDate').value=visit.date||'2026-08-14';document.getElementById('r3cStart').value=visit.t;
-    r3cSetOptions(document.getElementById('r3cTherapist'),DATA[salon].team.map(function(person){return {value:person[0],label:person[0]+(person[2]===false?' · nie pracuje':'')};}),visit.who);
+    r3cSetOptions(document.getElementById('r3cTherapist'),StaffSchedule.staff.map(function(person){return {value:person.name,label:person.name};}),visit.who);
     var partner=r1BookingGroup(visit,salon).find(function(v){return v.id!==visit.id;});
     document.getElementById('r3cSecondTherapistField').hidden=!partner;document.getElementById('r3cSecondTherapistField').style.display=partner?'':'none';
     r3cSetOptions(document.getElementById('r3cSecondTherapist'),DATA[salon].team.map(function(person){return {value:person[0],label:person[0]};}),partner?partner.who:'');
@@ -1410,7 +1415,7 @@ addEventListener('pointerup',function(){if(!drag)return;drag=false;vel=Math.max(
   function r3cCancelMove(){r3c.pendingMove=null;document.getElementById('r3cMoveModal').classList.remove('open');}
   function r3cOpenMove(visit,salon,targetWho,targetStart,targetEnd){r3c.pendingMove={salon:salon,id:visit.id,fromTime:visit.t,fromWho:visit.who,toTime:targetStart,toWho:targetWho,toEnd:targetEnd,bookingId:visit.booking_id};document.getElementById('r3cMoveCopy').innerHTML='<b>'+r2Esc(visit.t)+'</b> → <b>'+r2Esc(targetStart)+'</b><br>'+r2Esc(visit.who)+' → '+r2Esc(targetWho);document.getElementById('r3cMoveModal').classList.add('open');}
   function r3cConfirmMove(){var move=r3c.pendingMove,visit=move&&r3cVisit(move.salon,move.id);if(!move||!visit)return r3cCancelMove();if(R1_PROD){r3cCancelMove();renderSchedule();r3cOpenEdit(visit,move.salon);if(r21CanEdit(visit)){document.getElementById('r3cStart').value=move.toTime;document.getElementById('r3cTherapist').value=move.toWho;toast('Sprawdź termin i zapisz zmianę w bazie.');}return;}if(r1BookingGroup(visit,move.salon).length>1){r3cCancelMove();renderSchedule();r3cOpenEdit(visit,move.salon);toast('Zmień termin obu masażystek w karcie rezerwacji.');return;}var bookingId=visit.booking_id,validation=r3cValidateMove(visit,move.toWho,move.toTime,move.salon);if(!validation.ok){r3cCancelMove();renderSchedule();toast(validation.message);return;}visit.t=move.toTime;visit.end=validation.end;visit.who=move.toWho;visit.booking_id=bookingId;r1MarkLocalChange(visit);r3cCancelMove();renderAll();toast('Wizyta przeniesiona lokalnie · booking_id bez zmian');}
-  function r3cDropTarget(event){var schedule=document.getElementById('r1Schedule'),rect=schedule.getBoundingClientRect(),data=DATA[state.salon],kol=data.team.filter(function(t){return t[2]!==false;});if(!kol.length)kol=data.team.slice(0,1);var columnWidth=(rect.width-52)/kol.length,index=Math.floor((event.clientX-rect.left-52)/columnWidth),quarter=Math.round((event.clientY-rect.top-44)/11);if(index<0||index>=kol.length)return null;quarter=Math.max(0,Math.min(43,quarter));return {who:kol[index][0],start:r3cTime(720+quarter*15)};}
+  function r3cDropTarget(event){var schedule=document.getElementById('r1Schedule'),rect=schedule.getBoundingClientRect(),data=DATA[state.salon],kol=r34Columns(state.salon);if(!kol.length)return null;var columnWidth=(rect.width-52)/kol.length,index=Math.floor((event.clientX-rect.left-52)/columnWidth),quarter=Math.round((event.clientY-rect.top-44)/11);if(index<0||index>=kol.length)return null;quarter=Math.max(0,Math.min(43,quarter));return {who:kol[index][0],start:r3cTime(720+quarter*15)};}
   function r3cHandleDrop(event){event.preventDefault();var schedule=document.getElementById('r1Schedule');schedule.classList.remove('r3c-drag-active');var id=(event.dataTransfer&&event.dataTransfer.getData('text/plain'))||r3c.draggingId,visit=r3cVisit(state.salon,id),target=r3cDropTarget(event);if(!visit||!target)return;var validation=r3cValidateMove(visit,target.who,target.start,state.salon);if(!validation.ok){renderSchedule();toast(validation.message+' Karta wróciła na poprzednią pozycję.');return;}r3cOpenMove(visit,state.salon,target.who,target.start,validation.end);}
   function r3cPointerMove(event){var pointer=r3c.pointer;if(!pointer)return;var dx=event.clientX-pointer.x,dy=event.clientY-pointer.y;if(!pointer.moved&&Math.sqrt(dx*dx+dy*dy)<7)return;pointer.moved=true;r3c.suppressClick=true;var card=document.querySelector('[data-visit-id="'+pointer.id+'"]');if(card)card.classList.add('dragging');document.getElementById('r1Schedule').classList.add('r3c-drag-active');event.preventDefault();}
   function r3cPointerUp(event){var pointer=r3c.pointer;if(!pointer)return;r3c.pointer=null;document.getElementById('r1Schedule').classList.remove('r3c-drag-active');var card=document.querySelector('[data-visit-id="'+pointer.id+'"]');if(card)card.classList.remove('dragging');if(!pointer.moved)return;event.preventDefault();var visit=r3cVisit(pointer.salon,pointer.id),target=r3cDropTarget(event);if(!visit||!target){renderSchedule();toast('Karta wróciła na poprzednią pozycję.');setTimeout(function(){r3c.suppressClick=false;},80);return;}var validation=r3cValidateMove(visit,target.who,target.start,pointer.salon);if(!validation.ok){renderSchedule();toast(validation.message+' Karta wróciła na poprzednią pozycję.');setTimeout(function(){r3c.suppressClick=false;},80);return;}r3cOpenMove(visit,pointer.salon,target.who,target.start,validation.end);setTimeout(function(){r3c.suppressClick=false;},80);}
@@ -1433,9 +1438,10 @@ addEventListener('pointerup',function(){if(!drag)return;drag=false;vel=Math.max(
   }
   function renderSchedule(){
     var d=DATA[state.salon],el=document.getElementById('r1Schedule');el.innerHTML='';
-    var kol=d.team.filter(function(t){return t[2]!==false;});if(!kol.length)kol=d.team.slice(0,1);   // tylko aktywne masazystki = tylko ich kolumny (nieaktywne ukryte)
-    el.style.gridTemplateColumns='52px repeat('+kol.length+',minmax(130px,1fr))';                    // liczba kolumn idzie za zespolem, nie na sztywno
-    kol.forEach(function(t,i){var h=document.createElement('div');h.className='r1-therapist-head';h.style.gridColumn=String(i+2);h.style.gridRow='1';h.innerHTML='<i class="r1-avatar">'+initials(t[0])+'</i><span>'+t[0]+'</span>';el.appendChild(h);});
+    var kol=r34Columns(state.salon); // Existing visits remain visible outside planned work.
+    el.style.gridTemplateColumns=kol.length?'52px repeat('+kol.length+',minmax(130px,1fr))':'52px 1fr';                    // liczba kolumn idzie za zespolem, nie na sztywno
+    if(!kol.length){var empty=document.createElement('p');empty.textContent='Brak ustalonego zespołu. Otwórz Zespół dnia i wpisz godziny pracy.';empty.style.gridColumn='2';el.appendChild(empty);}
+    kol.forEach(function(t,i){var h=document.createElement('div');h.className='r1-therapist-head';h.style.gridColumn=String(i+2);h.style.gridRow='1';h.innerHTML='<i class="r1-avatar">'+r2Esc(initials(t[0]))+'</i><span>'+r2Esc(t[0])+'</span>';el.appendChild(h);});
     for(var hour=12;hour<=23;hour++){
       var label=document.createElement('div');label.className='r1-time-label';label.style.gridColumn='1';label.style.gridRow=(2+(hour-12)*4)+'/span 4';label.textContent=(hour<10?'0':'')+hour+':00';el.appendChild(label);
       kol.forEach(function(t,i){var slot=document.createElement('div');slot.className='r1-time-slot';slot.style.gridColumn=String(i+2);slot.style.gridRow=(2+(hour-12)*4)+'/span 4';el.appendChild(slot);});
@@ -1448,40 +1454,27 @@ addEventListener('pointerup',function(){if(!drag)return;drag=false;vel=Math.max(
       }
       var a=document.createElement('div'),heart=v.bookToTherapist?'<i class="r1-book-heart" title="Klient wybrał konkretnie tę masażystkę" aria-label="Book do masażystki">♥</i>':'',payment=v.settlementStatus==='ROZLICZONA'?r3fPaymentIcon(v.paymentMethod||'inne'):'',icons=(heart||payment)?'<span class="r3f-card-icons">'+heart+payment+'</span>':'',settled=v.settlementStatus==='ROZLICZONA'?'<i class="r3d-payment-mark">ROZLICZONA</i>':'',voucherLabel=v.booking_type==='VOUCHER'?'<i class="r1-voucher-badge">BON</i>':'';
       a.className='r1-appointment'+((heart||payment)?' has-card-icons':'')+(v.bookToTherapist?' book-to-therapist':'')+(v.source==='BOOKSY'?' source-booksy':'')+(v.settlementStatus==='ROZLICZONA'?' r3d-settled':'')+(v.booking_type==='VOUCHER'?' r5-voucher-booking':'');a.setAttribute('data-book-to-therapist',v.bookToTherapist?'true':'false');a.setAttribute('data-visit-id',v.id);a.setAttribute('data-source',v.source);a.setAttribute('data-booking-id',v.booking_id);a.setAttribute('data-settlement-status',v.settlementStatus||'NIEROZLICZONA');a.setAttribute('data-payment-method',v.paymentMethod||'');a.setAttribute('data-draggable',v.source==='BOOKSY'?'false':'true');a.setAttribute('role','button');a.setAttribute('tabindex','0');a.setAttribute('aria-label','Edytuj wizytę '+v.client);a.title=v.source==='BOOKSY'?'Kliknij, aby podejrzeć rezerwację Booksy':'Kliknij, aby edytować · przeciągnij, aby przenieść';a.style.gridColumn=String(idx+2);a.style.gridRow=quarterRow(v.t)+'/span '+Math.max(2,Math.round((min(v.end)-min(v.t))/15));a.innerHTML=icons+settled+'<b>'+r2Esc(v.t)+' – '+r2Esc(v.end)+'</b><strong>'+r2Esc(v.client)+'</strong><span>'+r2Esc(v.service)+'</span>'+voucherLabel;
+      if(!StaffSchedule.covers(r34Read(),v.date,state.salon,v.who,v.t,v.end)){a.classList.add('r34-outside-shift');var warning=document.createElement('span');warning.className='r34-shift-warning';warning.textContent='⚠ Sprawdź grafik pracy';a.appendChild(warning);}
       a.addEventListener('click',function(){if(r3c.suppressClick)return;r3cOpenEdit(v,state.salon);});a.addEventListener('keydown',function(event){if(event.key==='Enter'||event.key===' '){event.preventDefault();r3cOpenEdit(v,state.salon);}});a.addEventListener('pointerdown',function(event){if(v.source==='BOOKSY'||event.button!==0)return;r3c.pointer={id:v.id,salon:state.salon,x:event.clientX,y:event.clientY,moved:false};});el.appendChild(a);
     });
   }
-  /* Zapis/odczyt zespolu na tym urzadzeniu - zeby wybor "kto dzis pracuje" przezyl odswiezenie. */
-  function r1ZapiszZespol(){
-    try{var pack={};['ZW','SZ'].forEach(function(s){pack[s]=(DATA[s]&&DATA[s].team)||[];});localStorage.setItem('astera.zespol',JSON.stringify(pack));}catch(e){}
+  function r34Read(){try{return window.CalendarStaff?CalendarStaff.read(state.date):StaffEditor.read();}catch(e){return StaffSchedule.empty();}}
+  function r34Team(salon,date){return StaffSchedule.onDay(r34Read(),date,salon).map(function(p){return [p.name,'',true];});}
+  function r34Columns(salon){
+    var names=r34Team(salon,state.date).map(function(t){return t[0];});
+    DATA[salon].visits.filter(function(v){return v.date===state.date&&v.status!=='ODWOŁANA';}).forEach(function(v){if(names.indexOf(v.who)<0)names.push(v.who);});
+    return names.map(function(n){return [n,'',true];});
   }
-  function r1WczytajZespol(){
-    try{var raw=localStorage.getItem('astera.zespol');if(!raw)return;var pack=JSON.parse(raw);
-      ['ZW','SZ'].forEach(function(s){if(pack[s]&&pack[s].length&&DATA[s])DATA[s].team=pack[s];});}catch(e){}
-  }
+  function r34Visits(){return DATA.ZW.visits.concat(DATA.SZ.visits);}
+  function r1ZapiszZespol(){} // R34: no writes to the undated legacy team.
+  function r1WczytajZespol(){} // R34: old selections do not define future shifts.
   function r1SalonFullName(code){return code==='ZW'?'ZW · Zwierzyniecka':'SZ · Szewska';}
-  function r1MemberOrigin(member,currentSalon){return member[3]||currentSalon;}
-  function r1AddTeamMemberFromOtherSalon(member,originSalon){
-    var target=DATA[state.salon];
-    if(target.team.some(function(item){return item[0]===member[0];})){toast(member[0]+' jest już w dzisiejszym zespole');return;}
-    target.team.push([member[0],member[1],true,originSalon]);
-    r1ZapiszZespol();
-    renderAll();
-    toast(member[0]+' dodana do '+r1SalonFullName(state.salon)+' · zapisane');
-  }
   function renderTeam(){
-    var d=DATA[state.salon],list=document.getElementById('r1TeamList'),checks=document.getElementById('r1TeamChecks'),transfer=document.getElementById('r1TeamTransfer'),otherSalon=state.salon==='ZW'?'SZ':'ZW';list.innerHTML='';checks.innerHTML='';
-    d.team.forEach(function(t){
-      var active=t[2]!==false,origin=r1MemberOrigin(t,state.salon),originText=origin!==state.salon?' · z '+r1SalonFullName(origin):'';
-      var row=document.createElement('div');row.className='r1-team-row';row.style.opacity=active?'1':'.45';row.innerHTML='<i class="r1-avatar">'+initials(t[0])+'</i><div><strong>'+t[0]+'</strong><span>'+t[1]+originText+'</span></div><em>'+((active)?'●':'○')+'</em>';list.appendChild(row);
-      var c=document.createElement('label');c.className='r1-check';c.innerHTML='<input type="checkbox" '+(active?'checked':'')+'><span>'+t[0]+' · '+t[1]+originText+'</span>';c.querySelector('input').addEventListener('change',function(){t[2]=this.checked;r1ZapiszZespol();renderAll();toast(t[0]+(t[2]?' pracuje dziś · zapisane':' ukryta z grafiku · zapisane'));});checks.appendChild(c);
-    });
-    if(!transfer)return;
-    transfer.innerHTML='<h4>Dodaj z drugiego salonu</h4><p>Na dziś do '+r1SalonFullName(state.salon)+'. Dodanie nie zmienia grafiku źródłowego ani danych produkcyjnych.</p>';
-    var candidates=DATA[otherSalon].team.filter(function(person){return !d.team.some(function(current){return current[0]===person[0];});}),options=document.createElement('div');options.className='r1-transfer-options';
-    if(!candidates.length){options.innerHTML='<span class="r1-slot-empty">Wszystkie osoby z '+r1SalonFullName(otherSalon)+' są już dodane.</span>';}
-    candidates.forEach(function(person){var option=document.createElement('div');option.className='r1-transfer-option';option.innerHTML='<div><strong>'+person[0]+'</strong><span>'+person[1]+' · '+r1SalonFullName(otherSalon)+'</span></div><button type="button">Dodaj</button>';option.querySelector('button').addEventListener('click',function(){r1AddTeamMemberFromOtherSalon(person,otherSalon);});options.appendChild(option);});
-    transfer.appendChild(options);
+    var list=document.getElementById('r1TeamList'),checks=document.getElementById('r1TeamChecks');
+    if(window.CalendarStaff&&CalendarStaff.mode()!=='LOCAL'){
+      [list,checks].forEach(function(box){box.replaceChildren();try{var data=CalendarStaff.read(state.date);StaffSchedule.staff.forEach(function(p){var row=document.createElement('p');row.textContent=p.name+' · '+(p.active===false?'Nieaktywny':StaffSchedule.label(StaffSchedule.get(data,state.date,p.id),state.salon));box.appendChild(row);});}catch(e){box.textContent=e.message;}var link=document.createElement('a');link.href='https://core.thaimaliwan.pl/test-recepcja/pracownicy/?date='+state.date+'&salon='+state.salon;link.textContent='Ustaw godziny w Pracownicy';box.appendChild(link);});
+    }else{StaffEditor.day(list,state.date,state.salon,renderAll);StaffEditor.day(checks,state.date,state.salon,renderAll);}
+    document.getElementById('r1TeamTransfer').textContent='Zmianę salonu ustaw w godzinach pracy danej osoby. Nakładające się godziny są blokowane.';
   }
   function r1ReleasedSlot(data,therapist,start){return data.visits.some(function(v){return v.date===state.date&&v.status==='BLOKADA'&&v.booking_type==='VOUCHER'&&v.who===therapist&&v.t===start;});}
   function r1AddMinutes(start,minutes){var total=min(start)+minutes;return String(Math.floor(total/60)).padStart(2,'0')+':'+String(total%60).padStart(2,'0');}
@@ -1499,6 +1492,7 @@ addEventListener('pointerup',function(){if(!drag)return;drag=false;vel=Math.max(
   }
   function r1ReleaseSlot(therapist,start){
     var data=DATA[state.salon],duration=r22ReleaseMinutes();
+    if(window.CalendarStaff&&CalendarStaff.mode()!=='LOCAL'&&(!R1_PROD||!CalendarStaff.coverage(state.date,r34Visits()))){toast('Najpierw odczytaj pełny grafik wizyt i godzin pracy.');return;}
     if(r1ReleasedSlot(data,therapist,start)){toast('Ten termin jest już udostępniony.');return;}
     if(R1_PROD&&(R1_READ_INCOMPLETE||R1_LOCAL_DIRTY||Date.now()-R1_READ_AT>300000)){toast('Odśwież grafik przed udostępnieniem terminu.');return;}
     var validation=r3cValidateMove({date:state.date,duration:duration},therapist,start,state.salon);
@@ -1518,7 +1512,8 @@ addEventListener('pointerup',function(){if(!drag)return;drag=false;vel=Math.max(
     var el=document.getElementById('r1SlotList'),intro=document.getElementById('r1SlotsIntro'),data=DATA[state.salon],duration=r22ReleaseMinutes();
     intro.textContent=(state.releaseContext?'Kontekst: bon '+state.releaseContext.voucher+'. ':'')+'Wybierz długość i wolny termin jednej masażystki. Udostępnienie jest wspólne dla bonów i blokuje rezerwacje ręczne. '+(R1_PROD?'Zapis do bazy nastąpi po potwierdzeniu.':'DEMO — zapis tylko lokalny.');
     el.innerHTML='';
-    data.team.filter(function(person){return person[2]!==false;}).forEach(function(person){
+    if(window.CalendarStaff&&CalendarStaff.mode()!=='LOCAL'&&(!R1_PROD||R1_READ_INCOMPLETE||Date.now()-R1_READ_AT>300000||!CalendarStaff.coverage(state.date,r34Visits()))){el.textContent='Brak pełnego, aktualnego odczytu wizyt lub godzin pracy. Odśwież grafik.';return;}
+    r34Team(state.salon,state.date).forEach(function(person){
       var therapist=person[0],column=document.createElement('section'),head=document.createElement('div'),times=document.createElement('div'),own=[];
       for(var minute=720;minute+duration<=1380;minute+=30){var time=r3cTime(minute);if(r1ReleasedSlot(data,therapist,time)||r3cValidateMove({date:state.date,duration:duration},therapist,time,state.salon).ok)own.push(time);}
       column.className='r1-slot-column';head.className='r1-slot-person';times.className='r1-slot-times';head.innerHTML='<i>'+r2Esc(initials(therapist))+'</i><strong>'+r2Esc(therapist)+'</strong>';column.appendChild(head);
@@ -1529,15 +1524,14 @@ addEventListener('pointerup',function(){if(!drag)return;drag=false;vel=Math.max(
   }
   document.getElementById('r22ReleaseMinutes').addEventListener('change',renderSlots);
   function r1AvailableSlots(data){
-    var result=[];
-    data.team.forEach(function(member,therapistIndex){
-      if(member[2]===false)return;
+    var result=[];if(window.CalendarStaff&&CalendarStaff.mode()!=='LOCAL'&&(!R1_PROD||R1_READ_INCOMPLETE||Date.now()-R1_READ_AT>300000||!CalendarStaff.coverage(state.date,r34Visits())))return result;
+    r34Team(state.salon,state.date).forEach(function(member,therapistIndex){
       var therapist=member[0];
       for(var hour=12;hour<20;hour++){
         var start=String(hour).padStart(2,'0')+':00';
         var stop=r1AddMinutes(start,60);
-        var occupied=data.visits.some(function(v){
-          return v.date===state.date&&v.status!=='ODWOŁANA'&&v.who===therapist&&min(start)<min(v.end)&&min(stop)>min(v.t);
+        var occupied=!StaffSchedule.covers(r34Read(),state.date,state.salon,therapist,start,stop)||r34Visits().some(function(v){
+          return v.date===state.date&&v.status!=='ODWOŁANA'&&StaffSchedule.samePerson(v.who,therapist)&&min(start)<min(v.end)&&min(stop)>min(v.t);
         });
         if(!occupied)result.push({
           data:state.date,
@@ -1555,8 +1549,8 @@ addEventListener('pointerup',function(){if(!drag)return;drag=false;vel=Math.max(
     var slots=r1AvailableSlots(data);
     intro.textContent=slots.length+' wolnych pełnych godzin od 12:00 do 20:00. Wybierz okienko, aby otworzyć Rezerwację ręczną z podstawioną datą, godziną i masażystką. Terminy udostępnione klientom, blokady i aktywne rezerwacje są tu traktowane jak zajęte.';
     list.innerHTML='';
-    if(!slots.length){list.innerHTML='<span class="r1-slot-empty">Brak wolnych terminów w tym widoku.</span>';return;}
-    data.team.filter(function(t){return t[2]!==false;}).forEach(function(member){var matching=slots.filter(function(slot){return slot.terapeutka===member[0];});if(!matching.length)return;var column=document.createElement('section');column.className='r1-slot-column';column.innerHTML='<div class="r1-slot-person"><i>'+r2Esc(initials(member[0]))+'</i><strong>'+r2Esc(member[0])+'</strong></div>';var times=document.createElement('div');times.className='r1-slot-times';matching.forEach(function(slot){var button=document.createElement('button');button.type='button';button.className='r1-slot available';button.innerHTML='<b>'+r2Esc(slot.start+'–'+slot.stop)+'</b><span>wolny termin</span>';button.addEventListener('click',function(){r3OpenBookingFromFreeSlot(slot);});times.appendChild(button);});column.appendChild(times);list.appendChild(column);});
+    if(!slots.length){list.innerHTML='<span class="r1-slot-empty">Brak wolnych terminów. Sprawdź Zespół dnia i godziny pracy.</span>';return;}
+    r34Team(state.salon,state.date).forEach(function(member){var matching=slots.filter(function(slot){return slot.terapeutka===member[0];});if(!matching.length)return;var column=document.createElement('section');column.className='r1-slot-column';column.innerHTML='<div class="r1-slot-person"><i>'+r2Esc(initials(member[0]))+'</i><strong>'+r2Esc(member[0])+'</strong></div>';var times=document.createElement('div');times.className='r1-slot-times';matching.forEach(function(slot){var button=document.createElement('button');button.type='button';button.className='r1-slot available';button.innerHTML='<b>'+r2Esc(slot.start+'–'+slot.stop)+'</b><span>wolny termin</span>';button.addEventListener('click',function(){r3OpenBookingFromFreeSlot(slot);});times.appendChild(button);});column.appendChild(times);list.appendChild(column);});
   }
   function renderOrbit(){var el=document.getElementById('r1VisitOrbit'),v=DATA[state.salon].visits.filter(function(visit){return visit.status!=='ODWOŁANA'&&visit.date===state.date;}).slice(0,5),pos=[[19,56],[31,22],[50,12],[69,22],[81,56]];el.innerHTML='';v.forEach(function(x,i){var n=document.createElement('div');n.className='r1-visit-dot';n.style.setProperty('--x',pos[i][0]+'%');n.style.setProperty('--y',pos[i][1]+'%');n.innerHTML='<b>'+x.t+'</b><strong>'+x.client+'</strong><span>'+x.service+'</span>';el.appendChild(n);});}
 
@@ -1703,7 +1697,10 @@ addEventListener('pointerup',function(){if(!drag)return;drag=false;vel=Math.max(
     });
   }
 
-  function renderAll(){renderSchedule();renderTeam();renderSlots();renderAvailability();renderOrbit();r3eRenderCancelled();r1RenderBookingContext();r1RenderMiniCal();r1RenderNowLine();r1RenderLock();r1SaveLocalState();r1SaveAvailability();}
+  function renderAll(){if(window.CalendarStaff)CalendarStaff.ensure(state.date);renderSchedule();renderTeam();renderSlots();renderAvailability();renderOrbit();r3eRenderCancelled();r1RenderBookingContext();r1RenderMiniCal();r1RenderNowLine();r1RenderLock();r1SaveLocalState();r1SaveAvailability();}
+  document.getElementById('r34Employees').onclick=function(){location.href='https://core.thaimaliwan.pl/test-recepcja/pracownicy/?date='+state.date+'&salon='+state.salon;};
+  window.addEventListener('staff-schedule-changed',renderAll);
+  window.addEventListener('storage',function(e){if(e.key===StaffSchedule.KEY)renderAll();});
   function openModal(name){var ids={slots:'r1SlotsModal',availability:'r1AvailabilityModal',team:'r1TeamModal',reception:'r2ReceptionModal'};
     /* „Rezerwacja ręczna” prowadzi teraz do nowego, uproszczonego ekranu
        (test-recepcja/rezerwacje/) — makieta wg wizualizacji Breta.
@@ -1760,6 +1757,7 @@ addEventListener('pointerup',function(){if(!drag)return;drag=false;vel=Math.max(
   document.getElementById('r1ClearBookingContext').addEventListener('click',function(){state.bookingContext=null;state.releaseContext=null;history.replaceState(null,'',location.pathname);renderSlots();r1RenderBookingContext();});
   document.querySelectorAll('[data-close-modal]').forEach(function(el){el.addEventListener('click',function(){el.closest('.r1-modal-shell').classList.remove('open');});});
   document.querySelectorAll('.r1-modal-shell').forEach(function(el){el.addEventListener('click',function(e){if(e.target===el)el.classList.remove('open');});});
+  document.querySelectorAll('[data-clients-link]').forEach(function(el){el.addEventListener('click',function(){location.href=location.hostname==='astera260.github.io'?'https://core.thaimaliwan.pl/test-recepcja/klienci/':'./klienci/';});});
   document.querySelectorAll('[data-not-yet]').forEach(function(el){el.addEventListener('click',function(){toast(el.dataset.notYet+' — następny etap, bez implementacji w UI-R1');});});
   window.__ASTERA_R3C__={version:'UI-R21',productionWrites:'manual-update-cancel',integrationEnabled:ASTERA_INTEGRATION_ENABLED,validateMove:function(salon,id,who,start){var visit=r3cVisit(salon,id);return visit?r3cValidateMove(visit,who,start,salon):{ok:false,code:'NOT_FOUND'};},visit:function(salon,id){var visit=r3cVisit(salon,id);return visit?{id:visit.id,booking_id:visit.booking_id,source:visit.source,status:visit.status,t:visit.t,end:visit.end,who:visit.who,duration:visit.duration,price:visit.price,bookToTherapist:visit.bookToTherapist}:null;},catalogCount:function(){return OFFER_CATALOG.reduce(function(total,category){return total+category.services.length;},0);}};
   window.__ASTERA_R3D__={version:'UI-R3D',productionWrites:false,methods:SETTLEMENT_METHODS.map(function(method){return {id:method.id,label:method.label};}),cancellationDecision:function(visit,cancelledAt){return r3dVoucherCancellationDecision(visit,new Date(cancelledAt));},visit:function(salon,id){var visit=r3cVisit(salon,id);return visit?{id:visit.id,booking_id:visit.booking_id,status:visit.status,settlementStatus:visit.settlementStatus||'NIEROZLICZONA',paymentMethod:visit.paymentMethod||'',voucherNumber:visit.voucherNumber||'',voucherStatus:visit.voucherStatus||''}:null;}};
@@ -1796,6 +1794,7 @@ addEventListener('pointerup',function(){if(!drag)return;drag=false;vel=Math.max(
   setSalon(state.salon);
   renderAll();
   setInterval(r1RenderNowLine,30000);
+  if(window.CalendarStaff)CalendarStaff.mount(function(){return state.date;},renderAll,function(action){if(action==='save'){history.replaceState(null,'',location.pathname+'#'+new URLSearchParams({mode:'calendar',date:state.date,salon:state.salon}));}else r1OpenBookingContext();});
   r1WczytajRezerwacje();
   setInterval(function(){r1WczytajRezerwacje()},5*60*1000);
   r1OpenBookingContext();
