@@ -5,11 +5,12 @@ window.ReceptionAuth=(()=>{
  const requested=document.currentScript?.dataset.config;
  const calendarConfig=/^https:\/\/core\.thaimaliwan\.pl\/api\/reception\/calendar\/config\?screen=(calendar|manual)$/.test(requested||'');
  const configEndpoint=calendarConfig?requested:(requested==='/api/reception/staff/config'?requested:'/api/reception/config');
- let config=null,accessToken=null,ready=false;
+ let config=null,accessToken=null,ready=false,pending=null;
  const key='astera-reception-pkce';
  const encode=bytes=>btoa(String.fromCharCode(...bytes)).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
  const random=()=>encode(crypto.getRandomValues(new Uint8Array(32)));
- async function initialize(){
+ function initialize(){if(!pending)pending=initializeOnce().catch(e=>{pending=null;throw e;});return pending;}
+ async function initializeOnce(){
   if(ready)return;
   const response=await fetch(configEndpoint,{credentials:'same-origin',cache:'no-store'});
   if(response.status===404){ready=true;return;} // Existing synthetic test service.

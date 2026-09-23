@@ -723,8 +723,9 @@ addEventListener('pointerup',function(){if(!drag)return;drag=false;vel=Math.max(
 <link rel="stylesheet" href="pracownicy/style.css">
 <script src="pracownicy/model.js"></script>
 <link rel="stylesheet" href="pracownicy/calendar-source.css">
-<script src="klienci/auth.js" data-config="https://core.thaimaliwan.pl/api/reception/calendar/config?screen=calendar"></script>
+<script src="klienci/auth.js?v=r47" data-config="https://core.thaimaliwan.pl/api/reception/calendar/config?screen=calendar"></script>
 <script src="pracownicy/calendar-source.js"></script>
+<script src="booking-client.js?v=r47"></script>
 <script src="pracownicy/editor.js"></script>
 <script id="ui-r1-script">
 (function(){
@@ -914,14 +915,13 @@ addEventListener('pointerup',function(){if(!drag)return;drag=false;vel=Math.max(
     lista.forEach(function(im){var known=StaffSchedule.staff.find(function(p){return r1Bez(p.name)===r1Bez(im);});var name=known?known.name:im;if(out.indexOf(name)<0)out.push(name);});
     return out;
   }
-  function r1WczytajRezerwacje(ponowka){
+  async function r1WczytajRezerwacje(ponowka){
     var token='';try{token=localStorage.getItem('asteraReadToken')||''}catch(e){}
     if(!token)return Promise.resolve(false);
     var dzis=new Date();
     var od=r1Iso(dzis.getFullYear(),dzis.getMonth()-1,1);
     var doD=r1Iso(dzis.getFullYear(),dzis.getMonth()+3,1);
-    return fetch(R1_API+'?action=bookings&from='+od+'&to='+doD+'&token='+encodeURIComponent(token))
-      .then(function(r){return r.json()})
+    return (async()=>{await BookingClient.initialize();return BookingClient.enabled()?BookingClient.read({from:od,to:doD}):fetch(R1_API+'?action=bookings&from='+od+'&to='+doD+'&token='+encodeURIComponent(token)).then(r=>r.json());})()
       .then(function(d){
         if(!d||d.ok!==true||!Array.isArray(d.bookings)){
           if(!ponowka)setTimeout(function(){r1WczytajRezerwacje(true)},4000);
@@ -942,7 +942,7 @@ addEventListener('pointerup',function(){if(!drag)return;drag=false;vel=Math.max(
             d2.visits.push({
               id:b.booking_id?b.booking_id+'-'+j:'PROD-'+b.salon+'-'+i+'-'+j,groupId:b.booking_id||'PROD-'+b.salon+'-'+i,
               booking_id:b.booking_id||(b.source==='BOOKSY'?'BOOKSY-':'AST-')+b.salon+'-'+b.date.replace(/-/g,'')+'-'+i+'-'+j,
-              source:b.source,date:b.date,t:b.start,end:b.end,who:kto,
+              storage:b.storage,source:b.source,date:b.date,t:b.start,end:b.end,who:kto,
               client:b.client||'(bez nazwiska)',phone:b.phone||'',
               categoryId:offer?offer.categoryId:'',serviceId:offer?offer.serviceId:'',service:b.service||'—',
               serverVersion:b.version||'',serverWritable:b.editable===true,serverReleasable:b.releasable===true,booking_type:b.booking_type||'',voucherNumber:b.voucherNo||'',cancelledAt:b.cancelled_at||'',
@@ -960,7 +960,7 @@ addEventListener('pointerup',function(){if(!drag)return;drag=false;vel=Math.max(
         var znaczniki=document.querySelectorAll('.r1-board-date span, .r1-date-card span');
         znaczniki.forEach(function(el){
           if(/DANE PRZYKŁADOWE|makieta/i.test(el.textContent))
-            el.innerHTML=el.innerHTML.replace(/DANE PRZYKŁADOWE/i,'DANE Z ARKUSZA').replace(/· makieta/i,'· dane z arkusza');
+            el.innerHTML=el.innerHTML.replace(/DANE PRZYKŁADOWE/i,d.storage==='AWS'?'AWS + IMPORT':'DANE Z ARKUSZA').replace(/· makieta/i,d.storage==='AWS'?'· AWS + import':'· dane z arkusza');
         });
         renderAll();
         if(pominiete.length){
@@ -968,7 +968,7 @@ addEventListener('pointerup',function(){if(!drag)return;drag=false;vel=Math.max(
             '<span style="color:#c0392b">Pominieto '+pominiete.length+' - masazystka spoza zespolu salonu:</span><br>'+
             pominiete.slice(0,6).join('<br>')+(pominiete.length>6?'<br>...i '+(pominiete.length-6)+' wiecej':''));
         } else {
-          toast('Wczytano '+d.count+' rezerwacji z arkusza.');
+          toast('Wczytano '+d.count+' rezerwacji'+(d.storage==='AWS'?' — AWS i dotychczasowy import.':' z arkusza.'));
         }
         return true;
       })
@@ -1332,6 +1332,9 @@ addEventListener('pointerup',function(){if(!drag)return;drag=false;vel=Math.max(
     var token='';try{token=localStorage.getItem('asteraReadToken')||'';}catch(e){}
     if(!token)return {ok:false,error:'BRAK_TOKENA'};
     var request;try{request=r21RequestId(payload);}catch(e){return {ok:false,error:'BRAK_PAMIECI_PRZEGLADARKI'};}
+    try{await BookingClient.initialize();}catch(e){return{ok:false,error:BookingClient.message(e.message)}}
+    if(/^booking-|^slot-/.test(payload.booking_id||'')){var result=await BookingClient.command({...payload,request_id:request});if(result.ok){if(result.booking_id!==payload.booking_id||result.request_id!==request)return{ok:false,uncertain:true};sessionStorage.removeItem('astera.change.pending');}return result;}
+    // Voucher releases retain the working public calendar until the voucher API cutover.
     var q=new URLSearchParams(Object.assign({action:'bookings',zapisz:'1',token:token,request_id:request},payload));
     var controller=new AbortController(),timer=setTimeout(function(){controller.abort();},45000);
     try{
@@ -1386,6 +1389,7 @@ addEventListener('pointerup',function(){if(!drag)return;drag=false;vel=Math.max(
       if(r3dIsVoucher(visit)){r3cSetOptions(document.getElementById('r3cService'),[{value:visit.serviceId||'voucher',label:visit.service}],visit.serviceId||'voucher');r3cSetOptions(document.getElementById('r3cDuration'),[{value:visit.duration,label:visit.duration+' min · do zapłaty '+visit.price+' zł'}],visit.duration);document.getElementById('r3cPrice').value=visit.price+' zł';}
       else if(!visit.serviceId){r3cSetOptions(document.getElementById('r3cService'),[{value:'unknown',label:visit.service}],'unknown');r3cSetOptions(document.getElementById('r3cDuration'),[{value:visit.duration,label:visit.duration+' min'}],visit.duration);document.getElementById('r3cPrice').value=visit.price+' zł';}
     }
+    if(visit.storage==='AWS'){document.getElementById('r3cClient').disabled=true;document.getElementById('r3cPhone').disabled=true;}
     document.getElementById('r21WriteMode').textContent=R1_PROD?(canEdit?'Zapis do bazy':'Podgląd danych z bazy'):'Tryb demonstracyjny';
     document.getElementById('r3cSaveVisit').textContent=R1_PROD?'Zapisz w bazie':'Zapisz lokalnie';document.getElementById('r3cSaveVisit').style.display=canEdit?'':'none';document.getElementById('r3cCancelVisit').style.display=canCancel?'':'none';
     document.getElementById('r3cBooksyNote').classList.toggle('show',R1_PROD&&!canEdit);

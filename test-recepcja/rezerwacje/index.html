@@ -341,8 +341,9 @@ mark{background:rgba(205,159,76,.24);color:var(--r1-gold2);border-radius:3px;pad
 
 <script src="../pracownicy/model.js"></script>
 <link rel="stylesheet" href="../pracownicy/calendar-source.css">
-<script src="../klienci/auth.js" data-config="https://core.thaimaliwan.pl/api/reception/calendar/config?screen=manual"></script>
+<script src="../klienci/auth.js?v=r47" data-config="https://core.thaimaliwan.pl/api/reception/calendar/config?screen=manual"></script>
 <script src="../pracownicy/calendar-source.js"></script>
+<script src="../booking-client.js?v=r47"></script>
 <script>
 /* =========================================================================
    ASTERA — REZERWACJA RĘCZNA · makieta wg wizualizacji Breta
@@ -518,7 +519,7 @@ function slotyHTML(){
       slots.push('<div class="slot'+sel+'" data-g="'+g+'" data-kto="'+html(kto)+'"><div class="tick">✓</div><div class="h">'+g+'</div><div class="t">'+html(kto)+'</div></div>');
     });
   });
-  return '<div class="pusto">'+(grafik.source==='arkusz'?'Dostępność według ostatniego odczytu arkusza.':'TEST — dostępność z grafiku demonstracyjnego.')+'</div>'+
+  return '<div class="pusto">'+(grafik.source==='arkusz'?'Dostępność według ostatniego odczytu grafiku.':'TEST — dostępność z grafiku demonstracyjnego.')+'</div>'+
     (slots.length?'<div class="slots">'+slots.join('')+'</div>':'<div class="pusto">Brak wolnego terminu. Sprawdź godziny pracy w Pracownicy → Grafik oraz zajęte wizyty.</div>');
 }
 function wpiszSloty(box){
@@ -802,7 +803,8 @@ function manualRequestId(payload){
 }
 async function zapiszNaSerwer(){
   var t=asteraToken();
-  if(!t)return{ok:false,error:'BRAK_TOKENA'};
+  try{await BookingClient.initialize();}catch(e){return{ok:false,error:BookingClient.message(e.message)}}
+  if(!t)return{ok:false,error:BookingClient.enabled()?'Połącz źródło wizyt.':'BRAK_TOKENA'};
   if(!S.salon||!S.data||!S.godzina||!S.terapeutka)return{ok:false,error:'NIEKOMPLETNE_DANE'};
   var n=rozbijImie(S.imie);
   var payload={
@@ -813,6 +815,7 @@ async function zapiszNaSerwer(){
     uwagi:S.note||'Panel AsterA - rezerwacja reczna'
   };
   let requestId;try{requestId=manualRequestId(payload);}catch(e){return{ok:false,error:'Nie można zachować identyfikatora zapisu. Sprawdź pamięć przeglądarki.'};}
+  if(BookingClient.enabled()){const result=await BookingClient.command({...payload,request_id:requestId});if(result.ok){if(!result.booking_id||result.request_id!==requestId)return{ok:false,error:'BRAK_POTWIERDZENIA',uncertain:true};sessionStorage.removeItem('astera.manual.pending');}return result;}
   var q=new URLSearchParams(Object.assign({action:'bookings',zapisz:'1',token:t,request_id:requestId},payload));
   const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),45000);
   try{
@@ -854,8 +857,8 @@ async function zarezerwuj(){
             S.terapeutka,pln(S.cena)].join(' • ');
 
   if(w&&w.ok){
-    toast('<b>Zapisano w arkuszu.</b><br>'+opis+
-      '<br><span style="color:var(--r1-gold2)">Wiersz '+w.row+' w REZERWACJE '+S.salon+'. Potwierdzenie widoczności sprawdź po powrocie do grafiku.</span>');
+    toast('<b>'+(w.storage==='AWS'?'Zapisano w AWS.':'Zapisano w arkuszu.')+'</b><br>'+opis+
+      '<br><span style="color:var(--r1-gold2)">'+(w.storage==='AWS'?'Rezerwacja '+w.booking_id:'Wiersz '+w.row+' w REZERWACJE '+S.salon)+'. Potwierdzenie widoczności sprawdź po powrocie do grafiku.</span>');
     setTimeout(function(){location.href=adresPanelu()},2600);
     return;
   }
@@ -870,9 +873,9 @@ async function zarezerwuj(){
            :(w&&w.error==='ZAJETE_SPROBUJ_PONOWNIE')?'Trwa inny zapis. Spróbuj ponownie za chwilę.'
            :(w&&w.error==='CENA_NIEZGODNA_Z_ARKUSZEM')?'Cena w formularzu różni się od cennika w arkuszu. Recepcja musi wyjaśnić różnicę przed zapisem.'
            :(w&&w.error==='BRAK_USLUGI_W_CENNIKU')?'Nie znaleziono jednoznacznej usługi i czasu w cenniku arkusza. Recepcja musi sprawdzić tę pozycję.'
-           :(w&&w.uncertain)?'Brak potwierdzenia z serwera. Zapis mógł się wykonać — sprawdź arkusz.'
+           :(w&&w.uncertain)?'Brak potwierdzenia z serwera. Zapis mógł się wykonać — sprawdź grafik.'
            :(w&&w.error)?String(w.error):'Brak odpowiedzi z serwera.';
-  toast('<b>'+(w&&w.uncertain?'Brak potwierdzenia zapisu w arkuszu.':'NIE zapisano w arkuszu.')+'</b><br>'+opis+
+  toast('<b>'+(w&&w.uncertain?'Brak potwierdzenia zapisu w bazie.':'NIE zapisano w bazie.')+'</b><br>'+opis+
     '<br><span style="color:#c0392b">'+powod+'</span>'+
     '<br><span style="color:var(--r1-muted)">'+(lokalnie?'Wizyta jest zapisana tylko w tej przeglądarce.':(w&&w.uncertain?'Sprawdź grafik. Ponowienie tych samych danych zachowa identyfikator zapisu.':'Nie utworzono zastępczej wizyty lokalnej.'))+'</span>');
 }
