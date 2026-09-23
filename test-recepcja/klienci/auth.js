@@ -3,7 +3,7 @@
 // is stored in sessionStorage so the redirect can complete. No customer cache.
 window.ReceptionAuth=(()=>{
  const requested=document.currentScript?.dataset.config;
- const calendarConfig=/^https:\/\/core\.thaimaliwan\.pl\/api\/reception\/calendar\/config\?screen=(calendar|manual)$/.test(requested||'');
+ const calendarConfig=/^https:\/\/core\.thaimaliwan\.pl\/api\/reception\/calendar\/config\?screen=(calendar|manual|vouchers)$/.test(requested||'');
  const configEndpoint=calendarConfig?requested:(requested==='/api/reception/staff/config'?requested:'/api/reception/config');
  let config=null,accessToken=null,ready=false,pending=null;
  const key='astera-reception-pkce';
@@ -22,7 +22,7 @@ window.ReceptionAuth=(()=>{
    const saved=JSON.parse(sessionStorage.getItem(key)||'null');sessionStorage.removeItem(key);
    history.replaceState(null,'',location.pathname);
    if(!saved||Date.now()-saved.at>600000||saved.state!==params.get('state'))throw Error('Logowanie wygasło. Rozpocznij ponownie.');
-   if(calendarConfig&&saved?.returnTo){const back=new URL(saved.returnTo,location.origin);if(back.origin===location.origin&&['/thaimaliwan/test-recepcja/','/thaimaliwan/test-recepcja/index.html','/thaimaliwan/test-recepcja/rezerwacje/'].includes(back.pathname))history.replaceState(null,'',back.pathname+back.search+back.hash);}
+   if(calendarConfig&&saved?.returnTo){const back=new URL(saved.returnTo,location.origin);if(back.origin===location.origin&&['/thaimaliwan/test-recepcja/','/thaimaliwan/test-recepcja/index.html','/thaimaliwan/test-recepcja/rezerwacje/','/thaimaliwan/test-recepcja/bony/'].includes(back.pathname))history.replaceState(null,'',back.pathname+back.search+back.hash);}
    if(params.has('error'))throw Error('Logowanie nie zostało zakończone.');
    const result=await fetch(config.domain+'/oauth2/token',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:new URLSearchParams({grant_type:'authorization_code',client_id:config.clientId,code:params.get('code'),redirect_uri:config.redirectUri,code_verifier:saved.verifier})});
    if(!result.ok)throw Error('Nie udało się potwierdzić logowania.');

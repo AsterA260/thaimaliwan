@@ -236,10 +236,11 @@ button,input,select{font:inherit}button{cursor:pointer}
       </div>
       <div style="display:flex;gap:9px;align-items:center;flex-wrap:wrap;justify-content:flex-end">
         <button class="ghost" id="openCustomerFlow">Kalendarz klienta →</button>
-        <span class="badge">◉ Widok lokalny · read only</span>
+        <span class="badge" id="sourceBadge">AWS · odczyt</span><button class="ghost" id="voucherLogin">Zaloguj się</button><button class="ghost" id="voucherRefresh" hidden>Odśwież</button><button class="ghost" id="voucherLogout" hidden>Wyloguj</button>
       </div>
     </div>
 
+    <p id="voucherConnection" role="status" aria-live="polite">Sprawdzam połączenie…</p>
     <section class="metrics">
       <article class="metric"><span>Wszystkie bony</span><b id="metricAll">—</b><em>ZW + SZ</em></article>
       <article class="metric"><span>Sprzedane dziś</span><b id="metricToday">—</b><em id="metricTodaySum">—</em></article>
@@ -256,6 +257,7 @@ button,input,select{font:inherit}button{cursor:pointer}
       <select class="pill" id="statusFilter" aria-label="Status bonu">
         <option value="ALL">Wszystkie statusy</option>
         <option value="Ważny">Ważny</option>
+        <option value="Do sprawdzenia">Do sprawdzenia</option><option value="Wygasły">Wygasły</option>
         <option value="Wykorzystany">Wykorzystany</option>
         <option value="Anulowany">Anulowany</option>
       </select>
@@ -295,37 +297,21 @@ button,input,select{font:inherit}button{cursor:pointer}
 
   <footer class="r1-footer">
     <span>Thai Maliwan Internal · UI-R4 · bony i partnerzy</span>
-    <span>Relacja: BONY ZW/SZ → Nr Bonu + BOOKING_ID w REZERWACJE</span>
-    <span>Stan lokalny <i class="ok"></i></span>
+    <span>Baza bonów: AWS · powiązanie z rezerwacją</span>
+    <span><span id="footerSource">Oczekiwanie na logowanie</span></span>
   </footer>
 
   <div class="toast" id="toast"></div>
 </div>
 
+<script src="../klienci/auth.js" data-config="https://core.thaimaliwan.pl/api/reception/calendar/config?screen=vouchers"></script>
 <script>
-/* UI-R4 · Bony i partnerzy.
-   Most produkcyjny bez zmian: czyta read-only endpoint, token wyłącznie
-   z localStorage. Zero zapisu, zero POST. */
-
-const ASTERA_VOUCHERS_PROD_ENABLED=true;
-const ASTERA_VOUCHERS_API_URL='https://script.google.com/macros/s/AKfycbz1DIfrEuALN3wJ0MFJ_bmoWHFbWg3FKQH-OGvAGZSPOa5ej52XfbvrH-1tdTxxHy90DA/exec';
-
-const DEMO_VOUCHERS=[
- {n:'140801/26/ZW',issueDate:'2026-08-14',salon:'ZW',status:'Ważny',kind:'Tajski Klasyczny',minutes:60,value:210,client:'Test R5',channel:'Recepcja',booking:{id:'AST-ZW-20260820-8941C8C88339',date:'20.08.2026',start:'10:00',end:'11:00',therapist:'Cholthida',status:'REZERWACJA'}},
- {n:'140804/26/ZW',issueDate:'2026-08-14',salon:'ZW',status:'Ważny',kind:'Masaż olejkami',minutes:90,value:310,client:'Test R4',channel:'Recepcja',booking:null},
- {n:'140801/26/SZ',issueDate:'2026-08-14',salon:'SZ',status:'Ważny',kind:'Rytuał relaksu',minutes:120,value:420,client:'Test R4 SZ',channel:'Recepcja',booking:null},
- {n:'130812/26/ZW',issueDate:'2026-08-13',salon:'ZW',status:'Ważny',kind:'Masaż gorącymi kamieniami',minutes:90,value:340,client:'Anna K. · przypisany',channel:'PayU — bony',booking:{id:'AST-ZW-20260822-73E4A1C60507',date:'22.08.2026',start:'15:30',end:'17:00',therapist:'Tip',status:'REZERWACJA'}},
- {n:'120745/26/SZ',issueDate:'2026-07-12',salon:'SZ',status:'Wykorzystany',kind:'Masaż dla dwojga',minutes:60,value:420,client:'Marek i Ola',channel:'Partner',booking:{id:'AST-SZ-20260812-22AD19C11902',date:'12.08.2026',start:'18:00',end:'19:00',therapist:'Kai + Butsakorn',status:'ZREALIZOWANA'}},
- {n:'110522/26/ZW',issueDate:'2026-05-11',salon:'ZW',status:'Anulowany',kind:'Tajski Klasyczny',minutes:60,value:210,client:'Klient bez rezerwacji',channel:'Recepcja',booking:null},
- {n:'130910/26/SZ',issueDate:'2026-08-09',salon:'SZ',status:'Ważny',kind:'Oil Aroma Relaks Spa',minutes:90,value:320,client:'Joanna M.',channel:'PayU — bony',booking:null},
- {n:'100390/26/ZW',issueDate:'2026-03-09',salon:'ZW',status:'Wykorzystany',kind:'Rytuał Królewski Thai Spa',minutes:180,value:590,client:'Katarzyna R.',channel:'Maliwan / Groupon',booking:{id:'AST-ZW-20260805-199A5D4FD20A',date:'05.08.2026',start:'12:00',end:'15:00',therapist:'Cholthida',status:'ZREALIZOWANA'}},
- {n:'130901/26/ZW',issueDate:'2026-08-09',salon:'ZW',status:'Ważny',kind:'Masaż głowy, pleców i ramion',minutes:45,value:170,client:'Nieprzypisany',channel:'PayU — bony',booking:null},
- {n:'120864/26/SZ',issueDate:'2026-06-08',salon:'SZ',status:'Ważny',kind:'Tajski Klasyczny',minutes:90,value:290,client:'Paweł N.',channel:'Partner',booking:null}
-];
-let VOUCHERS=DEMO_VOUCHERS;
-
+/* R49 authenticated AWS read; no stored customer cache or fallback demo. */
+let VOUCHERS=[];
+let awsStats=null;
+const voucherKey=v=>v.id||v.salon+':'+v.n;
 const PARTNERS=[
- ['PayU — bony','Automatyczny import płatności ze sklepu','import co ~15 min'],
+ ['PayU — bony','Bony i historyczne płatności ze sklepu','import jednorazowy · AWS'],
  ['Recepcja','Sprzedaż ręczna / AsterA','bony papierowe'],
  ['Maliwan / Groupon','Partner zewnętrzny','rozliczenie osobne'],
  ['Partner','Bony partnerskie','umowa indywidualna'],
@@ -373,8 +359,8 @@ function renderMetrics(){
   var dzis=new Date();dzis.setHours(0,0,0,0);
   var dzisiejsze=VOUCHERS.filter(function(v){var d=dataBonu(v);if(!d)return false;d.setHours(0,0,0,0);return d.getTime()===dzis.getTime();});
   var suma=dzisiejsze.reduce(function(a,v){return a+(Number(v.value)||0)},0);
-  $('#metricToday').textContent=dzisiejsze.length;
-  $('#metricTodaySum').textContent=dzisiejsze.length?(Math.round(suma)+' zł'):'brak sprzedaży';
+  $('#metricToday').textContent=awsStats?awsStats.today:dzisiejsze.length;
+  $('#metricTodaySum').textContent=awsStats?(awsStats.todayAmount+' zł'):(dzisiejsze.length?(Math.round(suma)+' zł'):'brak sprzedaży');
   $('#metricBooked').textContent=VOUCHERS.filter(v=>v.booking&&v.booking.status==='REZERWACJA').length;
 }
 
@@ -404,6 +390,10 @@ function kartaHTML(v){
         (v.customerEmail?voucherFieldHTML('E-mail klienta',v.customerEmail):'')+
         (v.client&&v.client!=='—'?voucherFieldHTML('Klient wizyty',v.client):'')+
         voucherFieldHTML('Uwagi',v.notes)+
+        (v.paymentStatus?voucherFieldHTML('Płatność',({PAID:'Opłacony',UNVERIFIED:'Do potwierdzenia',REFUNDED:'Zwrócona',PARTIAL_REFUND:'Częściowy zwrot'})[v.paymentStatus]||v.paymentStatus):'')+
+        (v.faceValue!=null?voucherFieldHTML('Wartość przed rabatem',v.faceValue+' zł'):'')+
+        (v.reviewReasons?.length?voucherFieldHTML('Do sprawdzenia',v.reviewReasons.map(reviewLabel).join(' · ')):'')+
+        (v.items?.length?voucherFieldHTML('Pozycje bonu',v.items.map(i=>(i.name||'Usługa')+' × '+i.quantity+(i.minutes?' · '+i.minutes+' min':'')+(i.remaining!=null?' · pozostało: '+i.remaining:'')).join('\n')):'')+
         '<div class="fakt"><span>Wydany</span><b>'+esc(v.issueDate||'—')+'</b></div>'+'<div class="fakt"><span>Ważny do</span><b>'+esc(v.validUntil||'—')+'</b></div>'+
       '</div></div>'+voucherSourceHTML(v)+
       '<div class="blok"><div class="label">Udostępnianie terminu</div>'+
@@ -432,15 +422,15 @@ function renderList(){
   if(!rows.length){box.innerHTML='<div class="empty">Brak bonów dla wybranego filtra.</div>';return}
   rows.forEach(v=>{
     const b=document.createElement('button');
-    b.className='row'+(state.otwarty===v.n?' open':'');
+    b.className='row'+(state.otwarty===voucherKey(v)?' open':'');
     b.innerHTML='<span class="nr">'+esc(v.n)+'</span>'+tag(v.status)+
       '<span class="cell service-cell">'+esc(v.kind||'—')+(v.minutes?' <span class="cell dim">· '+v.minutes+' min</span>':'')+'</span>'+
       '<span class="cell kwota">'+(v.value!=null?v.value+' zł':'—')+'</span>'+
       '<span class="cell dim channel-cell">'+esc(v.channel||'—')+(v.buyer?' · '+esc(v.buyer):v.client&&v.client!=='—'?' · '+esc(v.client):'')+'</span>'+
       '<span class="chev">⌄</span>';
-    b.onclick=()=>{state.otwarty=(state.otwarty===v.n?null:v.n);renderList();};
+    b.onclick=()=>{state.otwarty=(state.otwarty===voucherKey(v)?null:voucherKey(v));renderList();};
     box.appendChild(b);
-    if(state.otwarty===v.n){
+    if(state.otwarty===voucherKey(v)){
       const k=document.createElement('div');
       k.innerHTML=kartaHTML(v);
       const karta=k.firstChild;
@@ -500,7 +490,7 @@ document.querySelectorAll('[data-reservations]').forEach(b=>b.onclick=()=>locati
 $('#openCustomerFlow').onclick=()=>location.href='../flow-bonu/';
 
 renderMetrics();renderList();renderPartners();
-window.__ASTERA_BONY_UI_R4__={productionWrites:false,version:'UI-R4-BONY',relation:'REZERWACJE.Nr Bonu + REZERWACJE.BOOKING_ID',dataSource:'DEMO'};
+window.__ASTERA_BONY_UI_R4__={productionWrites:false,version:'R49-BONY-AWS',dataSource:'NONE'};
 
 /* ── most produkcyjny (read-only) ── */
 function asteraProdInfo(msg){try{toast(msg)}catch(e){}}
@@ -511,36 +501,39 @@ function asteraVoucherStatus(status){
 }
 function asteraApplyVouchers(list){
   VOUCHERS=(list||[]).map(function(v){var w=(v.finalValue!=null?v.finalValue:v.value);
-    return {n:v.n,salon:v.salon,status:asteraVoucherStatus(v.status),statusRaw:v.statusRaw,kind:v.kind,minutes:v.minutes,value:w,
+    return {id:v.id,n:v.n,salon:v.salon,faceValue:v.value,paymentStatus:v.paymentStatus,reviewReasons:v.reviewReasons||[],items:v.items||[],status:asteraVoucherStatus(v.status),statusRaw:v.statusRaw,kind:v.kind,minutes:v.minutes,value:w,
             client:v.booking&&v.booking.client||'—',buyer:v.buyer||'',buyerPhone:v.buyerPhone||'',buyerEmail:v.buyerEmail||'',buyerNote:v.buyerNote||'',email:v.email||'',customerEmail:v.customerEmail||'',customerPhone:v.customerPhone||'',
             notes:v.notes||'',sheetFields:Array.isArray(v.sheetFields)?v.sheetFields:[],
             channel:v.channel,category:v.category,issueDate:v.issueDate,discount:v.discount,
             validUntil:v.validTo||v.validUntil,booking:v.booking||null,bookingIssue:v.bookingIssue||''};});
-  window.__ASTERA_BONY_UI_R4__.dataSource='PROD';
+  window.__ASTERA_BONY_UI_R4__.dataSource='AWS';
   state.otwarty=null;renderMetrics();renderList();
 }
-/* Pierwsze wywołanie potrafi nie dojść (Apps Script wstaje z zimna).
-   Dajemy jedną cichą ponowkę po 4 s, zanim powiemy „widok DEMO". */
-function asteraPonow(bylaJuz){
-  if(bylaJuz){asteraProdInfo('Brak połączenia z bazą bonów — widok DEMO.');return;}
-  setTimeout(function(){asteraLoadProductionVouchers(true)},4000);
+const reviewLabels={MULTIPLE_SESSIONS:'Bon obejmuje kilka masaży',MONETARY_VOUCHER:'Bon kwotowy',SERVICE_MAPPING_REQUIRED:'Usługa wymaga przypisania',LEGACY_LIFTING_SERVICE:'Dawna usługa liftingu',EXISTING_LEGACY_BOOKING:'Powiązanie z rezerwacją w arkuszu',PAYMENT_EVIDENCE_REQUIRED:'Brak potwierdzenia płatności',REFUND_REVIEW:'Zwrot do sprawdzenia',UNKNOWN_SOURCE_STATUS:'Status źródłowy do sprawdzenia',MISSING_SERVICE:'Brak usługi'};
+function reviewLabel(code){return reviewLabels[code]||'Dane wymagają sprawdzenia';}
+let voucherLoading=false;
+function connection(message){$('#voucherConnection').textContent=message;}
+function clearPrivateVouchers(){VOUCHERS=[];awsStats=null;state.otwarty=null;renderMetrics();renderList();window.__ASTERA_BONY_UI_R4__.dataSource='NONE';$('#footerSource').textContent='Brak aktualnego odczytu';}
+async function loadAWSVouchers(){
+ if(voucherLoading)return;voucherLoading=true;$('#voucherRefresh').disabled=true;
+ try{
+  await ReceptionAuth.initialize();
+  if(!ReceptionAuth.authenticated()){clearPrivateVouchers();connection('Zaloguj się, aby zobaczyć bony.');return;}
+  connection('Pobieram bony z AWS…');
+  const response=await fetch('https://core.thaimaliwan.pl/api/reception/vouchers',{headers:ReceptionAuth.headers(),cache:'no-store',credentials:'omit'});
+  if(response.status===401){ReceptionAuth.clear();throw Error('Sesja wygasła. Zaloguj się ponownie.');}
+  if(!response.ok)throw Error(response.status===403?'To konto nie ma dostępu do bonów.':'Nie udało się pobrać bonów. Kliknij Odśwież.');
+  const data=await response.json();if(data.mode!=='AWS'||!Array.isArray(data.vouchers)||data.count!==data.vouchers.length)throw Error('Niepełna odpowiedź bazy bonów.');
+  awsStats=data.stats;asteraApplyVouchers(data.vouchers);
+  connection('AWS · '+data.count+' bonów · dane źródłowe z '+(data.sourceAsOf||'importu')+'. Import jednorazowy; nowe zakupy nie są jeszcze synchronizowane.');
+  $('#footerSource').textContent='Odczyt AWS potwierdzony';
+ }catch(e){clearPrivateVouchers();connection(e.message||'Nie udało się połączyć z bazą bonów.');}
+ finally{voucherLoading=false;$('#voucherLogin').hidden=ReceptionAuth.authenticated();$('#voucherLogout').hidden=!ReceptionAuth.authenticated();$('#voucherRefresh').hidden=!ReceptionAuth.authenticated();$('#voucherRefresh').disabled=false;}
 }
-function asteraLoadProductionVouchers(ponowka){
-  if(!ASTERA_VOUCHERS_PROD_ENABLED)return;
-  var token='';try{token=localStorage.getItem('asteraReadToken')||''}catch(e){}
-  var urlOk=/^https:\/\/script\.google\.com\/macros\/s\/.+\/exec$/.test(ASTERA_VOUCHERS_API_URL);
-  if(!token||!urlOk){asteraProdInfo('Brak połączenia z bazą bonów — widok DEMO.');return;}
-  fetch(ASTERA_VOUCHERS_API_URL+'?action=vouchers&token='+encodeURIComponent(token))
-    .then(function(r){return r.json()})
-    .then(function(data){
-      if(!data||data.ok!==true||!Array.isArray(data.vouchers)){asteraPonow(ponowka);return;}
-      asteraApplyVouchers(data.vouchers);
-      asteraProdInfo('Połączono z produkcją: '+data.count+' bonów'+(data.archivedCount!=null?' (+'+data.archivedCount+' w archiwum)':'')+'.');
-    })
-    .catch(function(){asteraPonow(ponowka);});
-}
-asteraLoadProductionVouchers();
-if(ASTERA_VOUCHERS_PROD_ENABLED){setInterval(asteraLoadProductionVouchers,5*60*1000);}
+$('#voucherLogin').onclick=()=>ReceptionAuth.login().catch(e=>connection(e.message));
+$('#voucherLogout').onclick=()=>{clearPrivateVouchers();ReceptionAuth.logout();};
+$('#voucherRefresh').onclick=loadAWSVouchers;
+loadAWSVouchers();
 
 /* ── kłódka salonu — ta sama co w panelu recepcji (klucz astera.salonLock).
       Przy plikach z dysku (file://) przeglądarka nie dzieli pamięci między
