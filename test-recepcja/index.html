@@ -1333,8 +1333,8 @@ addEventListener('pointerup',function(){if(!drag)return;drag=false;vel=Math.max(
     if(!token)return {ok:false,error:'BRAK_TOKENA'};
     var request;try{request=r21RequestId(payload);}catch(e){return {ok:false,error:'BRAK_PAMIECI_PRZEGLADARKI'};}
     try{await BookingClient.initialize();}catch(e){return{ok:false,error:BookingClient.message(e.message)}}
-    if(/^booking-|^slot-/.test(payload.booking_id||'')){var result=await BookingClient.command({...payload,request_id:request});if(result.ok){if(result.booking_id!==payload.booking_id||result.request_id!==request)return{ok:false,uncertain:true};sessionStorage.removeItem('astera.change.pending');}return result;}
-    // Voucher releases retain the working public calendar until the voucher API cutover.
+    if(/^booking-|^slot-/.test(payload.booking_id||'')||(payload.operation==='release'&&BookingClient.vouchersEnabled())){var result=await BookingClient.command({...payload,request_id:request});if(result.ok){if((payload.operation==='release'?!/^slot-[0-9a-f-]{36}$/.test(result.booking_id||''):result.booking_id!==payload.booking_id)||result.request_id!==request)return{ok:false,uncertain:true};sessionStorage.removeItem('astera.change.pending');}return result;}
+    // Legacy records keep their existing adapter; new releases switch with the customer API flag.
     var q=new URLSearchParams(Object.assign({action:'bookings',zapisz:'1',token:token,request_id:request},payload));
     var controller=new AbortController(),timer=setTimeout(function(){controller.abort();},45000);
     try{

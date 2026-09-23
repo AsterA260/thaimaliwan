@@ -1,17 +1,17 @@
 /* Existing customer calendar. No receptionist controls or administrative token. */
 (() => {
   'use strict';
-  const API='https://script.google.com/macros/s/AKfycbz1DIfrEuALN3wJ0MFJ_bmoWHFbWg3FKQH-OGvAGZSPOa5ej52XfbvrH-1tdTxxHy90DA/exec';
+  const API='https://core.thaimaliwan.pl/api/public/vouchers';
   const $=s=>document.querySelector(s),esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const today=new Intl.DateTimeFormat('sv-SE',{timeZone:'Europe/Warsaw',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
   const state={month:today.slice(0,7),slots:[],date:null,slot:null,number:'',salon:'',request:null,busy:false,epoch:0,booking:null};
   function bounds(){const [y,m]=state.month.split('-').map(Number);return {from:state.month+'-01',to:state.month+'-'+new Date(y,m,0).getDate()};}
-  const messages={BON_NIEDOSTEPNY:'Nie znaleziono ważnego bonu w wybranym salonie. Sprawdź numer i salon.',BON_MA_REZERWACJE:'Ten bon ma już przypisaną wizytę. W sprawie zmiany skontaktuj się z recepcją.',BON_WYMAGA_RECEPCJI:'Ten bon wymaga ustalenia usługi z recepcją. Skontaktuj się z salonem.',TERMIN_ZAJETY:'Ten termin nie jest już dostępny. Sprawdź ponownie wolne godziny.',NIEKOMPLETNE_DANE:'Wpisz imię i nazwisko oraz poprawny numer telefonu.',ZAJETE_SPROBUJ_PONOWNIE:'Trwa inny zapis. Spróbuj ponownie za chwilę.'};
+  const messages={KLIENT_WYMAGA_RECEPCJI:'Dane wymagają sprawdzenia przez recepcję. Skontaktuj się z salonem.',SOURCE_UNAVAILABLE:'Trwa aktualizacja danych. Spróbuj ponownie za chwilę.',STALE_SOURCE:'Dane właśnie się zmieniły. Ponów próbę.',STAFF_ABSENT:'Ten termin nie jest już dostępny. Sprawdź wolne godziny ponownie.',TERM_OCCUPIED:'Ten termin nie jest już dostępny. Sprawdź wolne godziny ponownie.',BON_NIEDOSTEPNY:'Nie znaleziono ważnego bonu w wybranym salonie. Sprawdź numer i salon.',BON_MA_REZERWACJE:'Ten bon ma już przypisaną wizytę. W sprawie zmiany skontaktuj się z recepcją.',BON_WYMAGA_RECEPCJI:'Ten bon wymaga ustalenia usługi z recepcją. Skontaktuj się z salonem.',TERMIN_ZAJETY:'Ten termin nie jest już dostępny. Sprawdź ponownie wolne godziny.',NIEKOMPLETNE_DANE:'Wpisz imię i nazwisko oraz poprawny numer telefonu.',ZAJETE_SPROBUJ_PONOWNIE:'Trwa inny zapis. Spróbuj ponownie za chwilę.'};
   function notice(text){$('#voucherResult').className='result warn';$('#voucherResult').textContent=text;}
   function hideSelection(){state.slot=null;state.request=null;$('#customerDetails').classList.add('hidden');$('#customerState').textContent='Wybierz dzień i godzinę z udostępnionych terminów.';}
   function invalidate(){state.epoch++;state.number='';state.slots=[];state.booking=null;hideSelection();$('#slotChoices').classList.add('hidden');$('#bookingConfirmation').classList.add('hidden');$('#voucherResult').classList.add('hidden');}
   function busy(value){state.busy=value;['checkVoucher','confirmBooking','prevMonth','nextMonth','voucherInput','salonInput','customerName','customerPhone'].forEach(id=>$('#'+id).disabled=value);}
-  async function api(payload){const c=new AbortController(),timer=setTimeout(()=>c.abort(),45000);try{const response=await fetch(API,{method:'POST',body:new URLSearchParams({action:'customerVoucher',...payload}),signal:c.signal});if(!response.ok)throw Error('NETWORK');return await response.json();}finally{clearTimeout(timer);}}
+  async function api(payload){const c=new AbortController(),timer=setTimeout(()=>c.abort(),45000);try{const response=await fetch(API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload),signal:c.signal});const result=await response.json();if(!response.ok)return {ok:false,error:result.error};return result;}finally{clearTimeout(timer);}}
   async function check(){
     if(state.busy)return;const epoch=++state.epoch;hideSelection();state.booking=null;$('#bookingConfirmation').classList.add('hidden');$('#slotChoices').classList.add('hidden');
     state.number=$('#voucherInput').value.trim();state.salon=$('#salonInput').value;
@@ -39,13 +39,13 @@
     try{const r=await api({operation:'reserve',number:state.number,salon:state.salon,slot_id:state.slot.id,request_id:state.request.id,name,phone,...bounds()});
       if(!r.ok){notice(messages[r.error]||(r.uncertain?'Nie otrzymano potwierdzenia. Kliknij ponownie „Potwierdź rezerwację”, zachowując te same dane — system sprawdzi poprzednią próbę.':'Nie udało się zapisać wizyty. Sprawdź bon ponownie.'));return;}
       if(r.status!=='CONFIRMED'||!r.booking_id)throw Error('NO_CONFIRMATION');
-      state.booking=r;$('#customerDetails').classList.add('hidden');$('#slotChoices').classList.add('hidden');$('#voucherResult').classList.add('hidden');$('#customerState').textContent='Wizyta została zapisana.';
+      state.booking={...r,reservation_key:state.request.id};$('#customerDetails').classList.add('hidden');$('#slotChoices').classList.add('hidden');$('#voucherResult').classList.add('hidden');$('#customerState').textContent='Wizyta została zapisana.';
       $('#bookingConfirmation').className='booking-card';$('#bookingConfirmation').innerHTML='<strong>Rezerwacja potwierdzona ✓</strong><p>'+esc(r.date)+' · '+esc(r.start)+'–'+esc(r.end)+'</p><p>Do zapłaty: 0 zł — opłacono bonem.</p><p>Numer rezerwacji: '+esc(r.booking_id)+'</p><button class="outline" id="cancelBooking">Odwołaj wizytę</button>';
       $('#cancelBooking').onclick=cancel;
     }catch(e){notice('Nie otrzymano potwierdzenia zapisu. Ponów potwierdzenie z tymi samymi danymi; nie wybieraj nowego terminu.');}finally{busy(false);}
   }
   async function cancel(){if(state.busy||!state.booking)return;if(!confirm('Odwołać tę wizytę?'))return;busy(true);
-    try{const payload={operation:'cancel',number:state.number,salon:state.salon,booking_id:state.booking.booking_id};let r=await api(payload);
+    try{const payload={operation:'cancel',number:state.number,salon:state.salon,booking_id:state.booking.booking_id,reservation_key:state.booking.reservation_key};let r=await api(payload);
       if(r.error==='POZNE_ODWOLANIE'){if(!confirm('Do wizyty zostało mniej niż 24 godziny. Odwołanie oznacza utratę bonu. Czy odwołać?'))return;r=await api({...payload,accept_forfeit:'1'});}
       if(!r.ok){notice('Nie otrzymano potwierdzenia odwołania. Spróbuj ponownie lub skontaktuj się z recepcją.');return;}
       $('#customerState').textContent='Wizyta została odwołana.';
