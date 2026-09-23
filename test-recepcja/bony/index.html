@@ -311,7 +311,7 @@ let VOUCHERS=[];
 let awsStats=null;
 const voucherKey=v=>v.id||v.salon+':'+v.n;
 const PARTNERS=[
- ['PayU — bony','Bony i historyczne płatności ze sklepu','import jednorazowy · AWS'],
+ ['PayU — bony','Bony i historyczne płatności ze sklepu','sprzedaż i płatności · AWS'],
  ['Recepcja','Sprzedaż ręczna / AsterA','bony papierowe'],
  ['Maliwan / Groupon','Partner zewnętrzny','rozliczenie osobne'],
  ['Partner','Bony partnerskie','umowa indywidualna'],
@@ -525,7 +525,9 @@ async function loadAWSVouchers(){
   if(!response.ok)throw Error(response.status===403?'To konto nie ma dostępu do bonów.':'Nie udało się pobrać bonów. Kliknij Odśwież.');
   const data=await response.json();if(data.mode!=='AWS'||!Array.isArray(data.vouchers)||data.count!==data.vouchers.length)throw Error('Niepełna odpowiedź bazy bonów.');
   awsStats=data.stats;asteraApplyVouchers(data.vouchers);
-  connection('AWS · '+data.count+' bonów · dane źródłowe z '+(data.sourceAsOf||'importu')+'. Import jednorazowy; nowe zakupy nie są jeszcze synchronizowane.');
+  const checked=data.sourceCheckedAt?new Date(data.sourceCheckedAt).toLocaleString('pl-PL',{timeZone:'Europe/Warsaw'}):'brak pełnego odczytu';
+  const syncInfo=data.sourceSync==='ACTIVE'?'Automatyczna synchronizacja sklepów · ostatni poprawny odczyt: '+checked+'.':data.sourceSync==='DELAYED'?'Synchronizacja sklepów wymaga sprawdzenia · ostatni odczyt: '+checked+'.':'Import jednorazowy; nowe zakupy nie są jeszcze synchronizowane.';
+  connection('AWS · '+data.count+' bonów · '+syncInfo);
   $('#footerSource').textContent='Odczyt AWS potwierdzony';
  }catch(e){clearPrivateVouchers();connection(e.message||'Nie udało się połączyć z bazą bonów.');}
  finally{voucherLoading=false;$('#voucherLogin').hidden=ReceptionAuth.authenticated();$('#voucherLogout').hidden=!ReceptionAuth.authenticated();$('#voucherRefresh').hidden=!ReceptionAuth.authenticated();$('#voucherRefresh').disabled=false;}
